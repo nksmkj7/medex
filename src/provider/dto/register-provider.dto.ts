@@ -30,7 +30,7 @@ export class RegisterProviderDto extends RegisterUserDto {
 
   @IsNotEmpty()
   @IsInt()
-  companyId: number;
+  countryId: number;
 
   @Allow()
   city?: string;

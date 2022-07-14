@@ -1,8 +1,17 @@
+import { UserEntity } from 'src/auth/entity/user.entity';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
-import { Column, Entity } from 'typeorm';
+import { CountryEntity } from 'src/country/entities/country.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity('provider_informations')
 export class ProviderInformationEntity extends CustomBaseEntity {
+  @Column()
+  userId: number;
+
+  @OneToOne(() => UserEntity)
+  @JoinColumn()
+  user: UserEntity;
+
   @Column()
   companyName: string;
 
@@ -16,6 +25,10 @@ export class ProviderInformationEntity extends CustomBaseEntity {
 
   @Column()
   startDate: Date;
+
+  @OneToOne(() => CountryEntity)
+  @JoinColumn()
+  role: CountryEntity;
 
   @Column('int')
   countryId: number;

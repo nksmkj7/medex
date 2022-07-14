@@ -1,4 +1,4 @@
-import { DeepPartial, EntityRepository } from 'typeorm';
+import { DeepPartial, EntityManager, EntityRepository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { classToPlain, plainToClass } from 'class-transformer';
 
@@ -20,15 +20,22 @@ export class UserRepository extends BaseRepository<UserEntity, UserSerializer> {
    */
   async store(
     createUserDto: DeepPartial<UserEntity>,
-    token: string
+    token: string,
+    transactionManager?: EntityManager
   ): Promise<UserSerializer> {
     if (!createUserDto.status) {
       createUserDto.status = UserStatusEnum.INACTIVE;
     }
     createUserDto.salt = await bcrypt.genSalt();
     createUserDto.token = token;
-    const user = this.create(createUserDto);
-    await user.save();
+    let user;
+    if (transactionManager) {
+      user = transactionManager.create(UserEntity, createUserDto);
+      await transactionManager.save(user);
+    } else {
+      user = this.create(createUserDto);
+      await user.save();
+    }
     return this.transform(user);
   }
 

@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as config from 'config';
 import { existsSync, unlinkSync } from 'fs';
 import { SignOptions } from 'jsonwebtoken';
-import { DeepPartial, Not, ObjectLiteral } from 'typeorm';
+import { DeepPartial, EntityManager, Not, ObjectLiteral } from 'typeorm';
 import {
   RateLimiterRes,
   RateLimiterStoreAbstract
@@ -61,6 +61,7 @@ const BASE_OPTIONS: SignOptions = {
 
 @Injectable()
 export class AuthService {
+  manager: EntityManager;
   constructor(
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
@@ -72,6 +73,14 @@ export class AuthService {
     @Inject('LOGIN_THROTTLE')
     private readonly rateLimiter: RateLimiterStoreAbstract
   ) {}
+
+  get transactionManager() {
+    return this.manager;
+  }
+
+  set transactionManager(manager: EntityManager) {
+    this.manager = manager;
+  }
 
   /**
    * send mail
@@ -121,7 +130,11 @@ export class AuthService {
       createUserDto.tokenValidityDate = currentDateTime;
     }
     const registerProcess = !createUserDto.status;
-    const user = await this.userRepository.store(createUserDto, token);
+    const user = await this.userRepository.store(
+      createUserDto,
+      token,
+      this.transactionManager
+    );
     const subject = registerProcess ? 'Account created' : 'Set Password';
     const link = registerProcess ? `verify/${token}` : `reset/${token}`;
     const slug = registerProcess ? 'activate-account' : 'new-user-set-password';
