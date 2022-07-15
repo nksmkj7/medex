@@ -1,12 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
 import { UserEntity } from 'src/auth/entity/user.entity';
+import { UserSerializer } from 'src/auth/serializer/user.serializer';
 import { UserRepository } from 'src/auth/user.repository';
-import { Connection, DeepPartial } from 'typeorm';
+import { Pagination } from 'src/paginate';
+import { RoleRepository } from 'src/role/role.repository';
+import { Connection, DeepPartial, EntityManager } from 'typeorm';
+import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import { ProviderInformationEntity } from './entity/provider-information.entity';
 import { ProviderEntity } from './entity/provider.entity';
 import { ProviderRepository } from './provider.repository';
+import {
+  adminUserGroupsForSerializing,
+  defaultUserGroupsForSerializing,
+  ownerUserGroupsForSerializing
+} from 'src/auth/serializer/user.serializer';
 
 @Injectable()
 export class ProviderService {
@@ -17,33 +26,29 @@ export class ProviderService {
     private readonly userRepository: UserRepository,
     @InjectRepository(ProviderRepository)
     private readonly providerRepository: ProviderRepository,
+    @InjectRepository(RoleRepository)
+    private readonly roleRepository: RoleRepository,
     private readonly authService: AuthService
   ) {}
 
-  // async create(
-  //   createUserDto: DeepPartial<UserEntity>,
-  //   roleName = 'admin'
-  // ): Promise<UserSerializer> {
-  //   const token = await this.generateUniqueToken(12);
-  //   if (!createUserDto.status) {
-  //     // createUserDto.roleId = 2;
-  //     const role = await this.roleRepository.findBy('name', roleName);
-  //     createUserDto.roleId = role.id;
-  //     const currentDateTime = new Date();
-  //     currentDateTime.setHours(currentDateTime.getHours() + 1);
-  //     createUserDto.tokenValidityDate = currentDateTime;
-  //   }
-  //   const registerProcess = !createUserDto.status;
-  //   const user = await this.userRepository.store(createUserDto, token);
-  //   const subject = registerProcess ? 'Account created' : 'Set Password';
-  //   const link = registerProcess ? `verify/${token}` : `reset/${token}`;
-  //   const slug = registerProcess ? 'activate-account' : 'new-user-set-password';
-  //   const linkLabel = registerProcess ? 'Activate Account' : 'Set Password';
-  //   await this.sendMailToUser(user, subject, link, slug, linkLabel);
-  //   return user;
-  // }
+  async registerUser(
+    createUserDto: DeepPartial<UserEntity>,
+    roleName = 'provider',
+    token: string,
+    manager?: EntityManager
+  ): Promise<UserSerializer> {
+    if (!createUserDto.status) {
+      const role = await this.roleRepository.findBy('name', roleName);
+      createUserDto.roleId = role.id;
+      const currentDateTime = new Date();
+      currentDateTime.setHours(currentDateTime.getHours() + 1);
+      createUserDto.tokenValidityDate = currentDateTime;
+    }
+    const user = await this.userRepository.store(createUserDto, token, manager);
+    return user;
+  }
 
-  async registerProvider(registerProviderDto: DeepPartial<ProviderEntity>) {
+  async createProvider(registerProviderDto: DeepPartial<ProviderEntity>) {
     const { username, email, password, name, ...providerInformation } =
       registerProviderDto;
     const createUserDto: DeepPartial<UserEntity> = {
@@ -52,48 +57,75 @@ export class ProviderService {
       password,
       name
     };
-
-    console.log(registerProviderDto, 'register provider dto is');
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
       this.authService.transactionManager = manager;
-      const user = await this.authService.create(createUserDto);
-      if (user) {
-        const provider = manager.create(ProviderInformationEntity, {
-          ...providerInformation
-        });
-        await manager.save(provider);
-      }
+      const token = await this.authService.generateUniqueToken(12);
+      const user = await this.registerUser(
+        createUserDto,
+        'provider',
+        token,
+        manager
+      );
+      if (!user) throw new BadRequestException();
+
+      const provider = await this.providerRepository.store({
+        ...providerInformation,
+        userId: user.id
+      });
+
+      const registerProcess = !createUserDto.status;
+
+      const subject = registerProcess ? 'Account created' : 'Set Password';
+      const link = registerProcess ? `verify/${token}` : `reset/${token}`;
+      const slug = registerProcess
+        ? 'activate-account'
+        : 'new-user-set-password';
+      const linkLabel = registerProcess ? 'Activate Account' : 'Set Password';
+      await this.authService.sendMailToUser(
+        user,
+        subject,
+        link,
+        slug,
+        linkLabel
+      );
       await queryRunner.commitTransaction();
+      return provider;
     } catch (err) {
-      console.log(err);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
     }
-    // try {
-    //   const { username, name, password, email }: DeepPartial<UserEntity> =
-    //     registerProviderDto;
-    //   const userDto: DeepPartial<UserEntity> = {
-    //     username,
-    //     name,
-    //     password,
-    //     email,
-    //     roleId: 40
-    //   };
-    //   // const user = await this.create({ username, name, password, email });
-    //   queryRunner.manager.queryRunner.manager.create(UserEntity, userDto);
-    //   await queryRunner.commitTransaction();
-    //   // console.log(user, 'asdfasdfasdf');
-    //   // const provider = this.create(registerProviderDto);
-    // } catch (error) {
-    //   console.log(error);
-    //   await queryRunner.rollbackTransaction();
-    // } finally {
-    //   await queryRunner.release();
-    // }
+  }
+
+  async getProviderDetail(id: number) {
+    return this.providerRepository.getProviderDetail(id);
+  }
+
+  async getProviderList(
+    providerSearchFilterDto: ProviderSearchFilterDto
+  ): Promise<Pagination<UserSerializer>> {
+    return this.userRepository.paginate(
+      providerSearchFilterDto,
+      ['providerInformation', 'role'],
+      ['username', 'email', 'name', 'contact', 'address'],
+      {
+        groups: [
+          ...adminUserGroupsForSerializing,
+          ...ownerUserGroupsForSerializing,
+          ...defaultUserGroupsForSerializing
+        ]
+      },
+      [
+        {
+          role: {
+            name: 'provider'
+          }
+        }
+      ]
+    );
   }
 }

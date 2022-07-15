@@ -21,14 +21,15 @@ export class UserRepository extends BaseRepository<UserEntity, UserSerializer> {
   async store(
     createUserDto: DeepPartial<UserEntity>,
     token: string,
-    transactionManager?: EntityManager
+    transactionManager?: EntityManager,
+    transformGroups = ['admin', 'provider']
   ): Promise<UserSerializer> {
     if (!createUserDto.status) {
       createUserDto.status = UserStatusEnum.INACTIVE;
     }
     createUserDto.salt = await bcrypt.genSalt();
     createUserDto.token = token;
-    let user;
+    let user: UserEntity;
     if (transactionManager) {
       user = transactionManager.create(UserEntity, createUserDto);
       await transactionManager.save(user);
@@ -36,7 +37,7 @@ export class UserRepository extends BaseRepository<UserEntity, UserSerializer> {
       user = this.create(createUserDto);
       await user.save();
     }
-    return this.transform(user);
+    return this.transform(user, { groups: transformGroups });
   }
 
   /**

@@ -6,8 +6,8 @@ import {
 } from '@nestjs/swagger';
 
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
-import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { RoleSerializer } from 'src/role/serializer/role.serializer';
+import { UserSerializer } from 'src/auth/serializer/user.serializer';
 
 export const adminUserGroupsForSerializing: string[] = ['admin'];
 export const ownerUserGroupsForSerializing: string[] = ['owner'];
@@ -17,68 +17,59 @@ export const defaultUserGroupsForSerializing: string[] = ['timestamps'];
  * user serializer
  */
 export class ProviderSerializer extends ModelSerializer {
-  @Expose()
-  id: number;
+  @ApiProperty()
+  companyName: string;
 
   @ApiProperty()
-  username: string;
+  phone1: string;
 
   @ApiProperty()
-  email: string;
+  @Exclude()
+  phone2: string;
 
   @ApiProperty()
-  name: string;
-
-  @ApiProperty()
-  @Transform(({ value }) => (value !== 'null' ? value : ''))
-  address: string;
+  startDate: Date;
 
   @ApiProperty()
   @Expose({
-    groups: ownerUserGroupsForSerializing
+    toClassOnly: true
   })
-  isTwoFAEnabled: boolean;
+  countryId: number;
 
   @ApiProperty()
-  @Transform(({ value }) => (value !== 'null' ? value : ''))
-  contact: string;
+  city: string;
 
   @ApiProperty()
-  @Transform(({ value }) => (value !== 'null' ? value : ''))
-  avatar: string;
+  state: string;
 
-  @ApiPropertyOptional()
-  @Expose({
-    groups: adminUserGroupsForSerializing
-  })
-  status: UserStatusEnum;
+  @ApiProperty()
+  landmark: string;
+
+  @ApiProperty()
+  timezone: string;
+
+  @ApiProperty()
+  contactPerson: string;
+
+  @ApiProperty()
+  serviceArea: string;
+
+  @ApiProperty()
+  businessLocation: string;
+
+  @ApiProperty()
+  businessLogo: string;
+
+  @ApiProperty()
+  businessDescription: string;
+
+  @ApiProperty()
+  vatNo: string;
+
+  @ApiProperty()
+  termsCondition: string;
 
   @ApiHideProperty()
-  @Expose({
-    groups: ownerUserGroupsForSerializing
-  })
-  @Type(() => RoleSerializer)
-  role: RoleSerializer;
-
-  @Exclude({
-    toClassOnly: true
-  })
-  roleId: number;
-
-  @Exclude({
-    toClassOnly: true
-  })
-  tokenValidityDate: Date;
-
-  @ApiPropertyOptional()
-  @Expose({
-    groups: defaultUserGroupsForSerializing
-  })
-  createdAt: Date;
-
-  @ApiPropertyOptional()
-  @Expose({
-    groups: defaultUserGroupsForSerializing
-  })
-  updatedAt: Date;
+  @Type(() => UserSerializer)
+  user: UserSerializer;
 }

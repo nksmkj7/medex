@@ -8,7 +8,7 @@ export class ProviderInformationEntity extends CustomBaseEntity {
   @Column()
   userId: number;
 
-  @OneToOne(() => UserEntity)
+  @OneToOne(() => UserEntity, (user) => user.providerInformation) // specify inverse side as a second parameter
   @JoinColumn()
   user: UserEntity;
 
@@ -28,7 +28,7 @@ export class ProviderInformationEntity extends CustomBaseEntity {
 
   @OneToOne(() => CountryEntity)
   @JoinColumn()
-  role: CountryEntity;
+  country: CountryEntity;
 
   @Column('int')
   countryId: number;
@@ -72,6 +72,11 @@ export class ProviderInformationEntity extends CustomBaseEntity {
     nullable: true
   })
   businessLocation: string;
+
+  @Column({
+    nullable: true
+  })
+  businessLogo: string;
 
   @Column({
     nullable: true

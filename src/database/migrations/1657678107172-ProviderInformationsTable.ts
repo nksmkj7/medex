@@ -87,7 +87,7 @@ export class ProviderInformationsTable1657678107172
             isNullable: true
           },
           {
-            name: 'businessLocaiton',
+            name: 'businessLocation',
             type: 'varchar',
             length: '200',
             isNullable: true
@@ -130,12 +130,12 @@ export class ProviderInformationsTable1657678107172
             columnNames: ['countryId'],
             referencedTableName: 'countries',
             referencedColumnNames: ['id']
-          },
-          {
-            columnNames: ['userId'],
-            referencedTableName: 'user',
-            referencedColumnNames: ['id']
           }
+          // {
+          //   columnNames: ['userId'],
+          //   referencedTableName: 'user',
+          //   referencedColumnNames: ['id']
+          // }
         ]
       })
     );

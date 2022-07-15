@@ -154,7 +154,8 @@ export class BaseRepository<
     searchFilter: DeepPartial<SearchFilterInterface>,
     relations: string[] = [],
     searchCriteria: string[] = [],
-    transformOptions = {}
+    transformOptions = {},
+    searchCondition = []
   ): Promise<Pagination<K>> {
     const whereCondition = [];
     const findOptions: FindManyOptions = {};
@@ -170,7 +171,7 @@ export class BaseRepository<
     findOptions.relations = relations;
     findOptions.take = paginationInfo.limit;
     findOptions.skip = paginationInfo.skip;
-    findOptions.where = whereCondition;
+    findOptions.where = [...whereCondition, ...searchCondition];
     findOptions.order = {
       createdAt: 'DESC'
     };

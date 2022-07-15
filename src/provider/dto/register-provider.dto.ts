@@ -60,7 +60,7 @@ export class RegisterProviderDto extends RegisterUserDto {
   businessLogo?: string;
 
   @Allow()
-  businessDespriction?: string;
+  businessDescription?: string;
 
   @Allow()
   vatNo?: string;

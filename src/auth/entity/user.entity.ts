@@ -14,6 +14,7 @@ import { Exclude } from 'class-transformer';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { RoleEntity } from 'src/role/entities/role.entity';
+import { ProviderInformationEntity } from 'src/provider/entity/provider-information.entity';
 
 /**
  * User Entity
@@ -107,6 +108,12 @@ export class UserEntity extends CustomBaseEntity {
 
   @Column()
   roleId: number;
+
+  @OneToOne(
+    () => ProviderInformationEntity,
+    (providerInformation) => providerInformation.user
+  )
+  providerInformation: ProviderInformationEntity;
 
   @BeforeInsert()
   async hashPasswordBeforeInsert() {

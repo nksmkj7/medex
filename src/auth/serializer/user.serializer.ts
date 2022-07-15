@@ -8,8 +8,9 @@ import {
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { RoleSerializer } from 'src/role/serializer/role.serializer';
+import { ProviderSerializer } from 'src/provider/serializer/provider.serializer';
 
-export const adminUserGroupsForSerializing: string[] = ['admin'];
+export const adminUserGroupsForSerializing: string[] = ['admin', 'provider'];
 export const ownerUserGroupsForSerializing: string[] = ['owner'];
 export const defaultUserGroupsForSerializing: string[] = ['timestamps'];
 
@@ -83,4 +84,11 @@ export class UserSerializer extends ModelSerializer {
     groups: defaultUserGroupsForSerializing
   })
   updatedAt: Date;
+
+  @ApiHideProperty()
+  @Expose({
+    groups: adminUserGroupsForSerializing
+  })
+  @Type(() => ProviderSerializer)
+  providerInformation: ProviderSerializer;
 }
