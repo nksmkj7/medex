@@ -1,36 +1,3 @@
-<div align="center">
-<img src="./public/images/logo.svg" alt="Truthy Logo">
-</div><br>
-<h1 align="center">
-  Truthy CMS (NestJS Headless API)
-</h1>
-
-<p align="center"> This repository is Backend API part of Truthy CMS written in NestJS. For Frontend please visit https://github.com/gobeam/truthy-react-frontend. This project includes API for Authentication, User Management, Role Management, Permission Management, Email Module, Account Settings, OTP, RBAC support, Localization, and many more. </p>
-<br>
-<p align="center">
-<img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/gobeam/truthy">
-<img alt="Workflow test" src="https://github.com/gobeam/truthy/actions/workflows/test.yml/badge.svg">
-<img alt="GitHub" src="https://img.shields.io/github/license/gobeam/truthy">
-<img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/gobeam/truthy">
-<img src='https://www.codetriage.com/gobeam/truthy/badges/users.svg' alt='Open Source Helpers' />
-</p>
-<p align="center">
-<a href="https://www.buymeacoffee.com/gobeam" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-</p>
-<p align="center">
-  <sub>Created by <a href="https://www.linkedin.com/in/roshan-ranabhat/">Roshan Ranabhat (gobeam)</a> and maintained with ❤️ by an amazing <a href="https://github.com/gobeam/truthy-contributors">team of awesome developers</a>.</sub>
-</p>
-
-<p align="center">
-  <sub>Check Live code deployed here:  Backend API Docs: <a href="http://157.245.148.131:7777/api-docs/">Swagger Docs</a>
-  Frontend: <a href="http://157.245.148.131:3000">Truthy CMS</a>
-  </sub>
-</p>
-
-<p align="center">
-<img src="https://gobeam.github.io/truthy-contributors/truthy.gif" alt="Truthy CMS" >
-</p>
-
 ## Table of Contents
 
 - [Getting Started](#getting-started)
@@ -47,12 +14,6 @@
 
 ---
 
-## Getting Started
-
-This project was created to help developers by bootstrapping basic modules that need to be present while creating a standard CMS. The main motto of this project was to save precious time while developing CMS and focus more on the core part. This project is trying to follow the best possible standard to make it optimized and production-ready. Hope you like it. <br>
-If you love it don't forget to share your experience. If you want to contribute to the Truthy CMS in any way like API, Frontend, Design, Logo you're more than welcome to do so. Our plan is to make this no. 1 CMS maintained by opensource community.
-
----
 
 ## Prerequisites
 
@@ -72,9 +33,6 @@ https://redis.io/
 
 ## Available Scripts
 
-### npx truthy-api
-
-This commands downloads the latest version of truthy i.e NestJS Truthy CMS backend API.
 
 In the project directory, you can run:
 
@@ -126,17 +84,10 @@ This command is used to run existing seeders.
 ---
 
 ## Setup
-
-First, you need to install the project using npx command
-
-```bash
-npx truthy-api
-```
-
-or clone it using
+clone it using
 
 ```bash
-git clone https://github.com/gobeam/truthy.git
+git clone https://gitlab.com/medex4/medex_backend.git
 ```
 **You also need to run PostgresQL for database and Redis for key-val storage which will be used for queue and throttling.**
 After cloning the make changes in configuration file that exists in config folder which exists in root of project.
@@ -177,7 +128,7 @@ First create a .env file copying from .env.example and add environment for below
 SERVER_PORT=7777
 DB_PASSWORD=root
 DB_USERNAME=postgres
-DB_DATABASE_NAME=truthy
+DB_DATABASE_NAME=medex
 DB_PORT=5488
 REDIS_PORT=6399
 ```
@@ -208,7 +159,7 @@ docker exec -it <container_id_or_name> yarn seed
 This project follows the following file structure:
 
 ```text
-truthy
+medex
 ├── config                                  * Contains all configuration files
 │   └── default.yml                         * Default configuration file.
 │   └── development.yml                     * Configuration file for development environment.
@@ -254,39 +205,3 @@ truthy
 ├── tsconfig.json                           * Typescript configuration for application.
 ```
 
----
-
-## Application Security
-
-### Throttle
-
-By default Throttle has been implemented for all API's. Redis is default driver to record throttle state data. You can easily change configuration from config files.
-
-### Two Factor Authentication (2FA)
-
-User Will have 2FA authentication option available to be turned on or off. For 2FA time-based one-time password is used. A time-based one-time password (TOTP) application automatically generates an authentication code that changes after a certain period of time. Applications like [Authenticator](https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=en&gl=US), [1Password](https://support.1password.com/one-time-passwords/), [Authy](https://authy.com/guides/github/) etc. can be used to generate TOTP. When you enable 2FA, you will be sent a QR code in your email which should be scanned from above mentioned application and TOTP will be generated by those applications.
-
----
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-Please make sure to update tests as appropriate. - see `CONTRIBUTING.md` for details.
-**If you want to be featured in contributors list on our home page please add PR on https://github.com/gobeam/truthy-contributors to provide your details.**
-
----
-
-## Sponsors
-- [Ekbana Solutions Pvt. Ltd](https://ekbana.com/)
-
----
-
-## License
-
-Released under the MIT License - see `LICENSE.md` for details.
-
----
-
-## Acknowledgement
-
-- [NestJS](https://github.com/nestjs/nest)
