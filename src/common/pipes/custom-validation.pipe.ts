@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
+import { omit } from 'lodash';
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform<any> {
@@ -19,7 +20,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
       const translatedError = await this.transformError(errors);
       throw new UnprocessableEntityException(translatedError);
     }
-    return value;
+    if (value?._requestContext) return omit(value, ['_requestContext']);
   }
 
   async transformError(errors: ValidationError[]) {
