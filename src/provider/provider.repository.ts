@@ -35,6 +35,7 @@ export class ProviderRepository extends BaseRepository<
       ProviderInformationEntity,
       createProviderDto
     );
+    console.log(provider);
     await manager.save(provider);
     return this.transform(provider);
   }

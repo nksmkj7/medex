@@ -28,7 +28,8 @@ export class ProviderController {
     @Body(ValidationPipe)
     registerProviderDto: RegisterProviderDto
   ) {
-    return this.providerService.createProvider(registerProviderDto);
+    const user = await this.providerService.createProvider(registerProviderDto);
+    return user;
   }
 
   @Get(':id')

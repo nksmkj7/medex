@@ -21,6 +21,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
       throw new UnprocessableEntityException(translatedError);
     }
     if (value?._requestContext) return omit(value, ['_requestContext']);
+    return value;
   }
 
   async transformError(errors: ValidationError[]) {

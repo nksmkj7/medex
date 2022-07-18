@@ -72,10 +72,13 @@ export class ProviderService {
       );
       if (!user) throw new BadRequestException();
 
-      const provider = await this.providerRepository.store({
-        ...providerInformation,
-        userId: user.id
-      });
+      const provider = await this.providerRepository.store(
+        {
+          ...providerInformation,
+          userId: user.id
+        },
+        manager
+      );
 
       const registerProcess = !createUserDto.status;
 
@@ -95,6 +98,7 @@ export class ProviderService {
       await queryRunner.commitTransaction();
       return provider;
     } catch (err) {
+      console.log(err);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -102,7 +106,7 @@ export class ProviderService {
   }
 
   async getProviderDetail(id: number) {
-    return this.providerRepository.getProviderDetail(id);
+    return await this.providerRepository.getProviderDetail(id);
   }
 
   async getProviderList(

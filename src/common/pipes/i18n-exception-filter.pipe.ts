@@ -9,7 +9,18 @@ import { I18nService } from 'nestjs-i18n';
 
 import { ValidationErrorInterface } from 'src/common/interfaces/validation-error.interface';
 import { StatusCodesList } from 'src/common/constants/status-codes-list.constants';
-
+import path = require('path');
+import {
+  access,
+  accessSync,
+  fstat,
+  readdirSync,
+  readFile,
+  readFileSync,
+  writeFileSync,
+  constants
+} from 'fs';
+import { startCase } from 'lodash';
 @Catch(HttpException)
 export class I18nExceptionFilterPipe implements ExceptionFilter {
   constructor(private readonly i18n: I18nService) {}
@@ -111,7 +122,7 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
       const item = errors[i];
       let message = [];
       if (item.constraints) {
-        message = await Promise.all(
+        message = await Promise.allSettled(
           Object.keys(item.constraints).map(async (key: string) => {
             let validationKey: string = key,
               validationArgument: Record<string, any> = {};
@@ -135,9 +146,29 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
 
       validationData.push({
         name: item.property,
-        errors: message
+        errors: message.map((err) => err.value)
       });
     }
+
+    validationData.forEach((item) => {
+      if (item?.errors && item.errors.length) {
+        const i18nFilePath = path.join(__dirname, '../../../src/i18n/');
+        readdirSync(i18nFilePath).map((file) => {
+          const jsonFilePath = path.join(i18nFilePath, file, 'app.json');
+          // try {
+          //   accessSync(jsonFilePath, constants.R_OK | constants.W_OK);
+          //   console.log('can read and write');
+          // } catch (err) {
+          //   console.log('no access');
+          // }
+          const jsonData = JSON.parse(readFileSync(jsonFilePath, 'utf-8'));
+          // item.name = startCase(item.name);
+          jsonData[item.name] = startCase(item.name);
+          writeFileSync(jsonFilePath, JSON.stringify(jsonData), 'utf-8');
+          item.name = startCase(item.name);
+        });
+      }
+    });
     return validationData;
   }
 }

@@ -46,7 +46,7 @@ export abstract class AbstractUniqueValidator
     const [EntityClass, findCondition = args.property] = args.constraints;
     const compareWith = args.constraints[2] || 'id';
     const extraCondition = args.constraints[3] || {};
-    function getSearchCondition(findCondition: { [inxdex: string]: string }) {
+    function getSearchCondition(findCondition: { [index: string]: string }) {
       if (_requestContext && _requestContext?.['params']?.[compareWith]) {
         return {
           ...findCondition,
@@ -56,14 +56,6 @@ export abstract class AbstractUniqueValidator
       }
       return findCondition;
     }
-    console.log(
-      typeof findCondition === 'function'
-        ? findCondition(args)
-        : getSearchCondition({
-            [findCondition || args.property]: value
-          }),
-      'blablablabal'
-    );
     return (
       (await this.connection.getRepository(EntityClass).count({
         where:
