@@ -123,13 +123,11 @@ export class ProviderService {
           ...defaultUserGroupsForSerializing
         ]
       },
-      [
-        {
-          role: {
-            name: 'provider'
-          }
+      {
+        role: {
+          name: 'provider'
         }
-      ]
+      }
     );
   }
 }

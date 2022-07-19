@@ -155,23 +155,34 @@ export class BaseRepository<
     relations: string[] = [],
     searchCriteria: string[] = [],
     transformOptions = {},
-    searchCondition = []
+    searchCondition = {}
   ): Promise<Pagination<K>> {
     const whereCondition = [];
     const findOptions: FindManyOptions = {};
     if (searchFilter.hasOwnProperty('keywords') && searchFilter.keywords) {
-      for (const key of searchCriteria) {
-        whereCondition.push({
-          [key]: ILike(`%${searchFilter.keywords}%`)
-        });
+      if (Object.keys(searchCondition).length) {
+        for (const key of searchCriteria) {
+          whereCondition.push({
+            [key]: ILike(`%${searchFilter.keywords}%`),
+            ...searchCondition
+          });
+        }
+      } else {
+        for (const key of searchCriteria) {
+          whereCondition.push({
+            [key]: ILike(`%${searchFilter.keywords}%`)
+          });
+        }
       }
+    } else {
+      whereCondition.push({ ...searchCondition });
     }
     const paginationInfo: PaginationInfoInterface =
       this.getPaginationInfo(searchFilter);
     findOptions.relations = relations;
     findOptions.take = paginationInfo.limit;
     findOptions.skip = paginationInfo.skip;
-    findOptions.where = [...whereCondition, ...searchCondition];
+    findOptions.where = whereCondition;
     findOptions.order = {
       createdAt: 'DESC'
     };
