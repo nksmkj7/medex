@@ -187,10 +187,6 @@ export class BaseRepository<
       createdAt: 'DESC'
     };
     const { page, skip, limit } = paginationInfo;
-    console.log(
-      await this.createQueryBuilder().select('*').getMany(),
-      'query builder'
-    );
     const [results, total] = await this.findAndCount(findOptions);
     const serializedResult = this.transformMany(results, transformOptions);
     return new Pagination<K>({

@@ -1,3 +1,4 @@
+import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   MinLength,
@@ -6,13 +7,19 @@ import {
   IsInt,
   Allow,
   IsDateString,
-  Validate
+  Validate,
+  IsEmail,
+  IsString
 } from 'class-validator';
+import { UpdateUserProfileDto } from 'src/auth/dto/update-user-profile.dto';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
 // import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 
-export class UpdateProviderDto {
+export class UpdateProviderDto extends OmitType(UpdateUserProfileDto, [
+  'email',
+  'username'
+] as const) {
   @Validate(
     UniqueValidatorPipe,
     [
@@ -27,7 +34,13 @@ export class UpdateProviderDto {
       message: 'already taken'
     }
   )
+  @IsNotEmpty()
+  @IsEmail()
   email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  name: string;
 
   @IsNotEmpty()
   @MinLength(6, {
@@ -41,6 +54,7 @@ export class UpdateProviderDto {
   @IsNotEmpty()
   phone1: string;
 
+  @ApiPropertyOptional()
   @Allow()
   phone2: string;
 

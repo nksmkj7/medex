@@ -130,4 +130,22 @@ export class ProviderService {
       }
     );
   }
+
+  async update(id: number, updateUserDto: DeepPartial<UserEntity>) {
+    const user = await this.userRepository.get(id, [], {
+      groups: [
+        ...ownerUserGroupsForSerializing,
+        ...adminUserGroupsForSerializing
+      ]
+    });
+    console.log(user);
+
+    // if (updateUserDto.avatar && user.avatar) {
+    //   const path = `public/images/profile/${user.avatar}`;
+    //   if (existsSync(path)) {
+    //     unlinkSync(`public/images/profile/${user.avatar}`);
+    //   }
+    // }
+    // return this.userRepository.updateEntity(user, updateUserDto);
+  }
 }
