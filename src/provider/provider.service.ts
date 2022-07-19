@@ -6,7 +6,12 @@ import { UserSerializer } from 'src/auth/serializer/user.serializer';
 import { UserRepository } from 'src/auth/user.repository';
 import { Pagination } from 'src/paginate';
 import { RoleRepository } from 'src/role/role.repository';
-import { Connection, DeepPartial, EntityManager } from 'typeorm';
+import {
+  Connection,
+  DeepPartial,
+  EntityManager,
+  ReturningStatementNotSupportedError
+} from 'typeorm';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import { ProviderInformationEntity } from './entity/provider-information.entity';
 import { ProviderEntity } from './entity/provider.entity';
@@ -16,6 +21,7 @@ import {
   defaultUserGroupsForSerializing,
   ownerUserGroupsForSerializing
 } from 'src/auth/serializer/user.serializer';
+import { existsSync, unlinkSync } from 'fs';
 
 @Injectable()
 export class ProviderService {
@@ -131,21 +137,56 @@ export class ProviderService {
     );
   }
 
-  async update(id: number, updateUserDto: DeepPartial<UserEntity>) {
-    const user = await this.userRepository.get(id, [], {
+  async update(id: number, updateProviderDto: DeepPartial<ProviderEntity>) {
+    const user = await this.userRepository.get(id, ['providerInformation'], {
       groups: [
         ...ownerUserGroupsForSerializing,
         ...adminUserGroupsForSerializing
       ]
     });
-    console.log(user);
+    const {
+      username,
+      email,
+      name,
+      avatar,
+      address,
+      contact,
+      ...providerInformation
+    } = updateProviderDto;
+    const updateUserDto: DeepPartial<UserEntity> = {
+      username,
+      email,
+      name,
+      address,
+      contact,
+      avatar
+    };
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const manager = queryRunner.manager;
+      await manager.update(UserEntity, id, updateUserDto);
+      await manager.update(
+        ProviderInformationEntity,
+        { userId: user.id },
+        providerInformation
+      );
+      await queryRunner.commitTransaction();
+      return manager.merge(ProviderEntity, updateUserDto, providerInformation);
+    } catch (error) {
+      console.log(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
 
-    // if (updateUserDto.avatar && user.avatar) {
-    //   const path = `public/images/profile/${user.avatar}`;
-    //   if (existsSync(path)) {
-    //     unlinkSync(`public/images/profile/${user.avatar}`);
-    //   }
-    // }
-    // return this.userRepository.updateEntity(user, updateUserDto);
+    if (updateUserDto.avatar && user.avatar) {
+      const path = `public/images/profile/${user.avatar}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/profile/${user.avatar}`);
+      }
+    }
+    // return this.providerRepository.updateEntity(user, updateUserDto);
   }
 }

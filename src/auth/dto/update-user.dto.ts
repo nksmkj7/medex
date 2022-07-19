@@ -1,4 +1,10 @@
-import { IsEmail, IsEmpty, IsIn, IsString, ValidateIf } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsIn,
+  IsString,
+  ValidateIf
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 import { UserStatusEnum } from 'src/auth/user-status.enum';
@@ -12,16 +18,15 @@ const statusEnumArray = [
  * update user data transfer object
  */
 export class UpdateUserDto {
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   username: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsEmail()
   email: string;
 
-  @ApiPropertyOptional()
-  @ValidateIf((object, value) => value)
+  @IsNotEmpty()
   @IsString()
   name: string;
 

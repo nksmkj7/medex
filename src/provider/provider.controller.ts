@@ -47,12 +47,13 @@ export class ProviderController {
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))
   @Put(':id')
-  update(
-    @Param('id')
-    id: string,
+  async update(
+    @Param('id', ParseIntPipe)
+    id: number,
     @Body()
     updateProviderDto: UpdateProviderDto
   ) {
-    console.log('updateProviderDto', updateProviderDto);
+    return await this.providerService.update(id, updateProviderDto);
+    // console.log('updateProviderDto', updateProviderDto);
   }
 }

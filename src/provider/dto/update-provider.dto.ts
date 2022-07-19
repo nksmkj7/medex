@@ -14,7 +14,6 @@ import {
 import { UpdateUserProfileDto } from 'src/auth/dto/update-user-profile.dto';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
-// import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 
 export class UpdateProviderDto extends OmitType(UpdateUserProfileDto, [
   'email',
@@ -40,7 +39,7 @@ export class UpdateProviderDto extends OmitType(UpdateUserProfileDto, [
 
   @IsNotEmpty()
   @IsString()
-  name: string;
+  username: string;
 
   @IsNotEmpty()
   @MinLength(6, {
