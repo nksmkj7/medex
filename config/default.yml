@@ -28,8 +28,8 @@ app:
 mail:
   host: 'smtp.mailtrap.io'
   port: 2525
-  user: '8c59a499ab9da5'
-  pass: '78a4ef8e811db1'
+  user: '6e4b3bec564f80'
+  pass: '8f2fb631230d44'
   from: 'medex'
   fromMail: 'medex@medex.com'
   preview: true
