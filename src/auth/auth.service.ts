@@ -286,6 +286,11 @@ export class AuthService {
           ...ownerUserGroupsForSerializing,
           ...defaultUserGroupsForSerializing
         ]
+      },
+      {
+        role: {
+          name: Not('provider')
+        }
       }
     );
   }

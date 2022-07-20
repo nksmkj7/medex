@@ -54,6 +54,5 @@ export class ProviderController {
     updateProviderDto: UpdateProviderDto
   ) {
     return await this.providerService.update(id, updateProviderDto);
-    // console.log('updateProviderDto', updateProviderDto);
   }
 }

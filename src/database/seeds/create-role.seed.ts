@@ -8,7 +8,6 @@ import { PermissionEntity } from 'src/permission/entities/permission.entity';
 export default class CreateRoleSeed {
   public async run(factory: Factory, connection: Connection): Promise<any> {
     const roles = PermissionConfiguration.roles;
-    console.log(roles, '---->');
     await connection
       .createQueryBuilder()
       .insert()

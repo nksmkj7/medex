@@ -6,12 +6,7 @@ import { UserSerializer } from 'src/auth/serializer/user.serializer';
 import { UserRepository } from 'src/auth/user.repository';
 import { Pagination } from 'src/paginate';
 import { RoleRepository } from 'src/role/role.repository';
-import {
-  Connection,
-  DeepPartial,
-  EntityManager,
-  ReturningStatementNotSupportedError
-} from 'typeorm';
+import { Connection, DeepPartial, EntityManager } from 'typeorm';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import { ProviderInformationEntity } from './entity/provider-information.entity';
 import { ProviderEntity } from './entity/provider.entity';
@@ -104,7 +99,6 @@ export class ProviderService {
       await queryRunner.commitTransaction();
       return provider;
     } catch (err) {
-      console.log(err);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -175,7 +169,6 @@ export class ProviderService {
       await queryRunner.commitTransaction();
       return manager.merge(ProviderEntity, updateUserDto, providerInformation);
     } catch (error) {
-      console.log(error);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -187,6 +180,5 @@ export class ProviderService {
         unlinkSync(`public/images/profile/${user.avatar}`);
       }
     }
-    // return this.providerRepository.updateEntity(user, updateUserDto);
   }
 }
