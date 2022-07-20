@@ -337,6 +337,58 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Provider Management',
+      resource: 'providerInformations',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all providers',
+          route: [
+            {
+              path: '/providers',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View provider by id',
+          route: [
+            {
+              path: '/providers/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new provider',
+          route: [
+            {
+              path: '/providers',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update providers by id',
+          route: [
+            {
+              path: '/providers/:id',
+              method: MethodList.PUT
+            }
+          ]
+        }
+        // {
+        //   name: 'Delete providers by id',
+        //   route: [
+        //     {
+        //       path: '/providers/:id',
+        //       method: MethodList.DELETE
+        //     }
+        //   ]
+        // }
+      ]
     }
   ]
 };

@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
-  IsDate,
   IsInt,
   Allow,
   IsDateString,

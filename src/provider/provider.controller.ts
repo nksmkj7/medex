@@ -7,11 +7,13 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UseInterceptors,
-  UsePipes,
   ValidationPipe
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
+import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import { RegisterProviderDto } from './dto/register-provider.dto';
@@ -19,7 +21,8 @@ import { UpdateProviderDto } from './dto/update-provider.dto';
 import { ProviderService } from './provider.service';
 
 @ApiTags('provider')
-@Controller('provider')
+@UseGuards(JwtTwoFactorGuard, PermissionGuard)
+@Controller('providers')
 export class ProviderController {
   constructor(private readonly providerService: ProviderService) {}
 
@@ -38,11 +41,11 @@ export class ProviderController {
   }
 
   @Get()
-  async getProviderList(
+  getProviderList(
     @Query()
     providerSearchFilterDto: ProviderSearchFilterDto
   ) {
-    return await this.providerService.getProviderList(providerSearchFilterDto);
+    return this.providerService.getProviderList(providerSearchFilterDto);
   }
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))

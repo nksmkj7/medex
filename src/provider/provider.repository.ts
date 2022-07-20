@@ -3,11 +3,9 @@ import { classToPlain, plainToClass } from 'class-transformer';
 
 import { ProviderInformationEntity } from './entity/provider-information.entity';
 import { ProviderSerializer } from './serializer/provider.serializer';
-import { ProviderEntity } from './entity/provider.entity';
 import { BaseRepository } from 'src/common/repository/base.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from 'src/auth/user.repository';
-import { UserEntity } from 'src/auth/entity/user.entity';
 import { NotFoundException } from '@nestjs/common';
 
 @EntityRepository(ProviderInformationEntity)
