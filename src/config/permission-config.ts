@@ -365,7 +365,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Store new provider',
           route: [
             {
-              path: '/providers',
+              path: '/providers/register',
               method: MethodList.POST
             }
           ]

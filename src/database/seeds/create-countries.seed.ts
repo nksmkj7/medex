@@ -27,12 +27,18 @@ export default class CreateCountriesSeed {
   }
 
   public async run(factory: Factory, connection: Connection): Promise<any> {
-    await connection
+    const countries = await connection
       .createQueryBuilder()
-      .insert()
-      .into(CountryEntity)
-      .values(await this.getCountries())
-      .orIgnore()
-      .execute();
+      .from(CountryEntity, 'countries')
+      .getRawMany();
+    if (!Object.keys(countries).length) {
+      await connection
+        .createQueryBuilder()
+        .insert()
+        .into(CountryEntity)
+        .values(await this.getCountries())
+        .orIgnore()
+        .execute();
+    }
   }
 }

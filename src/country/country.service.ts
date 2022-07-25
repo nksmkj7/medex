@@ -22,7 +22,7 @@ export class CountryService {
     const { limit, page, skip } = this.getPaginationInfo(searchFilter);
 
     if (keywords) {
-      query.where('countries.name like :countryName', {
+      query.where('countries.name ilike :countryName', {
         countryName: `%${keywords}%`
       });
     }
