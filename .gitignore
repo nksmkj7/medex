@@ -34,3 +34,6 @@ dump.rdb
 !.vscode/launch.json
 !.vscode/extensions.json
 .env
+
+
+/i18n/*

@@ -7,7 +7,8 @@ import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
  */
 export class UpdateUserProfileDto extends OmitType(UpdateUserDto, [
   'status',
-  'roleId'
+  'roleId',
+  'avatar'
 ] as const) {
   @ApiPropertyOptional()
   @ValidateIf((object, value) => value)

@@ -50,4 +50,8 @@ export class UpdateUserDto {
   @ApiPropertyOptional()
   @ValidateIf((object, value) => value)
   roleId: number;
+
+  @ApiPropertyOptional()
+  @ValidateIf((object, value) => value)
+  avatar: string;
 }

@@ -46,7 +46,10 @@ export class BaseRepository<
           entity ? this.transform(entity, transformOptions) : null
         );
       })
-      .catch((error) => Promise.reject(error));
+      .catch((error) => {
+        console.log(error, 'error is');
+        return Promise.reject(error);
+      });
   }
 
   /**
@@ -225,7 +228,9 @@ export class BaseRepository<
     relations: string[] = []
   ): Promise<K> {
     return this.update(entity.id, inputs)
-      .then(async () => await this.get(entity.id, relations))
+      .then(async () => {
+        return await this.get(entity.id, relations);
+      })
       .catch((error) => Promise.reject(error));
   }
 

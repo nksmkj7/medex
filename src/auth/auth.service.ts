@@ -44,6 +44,7 @@ import { ValidationPayloadInterface } from 'src/common/interfaces/validation-err
 import { RefreshPaginateFilterDto } from 'src/refresh-token/dto/refresh-paginate-filter.dto';
 import { RefreshTokenSerializer } from 'src/refresh-token/serializer/refresh-token.serializer';
 import { RoleRepository } from 'src/role/role.repository';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
 const throttleConfig = config.get('throttle.login');
 const jwtConfig = config.get('jwt');
@@ -302,7 +303,7 @@ export class AuthService {
    */
   async update(
     id: number,
-    updateUserDto: DeepPartial<UserEntity>
+    updateUserDto: UpdateUserProfileDto
   ): Promise<UserSerializer> {
     const user = await this.userRepository.get(id, [], {
       groups: [
@@ -331,12 +332,6 @@ export class AuthService {
     }
     if (Object.keys(errorPayload).length > 0) {
       throw new UnprocessableEntityException(errorPayload);
-    }
-    if (updateUserDto.avatar && user.avatar) {
-      const path = `public/images/profile/${user.avatar}`;
-      if (existsSync(path)) {
-        unlinkSync(`public/images/profile/${user.avatar}`);
-      }
     }
     return this.userRepository.updateEntity(user, updateUserDto);
   }
@@ -646,5 +641,17 @@ export class AuthService {
 
   async getRefreshTokenGroupedData(field: string) {
     return this.refreshTokenService.getRefreshTokenGroupedData(field);
+  }
+
+  async uploadAvatar(file: Express.Multer.File, user: UserEntity) {
+    if (user.avatar) {
+      const path = `public/images/profile/${user.avatar}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/profile/${user.avatar}`);
+      }
+    }
+    user.avatar = file.filename;
+    user.save();
+    return this.userRepository.transform(user);
   }
 }

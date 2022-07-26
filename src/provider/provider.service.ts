@@ -169,6 +169,7 @@ export class ProviderService {
       await queryRunner.commitTransaction();
       return manager.merge(ProviderEntity, updateUserDto, providerInformation);
     } catch (error) {
+      console.log(error);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();

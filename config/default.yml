@@ -12,7 +12,7 @@ db:
 
 jwt:
   # expiresIn: 10
-  expiresIn: 900
+  expiresIn: 604800
   refreshExpiresIn: 604800
   cookieExpiresIn: 604800
 

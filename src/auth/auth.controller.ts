@@ -16,7 +16,7 @@ import {
   ValidationPipe
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { UAParser } from 'ua-parser-js';
 
@@ -40,6 +40,8 @@ import { UserEntity } from 'src/auth/entity/user.entity';
 import { UserSerializer } from 'src/auth/serializer/user.serializer';
 import { RefreshPaginateFilterDto } from 'src/refresh-token/dto/refresh-paginate-filter.dto';
 import { RefreshTokenSerializer } from 'src/refresh-token/serializer/refresh-token.serializer';
+import { ParseFormBodyPipe } from 'src/common/pipes/parse-form-body.pipe';
+import { UserAvatarDto } from './dto/user-avatar.dto';
 
 @ApiTags('user')
 @Controller()
@@ -136,24 +138,16 @@ export class AuthController {
 
   @UseGuards(JwtTwoFactorGuard)
   @Put('/auth/profile')
-  @UseInterceptors(
-    FileInterceptor(
-      'avatar',
-      multerOptionsHelper('public/images/profile', 1000000)
-    )
-  )
   updateProfile(
     @GetUser()
     user: UserEntity,
-    @UploadedFile()
-    file: Express.Multer.File,
-    @Body()
+    @Body(ParseFormBodyPipe)
     updateUserDto: UpdateUserProfileDto
   ): Promise<UserSerializer> {
-    if (file) {
-      updateUserDto.avatar = file.filename;
-    }
-    return this.authService.update(user.id, updateUserDto);
+    return this.authService.update(
+      user.id,
+      JSON.parse(JSON.stringify(updateUserDto))
+    );
   }
 
   @UseGuards(JwtTwoFactorGuard)
@@ -240,5 +234,26 @@ export class AuthController {
     user: UserEntity
   ) {
     return this.authService.revokeTokenById(+id, user.id);
+  }
+
+  @UseGuards(JwtTwoFactorGuard)
+  @Post('auth/profile/avatar')
+  @UseInterceptors(
+    FileInterceptor(
+      'avatar',
+      multerOptionsHelper('public/images/profile', 1000000)
+    )
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'List of cats',
+    type: UserAvatarDto
+  })
+  updateAvatar(
+    @GetUser() user: UserEntity,
+    @UploadedFile()
+    file: Express.Multer.File
+  ) {
+    return this.authService.uploadAvatar(file, user);
   }
 }
