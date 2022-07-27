@@ -246,7 +246,7 @@ export class AuthController {
   )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'List of cats',
+    description: 'user avatar',
     type: UserAvatarDto
   })
   updateAvatar(
