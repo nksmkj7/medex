@@ -21,8 +21,8 @@ app:
   name: 'Medex'
   version: 'v0.1'
   description: 'Official Medex API'
-  appUrl: 'http://localhost:7777'
-  frontendUrl: 'http://localhost:3000'
+  appUrl: 'http://52.77.68.139:7777'
+  frontendUrl: 'http://52.77.68.139:3000'
   sameSite: true
 
 mail:
