@@ -13,7 +13,7 @@ import { BannerFilterDto } from './dto/banner-filter.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 
 @Injectable()
-export class BannerService {
+export class BannerService implements CommonServiceInterface<BannerSerializer> {
   constructor(
     @InjectRepository(BannerRepository)
     private repository: BannerRepository
@@ -45,6 +45,12 @@ export class BannerService {
     if (!banner) {
       throw new NotFoundException();
     }
+    if (banner.image) {
+      const path = `public/images/banner/${banner.image}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/banner/${banner.image}`);
+      }
+    }
 
     return this.repository.updateItem(banner, updateRoleDto);
   }
@@ -57,10 +63,10 @@ export class BannerService {
       }
     }
 
-    if (banner.filename) {
-      const path = `public/images/banner/${banner.filename}`;
+    if (banner.image) {
+      const path = `public/images/banner/${banner.image}`;
       if (existsSync(path)) {
-        unlinkSync(`public/images/banner/${banner.filename}`);
+        unlinkSync(`public/images/banner/${banner.image}`);
       }
     }
     await this.repository.delete({ id });
