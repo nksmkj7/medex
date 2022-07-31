@@ -45,26 +45,36 @@ export abstract class AbstractUniqueValidator
 
     const [EntityClass, findCondition = args.property] = args.constraints;
     const compareWith = args.constraints[2] || 'id';
-    const extraCondition = args.constraints[3] || {};
+    const { relations = [], whereCondition: extraWhereCondition = {} } =
+      args.constraints[3] || {};
     function getSearchCondition(findCondition: { [index: string]: string }) {
       if (_requestContext && _requestContext?.['params']?.[compareWith]) {
         return {
           ...findCondition,
           id: Not(_requestContext['params'][compareWith]),
-          ...extraCondition
+          ...extraWhereCondition
         };
       }
       return findCondition;
     }
-    return (
-      (await this.connection.getRepository(EntityClass).count({
+    function getCountCondition(findCondition) {
+      const condition = {
         where:
           typeof findCondition === 'function'
             ? findCondition(args)
             : getSearchCondition({
                 [findCondition || args.property]: value
               })
-      })) <= 0
+      };
+      if (relations.length > 0) {
+        condition['relations'] = relations;
+      }
+      return condition;
+    }
+    return (
+      (await this.connection
+        .getRepository(EntityClass)
+        .count(getCountCondition(findCondition))) <= 0
     );
   }
 

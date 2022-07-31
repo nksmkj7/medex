@@ -13,6 +13,7 @@ import {
 import { UpdateUserProfileDto } from 'src/auth/dto/update-user-profile.dto';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
+import { RoleEntity } from 'src/role/entities/role.entity';
 
 export class UpdateProviderDto extends OmitType(UpdateUserProfileDto, [
   'email',
@@ -25,7 +26,12 @@ export class UpdateProviderDto extends OmitType(UpdateUserProfileDto, [
       'email',
       'id',
       {
-        roleId: 41
+        relations: ['role'],
+        whereCondition: {
+          role: {
+            name: 'provider'
+          }
+        }
       }
     ],
     {

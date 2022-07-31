@@ -167,19 +167,18 @@ export class ProviderService {
         providerInformation
       );
       await queryRunner.commitTransaction();
+      if (updateUserDto.avatar && user.avatar) {
+        const path = `public/images/profile/${user.avatar}`;
+        if (existsSync(path)) {
+          unlinkSync(`public/images/profile/${user.avatar}`);
+        }
+      }
       return manager.merge(ProviderEntity, updateUserDto, providerInformation);
     } catch (error) {
-      console.log(error);
       await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
-    }
-
-    if (updateUserDto.avatar && user.avatar) {
-      const path = `public/images/profile/${user.avatar}`;
-      if (existsSync(path)) {
-        unlinkSync(`public/images/profile/${user.avatar}`);
-      }
     }
   }
 }

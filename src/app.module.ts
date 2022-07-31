@@ -31,6 +31,7 @@ import { DashboardModule } from 'src/dashboard/dashboard.module';
 import { AppController } from 'src/app.controller';
 import { CountryModule } from './country/country.module';
 import { ProviderModule } from './provider/provider.module';
+import { BannerModule } from './banner/banner.module';
 import winstonConfig from 'src/config/winston';
 
 const appConfig = config.get('app');
@@ -75,7 +76,8 @@ const appConfig = config.get('app');
     TwofaModule,
     DashboardModule,
     CountryModule,
-    ProviderModule
+    ProviderModule,
+    BannerModule
   ],
   providers: [
     {
