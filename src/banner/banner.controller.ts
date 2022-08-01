@@ -14,8 +14,7 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { UserAvatarDto } from 'src/auth/dto/user-avatar.dto';
+import {  ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
