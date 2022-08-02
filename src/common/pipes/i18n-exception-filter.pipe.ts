@@ -117,7 +117,8 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
         'isIn',
         'matches',
         'maxLength',
-        'minLength'
+        'minLength',
+        'isEnum'
       ];
       const item = errors[i];
       let message = [];

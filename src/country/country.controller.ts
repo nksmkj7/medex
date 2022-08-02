@@ -16,7 +16,6 @@ export class CountryController {
     countryDto: // searchScope: keyof DeepPartial<CountryEntity>
     CountryDto
   ) {
-    // console.log(searchScope, 'search scope is');
     return this.countryService.findAll(countryDto);
   }
 }

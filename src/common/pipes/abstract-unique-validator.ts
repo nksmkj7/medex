@@ -57,14 +57,34 @@ export abstract class AbstractUniqueValidator
       }
       return findCondition;
     }
+    function getFindCondition(findCondition) {
+      if (Array.isArray(findCondition)) {
+        let updatedFindCondition = {};
+        findCondition.forEach((condition) => {
+          if (typeof condition === 'function') {
+            updatedFindCondition = {
+              ...updatedFindCondition,
+              ...condition(args.object[args.property])
+            };
+          } else {
+            updatedFindCondition = {
+              ...updatedFindCondition,
+              [condition]: args.object[condition]
+            };
+          }
+        });
+        return updatedFindCondition;
+      }
+      return {
+        [findCondition || args.property]: value
+      };
+    }
     function getCountCondition(findCondition) {
       const condition = {
         where:
           typeof findCondition === 'function'
             ? findCondition(args)
-            : getSearchCondition({
-                [findCondition || args.property]: value
-              })
+            : getSearchCondition(getFindCondition(findCondition))
       };
       if (relations.length > 0) {
         condition['relations'] = relations;

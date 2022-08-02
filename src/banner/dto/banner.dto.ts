@@ -2,11 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { kMaxLength } from 'buffer';
 import { Type } from 'class-transformer';
 import {
-  isBoolean,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
-  IsNumberString,
   IsString,
   MaxLength,
   Min,
