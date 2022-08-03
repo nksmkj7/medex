@@ -19,7 +19,9 @@ export class MenuService {
   ) {}
 
   async create(createMenuDto: CreateMenuDto): Promise<MenuSerializer> {
-    if (createMenuDto.parentId) {
+    if (!createMenuDto.parentId) {
+      createMenuDto.parentId = null;
+    } else if (createMenuDto.parentId) {
       if (createMenuDto.menuType === 'dropdown') {
         throw new PreconditionFailedException(
           'Child cannot have dropdown as parent'

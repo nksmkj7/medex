@@ -1,4 +1,3 @@
-import { Transform } from 'class-transformer';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { slugify } from 'src/common/helper/general.helper';
 import {
@@ -13,11 +12,11 @@ import {
 } from 'typeorm';
 
 @Entity({
-  name: 'menus'
+  name: 'categories'
 })
 @Unique(['position', 'slug'])
-@Unique(['slug', 'menuType'])
-export class MenuEntity extends CustomBaseEntity {
+@Unique(['slug'])
+export class CategoryEntity extends CustomBaseEntity {
   @Column('varchar')
   title: string;
 
@@ -32,37 +31,45 @@ export class MenuEntity extends CustomBaseEntity {
   @Column('varchar', {
     nullable: true
   })
-  link: string;
+  image: string;
 
-  @Column('enum', {
-    nullable: true,
-    enum: ['direct', 'dropdown'],
-    default: `'direct'`
+  @Column('varchar', {
+    nullable: true
   })
-  menuType: string;
+  color: string;
+
+  @Column('text', {
+    nullable: true
+  })
+  shortDescription: string;
 
   @Column('boolean', {
     default: false
   })
   status: boolean;
 
-  @Column('int', {
-    nullable: true,
-    unsigned: true
+  @Column('boolean', {
+    default: true
   })
-  @Transform(({ value }) => {
-    console.log(value, 'value of menu is');
-    return !value ? null : value;
+  isNew: boolean;
+
+  @Column('boolean', {
+    default: false
   })
-  parentId: number | null;
+  isFeatured: boolean;
 
-  @ManyToOne(() => MenuEntity, (menu) => menu.children)
-  @JoinColumn({ name: 'parentId' })
-  parent: MenuEntity;
+  @Column('uuid', {
+    nullable: true
+  })
+  parentId: string | null;
 
-  @OneToMany(() => MenuEntity, (menu) => menu.parent)
+  @ManyToOne(() => CategoryEntity, (menu) => menu.children)
   @JoinColumn({ name: 'parentId' })
-  children: MenuEntity[];
+  parent: CategoryEntity;
+
+  @OneToMany(() => CategoryEntity, (menu) => menu.parent)
+  @JoinColumn({ name: 'parentId' })
+  children: CategoryEntity[];
 
   @BeforeInsert()
   async generateSlugBeforeInsert() {

@@ -14,7 +14,7 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {  ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
@@ -80,12 +80,12 @@ export class BannerController {
     @UploadedFile()
     file: Express.Multer.File,
     @Body()
-    updateRoleDto: UpdateBannerDto
+    updateBannerDto: UpdateBannerDto
   ): Promise<BannerSerializer> {
-    updateRoleDto = file
-      ? { ...updateRoleDto, image: file.filename }
-      : { ...updateRoleDto };
-    return this.bannerService.update(id, updateRoleDto);
+    updateBannerDto = file
+      ? { ...updateBannerDto, image: file.filename }
+      : { ...updateBannerDto };
+    return this.bannerService.update(id, updateBannerDto);
   }
 
   @Delete(':id')
