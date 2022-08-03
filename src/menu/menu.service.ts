@@ -77,7 +77,7 @@ export class MenuService {
   }
 
   async update(
-    id: string,
+    id: number,
     updateMenuDto: UpdateMenuDto
   ): Promise<MenuSerializer> {
     const category = await this.repository.findOne(id);
