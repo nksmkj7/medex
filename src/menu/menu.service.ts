@@ -1,4 +1,8 @@
-import { Injectable, PreconditionFailedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  PreconditionFailedException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from 'src/exception/not-found.exception';
 import { CommonServiceInterface } from 'src/common/interfaces/common-service.interface';
@@ -10,6 +14,7 @@ import { UpdateMenuDto } from './dto/update-menu.dto';
 import { MenuSerializer } from './serializer/menu.serializer';
 import { MenuFilterDto } from './dto/menu-filter.dto';
 import { IsNull, Not } from 'typeorm';
+import { MenuEntity } from './entity/menu.entity';
 
 @Injectable()
 export class MenuService {
@@ -72,15 +77,38 @@ export class MenuService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateMenuDto: UpdateMenuDto
   ): Promise<MenuSerializer> {
-    const menu = await this.repository.findOne(id);
-    if (!menu) {
+    const category = await this.repository.findOne(id);
+    await this.canBeUpdated(updateMenuDto, category);
+    if (!updateMenuDto.parentId) {
+      updateMenuDto.parentId = null;
+    }
+    return this.repository.updateItem(category, updateMenuDto);
+  }
+
+  async canBeUpdated(
+    updateMenuDto: UpdateMenuDto,
+    category: MenuEntity
+  ): Promise<boolean> {
+    if (!category) {
       throw new NotFoundException();
     }
-
-    return this.repository.updateItem(menu, updateMenuDto);
+    if (
+      !category.parentId &&
+      (await this.repository.count({
+        where: {
+          id: category.id
+        }
+      })) > 0 &&
+      updateMenuDto.parentId
+    ) {
+      throw new BadRequestException(
+        "Can't change parent of root menu that has children"
+      );
+    }
+    return true;
   }
 
   async remove(id: number): Promise<void> {
@@ -90,6 +118,18 @@ export class MenuService {
         throw new NotFoundException();
       }
     }
-    await this.repository.delete({ id });
+    if (
+      !menu.parentId &&
+      (await this.repository.count({
+        where: {
+          id: menu.id
+        }
+      })) > 0
+    ) {
+      throw new BadRequestException(
+        "Can't remove root menu that has children."
+      );
+    }
+    await this.repository.delete(id);
   }
 }
