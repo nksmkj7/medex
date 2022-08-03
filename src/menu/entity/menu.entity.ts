@@ -5,6 +5,7 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   Unique
@@ -14,7 +15,7 @@ import {
   name: 'menus'
 })
 @Unique(['position', 'slug'])
-@Unique(['slug'])
+@Unique(['slug', 'menuType'])
 export class MenuEntity extends CustomBaseEntity {
   @Column('varchar')
   title: string;
@@ -50,10 +51,12 @@ export class MenuEntity extends CustomBaseEntity {
   })
   parentId: number | null;
 
-  @ManyToOne((type) => MenuEntity, (menu) => menu.children)
+  @ManyToOne(() => MenuEntity, (menu) => menu.children)
+  @JoinColumn({ name: 'parentId' })
   parent: MenuEntity;
 
-  @OneToMany((type) => MenuEntity, (menu) => menu.parent)
+  @OneToMany(() => MenuEntity, (menu) => menu.parent)
+  @JoinColumn({ name: 'parentId' })
   children: MenuEntity[];
 
   @BeforeInsert()

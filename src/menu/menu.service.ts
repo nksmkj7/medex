@@ -66,7 +66,7 @@ export class MenuService {
   }
 
   async findOne(id: number): Promise<MenuSerializer> {
-    return this.repository.get(id);
+    return this.repository.get(id, ['parent', 'children']);
   }
 
   async update(

@@ -7,6 +7,7 @@ import { MenuEntity } from './entity/menu.entity';
 import { MenuSerializer } from './serializer/menu.serializer';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
+import { NotFoundException } from '@nestjs/common';
 
 @EntityRepository(MenuEntity)
 export class MenuRepository extends BaseRepository<MenuEntity, MenuSerializer> {
@@ -25,11 +26,34 @@ export class MenuRepository extends BaseRepository<MenuEntity, MenuSerializer> {
     return this.transform(updatedBanner);
   }
 
-  /**
-   * transform single role
-   * @param model
-   * @param transformOption
-   */
+  async get(
+    id: number,
+    relations: string[] = [],
+    transformOptions = {}
+  ): Promise<MenuSerializer | null> {
+    return await this.findOne({
+      where: {
+        id
+      },
+      relations
+    })
+      .then((entity) => {
+        transformOptions['groups'] = !entity.parentId
+          ? ['parent']
+          : ['children'];
+        if (!entity) {
+          return Promise.reject(new NotFoundException());
+        }
+
+        return Promise.resolve(
+          entity ? this.transform(entity, transformOptions) : null
+        );
+      })
+      .catch((error) => {
+        return Promise.reject(error);
+      });
+  }
+
   transform(model: MenuEntity, transformOption = {}): MenuSerializer {
     return plainToClass(
       MenuSerializer,
@@ -38,11 +62,6 @@ export class MenuRepository extends BaseRepository<MenuEntity, MenuSerializer> {
     );
   }
 
-  /**
-   * transform array of roles
-   * @param models
-   * @param transformOption
-   */
   transformMany(models: MenuEntity[], transformOption = {}): MenuSerializer[] {
     return models.map((model) => this.transform(model, transformOption));
   }

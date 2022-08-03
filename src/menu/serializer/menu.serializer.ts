@@ -1,12 +1,11 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import {
+  ApiHideProperty,
+  ApiProperty,
+  ApiPropertyOptional
+} from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
 
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
-import * as config from 'config';
-
-export const adminUserGroupsForSerializing: string[] = ['admin'];
-export const basicFieldGroupsForSerializing: string[] = ['basic'];
-const appConfig = config.get('app');
 
 export class MenuSerializer extends ModelSerializer {
   id: number;
@@ -27,15 +26,23 @@ export class MenuSerializer extends ModelSerializer {
   })
   status: boolean;
 
-  @ApiPropertyOptional()
+  @ApiHideProperty()
   @Expose({
-    groups: basicFieldGroupsForSerializing
+    groups: ['children']
   })
+  @Type(() => MenuSerializer)
+  parent: MenuSerializer;
+
+  @ApiHideProperty()
+  @Expose({
+    groups: ['parent']
+  })
+  @Type(() => MenuSerializer)
+  children: MenuSerializer;
+
+  @ApiPropertyOptional()
   createdAt: Date;
 
   @ApiPropertyOptional()
-  @Expose({
-    groups: basicFieldGroupsForSerializing
-  })
   updatedAt: Date;
 }
