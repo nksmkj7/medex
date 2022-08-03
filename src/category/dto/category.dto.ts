@@ -46,8 +46,8 @@ export class CategoryDto {
   @IsOptional()
   image: string;
 
+  @Transform((value) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
-  @Type(() => Number)
   @IsNumber(
     {
       allowNaN: false,

@@ -49,8 +49,8 @@ export class MenuDto {
   )
   title: string;
 
+  @Transform((value) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
-  @Type(() => Number)
   @IsNumber(
     {
       allowNaN: false,

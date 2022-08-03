@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { kMaxLength } from 'buffer';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -21,7 +21,7 @@ export class BannerDto {
   })
   title: string;
 
-  @Type(() => Number)
+  @Transform((value) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
   @IsNumber(
     {
@@ -33,7 +33,7 @@ export class BannerDto {
     }
   )
   @Min(1, {
-    message: 'min-{"ln":1,"count":1}'
+    message: 'min-{"ln":"1"}'
   })
   @Validate(UniqueValidatorPipe, [BannerEntity, 'position'], {
     message: 'already taken'

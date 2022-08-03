@@ -74,10 +74,11 @@ export abstract class AbstractUniqueValidator
           }
         });
         return updatedFindCondition;
+      } else {
+        return {
+          [findCondition || args.property]: value
+        };
       }
-      return {
-        [findCondition || args.property]: value
-      };
     }
     function getCountCondition(findCondition) {
       const condition = {

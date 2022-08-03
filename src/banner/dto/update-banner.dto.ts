@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, Min, Validate } from 'class-validator';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
 import { BannerEntity } from '../entity/banner.entity';
@@ -16,7 +16,7 @@ export class UpdateBannerDto extends OmitType(BannerDto, [
   })
   image: string;
 
-  @Type(() => Number)
+  @Transform((value) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
   @IsNumber(
     {

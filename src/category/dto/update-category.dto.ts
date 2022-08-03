@@ -1,5 +1,5 @@
 import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
@@ -39,8 +39,8 @@ export class UpdateCategoryDto extends OmitType(CategoryDto, [
   )
   title: string;
 
+  @Transform((value) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
-  @Type(() => Number)
   @IsNumber(
     {
       allowNaN: false,
