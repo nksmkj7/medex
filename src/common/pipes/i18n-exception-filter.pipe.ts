@@ -109,6 +109,7 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
   }
 
   async translateArray(errors: any[], lang: string) {
+    console.log(errors[0].children[0], 'asdfdsaf');
     const validationData: Array<ValidationErrorInterface> = [];
     for (let i = 0; i < errors.length; i++) {
       const constraintsValidator = [
@@ -123,14 +124,15 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
       ];
       const item = errors[i];
       let message = [];
-      if (item.constraints) {
+
+      let getValidationData = async (constraints) => {
         message = await Promise.allSettled(
-          Object.keys(item.constraints).map(async (key: string) => {
+          Object.keys(constraints).map(async (key: string) => {
             let validationKey: string = key,
               validationArgument: Record<string, any> = {};
             if (constraintsValidator.includes(key)) {
               const { title, argument } = this.checkIfConstraintAvailable(
-                item.constraints[key]
+                constraints[key]
               );
               validationKey = title;
               validationArgument = argument;
@@ -144,14 +146,23 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
             });
           })
         );
+
+        validationData.push({
+          name: item.property,
+          errors: message.map((err) => err.value)
+        });
+      };
+      console.log(item, 'pshyco');
+      if (item.constraints) {
+        if (Array.isArray(item.constraints)) {
+          for await (const constraint of item.constraints) {
+            await getValidationData(constraint);
+          }
+        } else {
+          await getValidationData(item.constraints);
+        }
       }
-
-      validationData.push({
-        name: item.property,
-        errors: message.map((err) => err.value)
-      });
     }
-
     validationData.forEach((item) => {
       if (item?.errors && item.errors.length) {
         const i18nFilePath = path.join(__dirname, '../../../src/i18n/');

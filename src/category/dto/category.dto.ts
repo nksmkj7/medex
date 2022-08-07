@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEmpty,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -22,6 +23,7 @@ export class CategoryDto {
     if (!value) return null;
     return value;
   })
+  @IsEmpty()
   parentId: string | null;
 
   @IsNotEmpty()

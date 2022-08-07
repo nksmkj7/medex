@@ -378,16 +378,16 @@ export const PermissionConfiguration: PermissionConfigInterface = {
               method: MethodList.PUT
             }
           ]
+        },
+        {
+          name: 'Update provider day schedules',
+          route: [
+            {
+              path: '/providers/:id/day-schedules',
+              method: MethodList.POST
+            }
+          ]
         }
-        // {
-        //   name: 'Delete providers by id',
-        //   route: [
-        //     {
-        //       path: '/providers/:id',
-        //       method: MethodList.DELETE
-        //     }
-        //   ]
-        // }
       ]
     }
   ]

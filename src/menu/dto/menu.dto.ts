@@ -33,6 +33,7 @@ export class MenuDto {
     if (!value) return null;
     return value;
   })
+  @IsEmpty()
   parentId: number | null;
 
   @IsNotEmpty()

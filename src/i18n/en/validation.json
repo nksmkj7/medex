@@ -21,5 +21,6 @@
   "isString": "$t(app.{property}) must be string",
   "isBoolean": "field must be selected between true or false",
   "already taken": "$t(app.{property}) is already taken",
-  "unique": "$t(app.{property}) is already taken"
+  "unique": "$t(app.{property}) is already taken",
+  "whitelistValidation": "$t(app.{property}) should not exits"
 }
