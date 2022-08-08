@@ -51,7 +51,6 @@ export class MenuEntity extends CustomBaseEntity {
     unsigned: true
   })
   @Transform(({ value }) => {
-    console.log(value, 'value of menu is');
     return !value ? null : value;
   })
   parentId: number | null;

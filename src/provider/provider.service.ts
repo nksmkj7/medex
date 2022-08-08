@@ -17,6 +17,7 @@ import {
   ownerUserGroupsForSerializing
 } from 'src/auth/serializer/user.serializer';
 import { existsSync, unlinkSync } from 'fs';
+import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
 
 @Injectable()
 export class ProviderService {
@@ -180,5 +181,33 @@ export class ProviderService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async addDaySchedule(
+    id: number,
+    providerDayScheduleDto: ProviderDayScheduleDto
+  ) {
+    let user = await this.userRepository.findOne(id, {
+      relations: ['providerInformation']
+    });
+    await this.connection
+      .createQueryBuilder()
+      .update(ProviderInformationEntity)
+      .set({
+        daySchedules: JSON.stringify(providerDayScheduleDto.daySchedules)
+      })
+      .where('userId=:id', { id: user.id })
+      .execute();
+    return providerDayScheduleDto;
+  }
+
+  async getDaySchedule(id: number) {
+    let user = await this.userRepository.findOne(id, {
+      relations: ['providerInformation']
+    });
+    const daySchedules: ProviderDayScheduleDto = JSON.parse(
+      user.providerInformation.daySchedules
+    );
+    return daySchedules;
   }
 }

@@ -18,15 +18,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
       return value;
     }
     const object = plainToClass(metatype, value);
-    const errors = await validate(object, {
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      forbidUnknownValues: true,
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: true
-      }
-    });
+    const errors = await validate(object);
     if (errors.length > 0) {
       const translatedError = await this.transformError(errors);
       throw new UnprocessableEntityException(translatedError);

@@ -387,6 +387,15 @@ export const PermissionConfiguration: PermissionConfigInterface = {
               method: MethodList.POST
             }
           ]
+        },
+        {
+          name: 'Get provider day schedules',
+          route: [
+            {
+              path: '/providers/:id/day-schedules',
+              method: MethodList.GET
+            }
+          ]
         }
       ]
     }

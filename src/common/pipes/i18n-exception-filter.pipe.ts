@@ -10,16 +10,7 @@ import { I18nService } from 'nestjs-i18n';
 import { ValidationErrorInterface } from 'src/common/interfaces/validation-error.interface';
 import { StatusCodesList } from 'src/common/constants/status-codes-list.constants';
 import path = require('path');
-import {
-  access,
-  accessSync,
-  fstat,
-  readdirSync,
-  readFile,
-  readFileSync,
-  writeFileSync,
-  constants
-} from 'fs';
+import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { startCase } from 'lodash';
 @Catch(HttpException)
 export class I18nExceptionFilterPipe implements ExceptionFilter {
@@ -109,7 +100,6 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
   }
 
   async translateArray(errors: any[], lang: string) {
-    console.log(errors[0].children[0], 'asdfdsaf');
     const validationData: Array<ValidationErrorInterface> = [];
     for (let i = 0; i < errors.length; i++) {
       const constraintsValidator = [
@@ -125,8 +115,8 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
       const item = errors[i];
       let message = [];
 
-      let getValidationData = async (constraints) => {
-        message = await Promise.allSettled(
+      let getErrorMessage = async (constraints) => {
+        return await Promise.allSettled(
           Object.keys(constraints).map(async (key: string) => {
             let validationKey: string = key,
               validationArgument: Record<string, any> = {};
@@ -146,20 +136,44 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
             });
           })
         );
-
-        validationData.push({
-          name: item.property,
-          errors: message.map((err) => err.value)
-        });
       };
-      console.log(item, 'pshyco');
       if (item.constraints) {
         if (Array.isArray(item.constraints)) {
           for await (const constraint of item.constraints) {
-            await getValidationData(constraint);
+            message = await getErrorMessage(constraint);
+            validationData.push({
+              name: item.property,
+              errors: message.map((err) => err.value)
+            });
           }
         } else {
-          await getValidationData(item.constraints);
+          message = await getErrorMessage(item.constraints);
+          validationData.push({
+            name: item.property,
+            errors: message.map((err) => err.value)
+          });
+        }
+      } else if (item.children) {
+        const getChildrenConstraints = async (childError, propertyName) => {
+          if (childError?.children && childError.children.length > 0) {
+            for await (const child of childError.children) {
+              await getChildrenConstraints(
+                child,
+                `${propertyName}.${childError.property}`
+              );
+            }
+          }
+
+          if (childError?.constraints) {
+            message = await getErrorMessage(childError.constraints);
+            validationData.push({
+              name: `${propertyName}.${childError.property}`,
+              errors: message.map((err) => err.value)
+            });
+          }
+        };
+        for await (const child of item.children) {
+          await getChildrenConstraints(child, item.property);
         }
       }
     }
@@ -168,17 +182,12 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
         const i18nFilePath = path.join(__dirname, '../../../src/i18n/');
         readdirSync(i18nFilePath).map((file) => {
           const jsonFilePath = path.join(i18nFilePath, file, 'app.json');
-          // try {
-          //   accessSync(jsonFilePath, constants.R_OK | constants.W_OK);
-          //   console.log('can read and write');
-          // } catch (err) {
-          //   console.log('no access');
-          // }
+
           const jsonData = JSON.parse(readFileSync(jsonFilePath, 'utf-8'));
           // item.name = startCase(item.name);
           jsonData[item.name] = startCase(item.name);
           writeFileSync(jsonFilePath, JSON.stringify(jsonData), 'utf-8');
-          item.name = startCase(item.name);
+          // item.name = startCase(item.name);
         });
       }
     });

@@ -88,6 +88,11 @@ export class ProviderInformationEntity extends CustomBaseEntity {
   })
   vatNo: string;
 
-  @Column({})
+  @Column()
   termsCondition: string;
+
+  @Column({
+    type: 'jsonb'
+  })
+  daySchedules: string;
 }

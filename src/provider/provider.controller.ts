@@ -69,10 +69,14 @@ export class ProviderController {
     @Body()
     providerDayScheduleDto: ProviderDayScheduleDto
   ) {
-    console.log(providerDayScheduleDto, '----->');
-    // return await this.providerService.addDaySchedule(
-    //   id,
-    //   providerDayScheduleDto
-    // );
+    return await this.providerService.addDaySchedule(
+      id,
+      providerDayScheduleDto
+    );
+  }
+
+  @Get(':id/day-schedules')
+  getDaySchedule(@Param('id', ParseIntPipe) id: number) {
+    return this.providerService.getDaySchedule(id);
   }
 }

@@ -1,26 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsDate,
-  IsDateString,
-  IsJSON,
   IsNotEmpty,
   IsNotEmptyObject,
-  IsObject,
   IsOptional,
-  IsString,
-  MinLength,
   ValidateNested
-  // MinLength,
 } from 'class-validator';
 import { IsTime } from 'src/common/validators/time-only.decorator';
 
 class ScheduleDto {
   @IsNotEmpty()
-  @IsTime('12h', {
-    message: 'time haleko milena'
-  })
+  @IsTime('12h')
   startTime: string;
 
   @IsNotEmpty()
@@ -29,12 +20,40 @@ class ScheduleDto {
 }
 
 class DayDto {
-  // @Transform(({ value }) => console.log(value, 'asdfasfdasdf'))
-  @IsOptional()
   @IsNotEmptyObject()
   @ValidateNested()
   @Type(() => ScheduleDto)
   sunday: ScheduleDto;
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => ScheduleDto)
+  monday: ScheduleDto;
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => ScheduleDto)
+  tuesday: ScheduleDto;
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => ScheduleDto)
+  wednesday: ScheduleDto;
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => ScheduleDto)
+  thursday: ScheduleDto;
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => ScheduleDto)
+  friday: ScheduleDto;
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => ScheduleDto)
+  saturday: ScheduleDto;
 }
 
 export class ProviderDayScheduleDto {

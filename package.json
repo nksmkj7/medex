@@ -49,6 +49,7 @@
     "@nestjs/throttler": "^2.0.1",
     "@nestjs/typeorm": "^8.0.3",
     "@types/cookie-parser": "^1.4.2",
+    "@types/flat": "^5.0.2",
     "aws-sdk": "^2.1096.0",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.0",
