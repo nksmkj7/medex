@@ -53,7 +53,7 @@ throttle:
     prefix: 'login_fail_throttle'
     limit: 5
     duration: 2592000
-    blockDuration: 3000
+    blockDuration: 300
 
 twofa:
   authenticationAppNAme: 'medex'
