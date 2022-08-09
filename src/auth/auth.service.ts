@@ -5,11 +5,17 @@ import {
   UnprocessableEntityException
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import * as config from 'config';
 import { existsSync, unlinkSync } from 'fs';
 import { SignOptions } from 'jsonwebtoken';
-import { DeepPartial, EntityManager, Not, ObjectLiteral } from 'typeorm';
+import {
+  Connection,
+  DeepPartial,
+  EntityManager,
+  Not,
+  ObjectLiteral
+} from 'typeorm';
 import {
   RateLimiterRes,
   RateLimiterStoreAbstract
@@ -45,6 +51,7 @@ import { RefreshPaginateFilterDto } from 'src/refresh-token/dto/refresh-paginate
 import { RefreshTokenSerializer } from 'src/refresh-token/serializer/refresh-token.serializer';
 import { RoleRepository } from 'src/role/role.repository';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { PermissionEntity } from 'src/permission/entities/permission.entity';
 
 const throttleConfig = config.get('throttle.login');
 const jwtConfig = config.get('jwt');
@@ -72,7 +79,9 @@ export class AuthService {
     @InjectRepository(RoleRepository)
     private readonly roleRepository: RoleRepository,
     @Inject('LOGIN_THROTTLE')
-    private readonly rateLimiter: RateLimiterStoreAbstract
+    private readonly rateLimiter: RateLimiterStoreAbstract,
+    @InjectConnection()
+    private readonly connection: Connection
   ) {}
 
   get transactionManager() {
@@ -252,6 +261,12 @@ export class AuthService {
    * @param user
    */
   async get(user: UserEntity): Promise<UserSerializer> {
+    if (user?.role.name === 'superuser') {
+      const allPermissions = await this.connection
+        .createQueryBuilder(PermissionEntity, 'permissions')
+        .getMany();
+      user.role.permission = allPermissions;
+    }
     return this.userRepository.transform(user, {
       groups: ownerUserGroupsForSerializing
     });

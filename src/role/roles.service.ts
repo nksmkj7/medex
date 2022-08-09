@@ -78,12 +78,16 @@ export class RolesService implements CommonServiceInterface<RoleSerializer> {
    * @param id
    */
   async findOne(id: number): Promise<RoleSerializer> {
-    return this.repository.get(id, ['permission'], {
+    const role = await this.repository.get(id, ['permission'], {
       groups: [
         ...adminUserGroupsForSerializing,
         ...basicFieldGroupsForSerializing
       ]
     });
+    // if (role.name === 'superuser') {
+    //   console.log(role);
+    // }
+    return role;
   }
 
   /**
