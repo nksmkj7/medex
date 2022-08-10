@@ -1,3 +1,4 @@
+import { OmitType } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   MinLength,
@@ -5,11 +6,20 @@ import {
   IsDate,
   IsInt,
   Allow,
-  IsDateString
+  IsDateString,
+  IsString,
+  IsEmpty,
+  IsPhoneNumber,
+  IsOptional,
+  Validate
 } from 'class-validator';
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto';
+import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
+import { CountryEntity } from 'src/country/entities/country.entity';
 
-export class RegisterProviderDto extends RegisterUserDto {
+export class RegisterProviderDto extends OmitType(RegisterUserDto, [
+  'password'
+]) {
   @IsNotEmpty()
   @MinLength(6, {
     message: 'minLength-{"ln":6,"count":6}'
@@ -20,9 +30,11 @@ export class RegisterProviderDto extends RegisterUserDto {
   companyName: string;
 
   @IsNotEmpty()
+  @IsPhoneNumber()
   phone1: string;
 
-  @Allow()
+  @IsOptional()
+  @IsPhoneNumber()
   phone2: string;
 
   @IsDateString()
@@ -30,41 +42,46 @@ export class RegisterProviderDto extends RegisterUserDto {
 
   @IsNotEmpty()
   @IsInt()
+  @Validate(IsValidForeignKey, [CountryEntity])
   countryId: number;
 
-  @Allow()
+  @IsOptional()
+  @IsString()
   city?: string;
 
-  @Allow()
+  @IsOptional()
+  @IsString()
   state?: string;
 
-  @Allow()
+  @IsOptional()
+  @IsString()
   landmark?: string;
 
-  @Allow()
+  @IsOptional()
+  @IsString()
   timezone?: string;
 
-  @Allow()
+  @IsOptional()
   currency?: string;
 
-  @Allow()
+  @IsOptional()
   contactPerson?: string;
 
-  @Allow()
+  @IsOptional()
   serviceArea?: string;
 
-  @Allow()
+  @IsOptional()
   businessLocation?: string;
 
-  @Allow()
+  @IsOptional()
   businessLogo?: string;
 
-  @Allow()
+  @IsOptional()
   businessDescription?: string;
 
-  @Allow()
+  @IsOptional()
   vatNo?: string;
 
-  @Allow()
+  @IsOptional()
   termsCondition?: string;
 }

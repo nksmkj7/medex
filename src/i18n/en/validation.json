@@ -23,5 +23,7 @@
   "already taken": "$t(app.{property}) is already taken",
   "unique": "$t(app.{property}) is already taken",
   "whitelistValidation": "$t(app.{property}) should not exits",
-  "isTime": "Time format is not valid"
+  "isTime": "Time format is not valid",
+  "isPhoneNumber": "$t(app.{property}) must be valid phone number starts with country code",
+  "isValidForeign": "$t(app.{property}) not found."
 }
