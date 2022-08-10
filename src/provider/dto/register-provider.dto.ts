@@ -1,17 +1,15 @@
-import { OmitType } from '@nestjs/swagger';
+import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   MinLength,
   MaxLength,
-  IsDate,
-  IsInt,
-  Allow,
   IsDateString,
   IsString,
-  IsEmpty,
   IsPhoneNumber,
   IsOptional,
-  Validate
+  Validate,
+  ValidateIf
 } from 'class-validator';
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
@@ -33,17 +31,18 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   @IsPhoneNumber()
   phone1: string;
 
-  @IsOptional()
-  @IsPhoneNumber()
-  phone2: string;
-
   @IsDateString()
   startDate: Date;
 
   @IsNotEmpty()
-  @IsInt()
+  @Transform(({ value }) => Number(value))
   @Validate(IsValidForeignKey, [CountryEntity])
   countryId: number;
+
+  @IsOptional()
+  @ValidateIf((object, value) => value)
+  @IsPhoneNumber()
+  phone2?: string;
 
   @IsOptional()
   @IsString()
@@ -74,6 +73,11 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   businessLocation?: string;
 
   @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Provider Image ',
+    type: 'string',
+    format: 'binary'
+  })
   businessLogo?: string;
 
   @IsOptional()

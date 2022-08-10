@@ -1,12 +1,9 @@
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import {
-  ApiHideProperty,
-  ApiProperty,
-  ApiPropertyOptional
-} from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import * as config from 'config';
+const appConfig = config.get('app');
 
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
-import { RoleSerializer } from 'src/role/serializer/role.serializer';
 import { UserSerializer } from 'src/auth/serializer/user.serializer';
 
 export const adminUserGroupsForSerializing: string[] = ['admin'];
@@ -58,6 +55,9 @@ export class ProviderSerializer extends ModelSerializer {
   businessLocation: string;
 
   @ApiProperty()
+  @Transform(({ value }) =>
+    value ? `${appConfig.appUrl}/images/logo/${value}` : null
+  )
   businessLogo: string;
 
   @ApiProperty()

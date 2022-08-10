@@ -63,6 +63,11 @@ export class ProviderEntity extends UserEntity {
   @Column({
     nullable: true
   })
+  businessLogo: string;
+
+  @Column({
+    nullable: true
+  })
   businessDescription: string;
 
   @Column({

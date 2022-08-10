@@ -7,14 +7,17 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
   ValidationPipe
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { ObjectLiteral } from 'typeorm';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
@@ -30,11 +33,23 @@ export class ProviderController {
   constructor(private readonly providerService: ProviderService) {}
 
   @Post('register')
+  @UseInterceptors(
+    FileInterceptor(
+      'businessLogo',
+      multerOptionsHelper('public/images/logos', 1000000)
+    )
+  )
+  @ApiConsumes('multipart/form-data')
   async register(
     @Body(ValidationPipe)
-    registerProviderDto: RegisterProviderDto
+    registerProviderDto: RegisterProviderDto,
+    @UploadedFile()
+    file: Express.Multer.File
   ) {
-    const user = await this.providerService.createProvider(registerProviderDto);
+    const user = await this.providerService.createProvider({
+      ...registerProviderDto,
+      businessLogo: file.filename
+    });
     return user;
   }
 
@@ -51,14 +66,27 @@ export class ProviderController {
     return this.providerService.getProviderList(providerSearchFilterDto);
   }
 
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(new InjectRequestInterceptor(['params']))
   @Put(':id')
+  @UseInterceptors(
+    FileInterceptor(
+      'businessLogo',
+      multerOptionsHelper('public/images/logos', 1000000)
+    )
+  )
   async update(
     @Param('id', ParseIntPipe)
     id: number,
     @Body()
-    updateProviderDto: UpdateProviderDto
+    updateProviderDto: UpdateProviderDto,
+    @UploadedFile()
+    file: Express.Multer.File
   ) {
+    updateProviderDto = file
+      ? { ...updateProviderDto, businessLogo: file.filename }
+      : updateProviderDto;
+
     return await this.providerService.update(id, updateProviderDto);
   }
 
