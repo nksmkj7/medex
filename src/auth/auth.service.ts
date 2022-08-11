@@ -131,14 +131,14 @@ export class AuthService {
     roleName = 'admin'
   ): Promise<UserSerializer> {
     const token = await this.generateUniqueToken(12);
-    if (!createUserDto.status) {
-      // createUserDto.roleId = 2;
-      const role = await this.roleRepository.findBy('name', roleName);
-      createUserDto.roleId = role.id;
-      const currentDateTime = new Date();
-      currentDateTime.setHours(currentDateTime.getHours() + 1);
-      createUserDto.tokenValidityDate = currentDateTime;
-    }
+    // if (!createUserDto.status) {
+    // createUserDto.roleId = 2;
+    const role = await this.roleRepository.findBy('name', roleName);
+    createUserDto.roleId = role.id;
+    const currentDateTime = new Date();
+    currentDateTime.setHours(currentDateTime.getHours() + 1);
+    createUserDto.tokenValidityDate = currentDateTime;
+    // }
     const registerProcess = !createUserDto.status;
     const user = await this.userRepository.store(
       createUserDto,
