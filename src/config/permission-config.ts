@@ -398,6 +398,162 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Banner management',
+      resource: 'banner',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all banners',
+          route: [
+            {
+              path: '/banner',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View banner by id',
+          route: [
+            {
+              path: '/banner/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new banner',
+          route: [
+            {
+              path: '/banner',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update banner by id',
+          route: [
+            {
+              path: '/banner/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete banner by id',
+          route: [
+            {
+              path: '/banner/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Category management',
+      resource: 'category',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all categories',
+          route: [
+            {
+              path: '/category',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View category by id',
+          route: [
+            {
+              path: '/category/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new category',
+          route: [
+            {
+              path: '/category',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update category by id',
+          route: [
+            {
+              path: '/category/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete category by id',
+          route: [
+            {
+              path: '/category/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Menu management',
+      resource: 'menu',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all menus',
+          route: [
+            {
+              path: '/menu',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View menu by id',
+          route: [
+            {
+              path: '/menu/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new menu',
+          route: [
+            {
+              path: '/menu',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update menu by id',
+          route: [
+            {
+              path: '/menu/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete menu by id',
+          route: [
+            {
+              path: '/menu/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
     }
   ]
 };

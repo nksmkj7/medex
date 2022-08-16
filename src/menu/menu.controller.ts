@@ -10,9 +10,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
+import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { CreateMenuDto } from './dto/create-menu.dto';
@@ -23,6 +26,7 @@ import { MenuSerializer } from './serializer/menu.serializer';
 
 @ApiTags('Menu')
 @Controller('menu')
+@UseGuards(JwtTwoFactorGuard, PermissionGuard)
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 

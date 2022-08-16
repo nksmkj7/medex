@@ -11,11 +11,11 @@ import { IsTime } from 'src/common/validators/time-only.decorator';
 
 class ScheduleDto {
   @IsNotEmpty()
-  @IsTime('12h')
+  @IsTime('24h')
   startTime: string;
 
   @IsNotEmpty()
-  @IsTime('12h')
+  @IsTime('24h')
   endTime: string;
 }
 
@@ -161,7 +161,8 @@ export class ProviderDayScheduleDto {
 
   @ApiProperty({
     nullable: false,
-    type: Boolean
+    type: Boolean,
+    default: false
   })
   @IsNotEmpty()
   @IsBoolean()

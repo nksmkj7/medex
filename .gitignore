@@ -36,6 +36,6 @@ dump.rdb
 .env
 
 
-/i18n/*
+/src/i18n/*
 
 public/images/*

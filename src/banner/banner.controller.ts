@@ -11,10 +11,13 @@ import {
   Put,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
+import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
@@ -25,6 +28,7 @@ import { UpdateBannerDto } from './dto/update-banner.dto';
 import { BannerSerializer } from './serializer/banner.serializer';
 
 @ApiTags('Banner')
+@UseGuards(JwtTwoFactorGuard, PermissionGuard)
 @Controller('banner')
 export class BannerController {
   constructor(private readonly bannerService: BannerService) {}
