@@ -8,24 +8,39 @@ export const adminUserGroupsForSerializing: string[] = ['admin'];
 export const basicFieldGroupsForSerializing: string[] = ['basic'];
 const appConfig = config.get('app');
 
-export class BannerSerializer extends ModelSerializer {
+export class SpecialistSerializer extends ModelSerializer {
   id: number;
 
   @ApiProperty()
-  title: string;
+  fullName: string;
+
+  @ApiPropertyOptional()
+  contactNo: number;
 
   @ApiProperty()
-  position: number;
-
-  @ApiProperty()
-  @Transform(({ value }) => `${appConfig.appUrl}/images/banner/${value}`)
+  @Transform(({ value }) => `${appConfig.appUrl}/images/specialist/${value}`)
   image: string;
 
   @ApiPropertyOptional()
-  seoDescription: string;
+  primarySpecialty: string;
 
   @ApiPropertyOptional()
-  link: string;
+  educationTraining: string;
+
+  @ApiPropertyOptional()
+  experienceExpertise: string;
+
+  @ApiPropertyOptional()
+  publicAwards: string;
+
+  @ApiPropertyOptional()
+  membershipActivities: string;
+
+  @ApiProperty()
+  licenseRegistrationNumber: string;
+
+  @ApiPropertyOptional()
+  licenseCountry: number;
 
   @ApiProperty({
     name: 'status',

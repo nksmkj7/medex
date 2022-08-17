@@ -1,11 +1,12 @@
-import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
-import { Column, Entity, Unique } from 'typeorm';
+import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
+import { CountryEntity } from 'src/country/entities/country.entity';
+import { Column, Entity, JoinColumn, OneToOne, Unique } from 'typeorm';
 
 @Entity({
   name: 'specialists'
 })
 @Unique(['licenseRegistrationNumber', 'licenseCountry'])
-export class BannerEntity extends CustomBaseEntity {
+export class SpecialistEntity extends CustomUuidBaseEntity {
   @Column('varchar')
   fullName: string;
 
@@ -15,7 +16,7 @@ export class BannerEntity extends CustomBaseEntity {
   @Column('varchar', {
     nullable: true
   })
-  primarySpeciality: string;
+  primarySpecialty: string;
 
   @Column('varchar')
   image: string;
@@ -55,4 +56,11 @@ export class BannerEntity extends CustomBaseEntity {
     default: true
   })
   status: boolean;
+
+  @OneToOne(() => CountryEntity)
+  @JoinColumn({
+    name: 'licenseCountry',
+    referencedColumnName: 'id'
+  })
+  country: CountryEntity;
 }

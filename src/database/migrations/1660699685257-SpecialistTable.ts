@@ -27,7 +27,7 @@ export class SpecialistTable1660699685257 implements MigrationInterface {
             isNullable: true
           },
           {
-            name: 'primarySpeciality',
+            name: 'primarySpecialty',
             type: 'varchar',
             length: '255',
             isNullable: true
@@ -68,7 +68,7 @@ export class SpecialistTable1660699685257 implements MigrationInterface {
           {
             name: 'image',
             type: 'varchar',
-            isNullable: false
+            isNullable: true
           },
           {
             name: 'status',

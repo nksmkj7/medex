@@ -32,6 +32,7 @@ import { AppController } from 'src/app.controller';
 import { CountryModule } from './country/country.module';
 import { ProviderModule } from './provider/provider.module';
 import { BannerModule } from './banner/banner.module';
+import { SpecialistModule } from './specialist/specialist.module';
 import { MenuModule } from './menu/menu.module';
 import winstonConfig from 'src/config/winston';
 import { CategoryModule } from './category/category.module';
@@ -81,7 +82,8 @@ const appConfig = config.get('app');
     ProviderModule,
     BannerModule,
     MenuModule,
-    CategoryModule
+    CategoryModule,
+    SpecialistModule
   ],
   providers: [
     {
