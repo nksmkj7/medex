@@ -554,6 +554,49 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Specialist management',
+      resource: 'menu',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all specialist/doctors',
+          route: [
+            {
+              path: '/specialist',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View specialist detail by id',
+          route: [
+            {
+              path: '/specialist/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new specialist',
+          route: [
+            {
+              path: '/specialist',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update specialist by id',
+          route: [
+            {
+              path: '/specialist/:id',
+              method: MethodList.PUT
+            }
+          ]
+        }
+      ]
     }
   ]
 };
