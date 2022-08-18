@@ -557,7 +557,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
     },
     {
       name: 'Specialist management',
-      resource: 'menu',
+      resource: 'specialist',
       hasSubmodules: false,
       permissions: [
         {
@@ -592,6 +592,49 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           route: [
             {
               path: '/specialist/:id',
+              method: MethodList.PUT
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Service management',
+      resource: 'service',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all services',
+          route: [
+            {
+              path: '/service',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View service detail by id',
+          route: [
+            {
+              path: '/service/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new service',
+          route: [
+            {
+              path: '/service',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update service by id',
+          route: [
+            {
+              path: '/service/:id',
               method: MethodList.PUT
             }
           ]

@@ -2,7 +2,7 @@
  * model serializer
  */
 export class ModelSerializer {
-  id: number;
+  id: number | string;
   createdAt: Date;
   [key: string]: any;
 }

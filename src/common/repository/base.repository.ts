@@ -28,7 +28,7 @@ export class BaseRepository<
    * @param transformOptions
    */
   async get(
-    id: number,
+    id: any,
     relations: string[] = [],
     transformOptions = {}
   ): Promise<K | null> {
@@ -158,7 +158,8 @@ export class BaseRepository<
     relations: string[] = [],
     searchCriteria: string[] = [],
     transformOptions = {},
-    searchCondition = {}
+    searchCondition = {},
+    relationalSearchCriteria: {} = {}
   ): Promise<Pagination<K>> {
     const whereCondition = [];
     const findOptions: FindManyOptions = {};
@@ -170,11 +171,26 @@ export class BaseRepository<
             ...searchCondition
           });
         }
+        if (Object.keys(relationalSearchCriteria).length) {
+          for (const [key, value] of Object.entries(relationalSearchCriteria)) {
+            whereCondition.push({
+              [key]: value,
+              ...searchCondition
+            });
+          }
+        }
       } else {
         for (const key of searchCriteria) {
           whereCondition.push({
             [key]: ILike(`%${searchFilter.keywords}%`)
           });
+        }
+        if (Object.keys(relationalSearchCriteria).length) {
+          for (const [key, value] of Object.entries(relationalSearchCriteria)) {
+            whereCondition.push({
+              [key]: value
+            });
+          }
         }
       }
     } else {

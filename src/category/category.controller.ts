@@ -36,7 +36,6 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  @Post()
   @UseInterceptors(
     FileInterceptor(
       'image',
