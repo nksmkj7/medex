@@ -18,6 +18,7 @@ import {
 } from 'src/auth/serializer/user.serializer';
 import { existsSync, unlinkSync } from 'fs';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
+import { ServiceRepository } from 'src/service/service.repository';
 
 @Injectable()
 export class ProviderService {
@@ -30,7 +31,9 @@ export class ProviderService {
     private readonly providerRepository: ProviderRepository,
     @InjectRepository(RoleRepository)
     private readonly roleRepository: RoleRepository,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    @InjectRepository(ServiceRepository)
+    private readonly serviceRepository: ServiceRepository
   ) {}
 
   async registerUser(
@@ -206,5 +209,15 @@ export class ProviderService {
       user.providerInformation.daySchedules
     );
     return daySchedules;
+  }
+
+  async providerCategories(id: number) {
+    const user = await this.userRepository.findOneOrFail(id, {
+      relations: ['role', 'services']
+    });
+    if (!user || user.role.name !== 'provider') {
+      throw new BadRequestException('Invalid user or user is not a provider');
+    }
+    return this.serviceRepository.transformMany(user.services);
   }
 }

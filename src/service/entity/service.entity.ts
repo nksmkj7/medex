@@ -10,6 +10,7 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToOne,
   Unique
 } from 'typeorm';
@@ -62,8 +63,7 @@ export class ServiceEntity extends CustomUuidBaseEntity {
   })
   subCategory: CategoryEntity;
 
-  @OneToOne(() => UserEntity)
-  @JoinColumn()
+  @ManyToOne(() => UserEntity, (user) => user.services)
   user: UserEntity;
 
   @ManyToMany(() => SpecialistEntity)

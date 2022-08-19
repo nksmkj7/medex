@@ -6,6 +6,7 @@ import {
   Entity,
   Index,
   JoinColumn,
+  OneToMany,
   OneToOne
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -15,6 +16,7 @@ import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { RoleEntity } from 'src/role/entities/role.entity';
 import { ProviderInformationEntity } from 'src/provider/entity/provider-information.entity';
+import { ServiceEntity } from 'src/service/entity/service.entity';
 
 /**
  * User Entity
@@ -137,4 +139,7 @@ export class UserEntity extends CustomBaseEntity {
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, this.salt);
   }
+
+  @OneToMany(() => ServiceEntity, (service) => service.user)
+  services: ServiceEntity[];
 }

@@ -72,8 +72,14 @@ export class CategoryEntity extends CustomBaseEntity {
   children: CategoryEntity[];
 
   @BeforeInsert()
-  @BeforeUpdate()
   async generateSlugBeforeInsert() {
+    if (this.title) {
+      this.slug = slugify(this.title);
+    }
+  }
+
+  @BeforeUpdate()
+  async generateSlugBeforeUpdate() {
     if (this.title) {
       this.slug = slugify(this.title);
     }

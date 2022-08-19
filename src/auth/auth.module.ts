@@ -15,6 +15,7 @@ import { RefreshTokenModule } from 'src/refresh-token/refresh-token.module';
 import { JwtTwoFactorStrategy } from 'src/common/strategy/jwt-two-factor.strategy';
 import { JwtStrategy } from 'src/common/strategy/jwt.strategy';
 import { RoleRepository } from 'src/role/role.repository';
+import { ServiceRepository } from 'src/service/service.repository';
 
 const throttleConfig = config.get('throttle.login');
 const redisConfig = config.get('queue');
@@ -52,7 +53,7 @@ const LoginThrottleFactory = {
     PassportModule.register({
       defaultStrategy: 'jwt'
     }),
-    TypeOrmModule.forFeature([UserRepository]),
+    TypeOrmModule.forFeature([UserRepository, ServiceRepository]),
     TypeOrmModule.forFeature([RoleRepository]),
     MailModule,
     RefreshTokenModule
