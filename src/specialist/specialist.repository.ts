@@ -9,7 +9,7 @@ import { SpecialistSerializer } from './serializer/specialist.serializer';
 import { UpdateSpecialistDto } from './dto/update-specialist.dto';
 
 @EntityRepository(SpecialistEntity)
-export class SpecialRepository extends BaseRepository<
+export class SpecialistRepository extends BaseRepository<
   SpecialistEntity,
   SpecialistSerializer
 > {

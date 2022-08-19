@@ -12,6 +12,7 @@ import { ServiceSpecialistEntity } from './entity/specialist-service.entity';
 import { ServiceRepository } from './service.repository';
 import { ServiceSerializer } from './service.serializer';
 import { difference } from 'lodash';
+import { SpecialistRepository } from 'src/specialist/specialist.repository';
 
 interface ICheckIds {
   userId: number;
@@ -28,7 +29,9 @@ export class ServiceService {
     @InjectRepository(CategoryRepository)
     private readonly categoryRepository: CategoryRepository,
     @InjectRepository(UserRepository)
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    @InjectRepository(SpecialistRepository)
+    private readonly specialistRepository: SpecialistRepository
   ) {}
   async create(createServiceDto: ServiceDto) {
     const { categoryId, subCategoryId, userId } = createServiceDto;
@@ -182,5 +185,12 @@ export class ServiceService {
         return manager.save(serviceWithSpecialist);
       })
     );
+  }
+
+  async findServiceSpecialists(id: string) {
+    const service = await this.repository.findOneOrFail(id, {
+      relations: ['specialists']
+    });
+    return this.specialistRepository.transformMany(service.specialists);
   }
 }

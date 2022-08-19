@@ -50,4 +50,9 @@ export class ServiceController {
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ServiceSerializer> {
     return this.service.findOne(id);
   }
+
+  @Get(':id/specialists')
+  findServiceSpecialists(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.findServiceSpecialists(id);
+  }
 }

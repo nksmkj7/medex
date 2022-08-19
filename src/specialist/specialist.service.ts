@@ -7,15 +7,15 @@ import { NotFoundException } from 'src/exception/not-found.exception';
 import { Pagination } from 'src/paginate';
 import { SpecialistSerializer } from './serializer/specialist.serializer';
 import { CreateSpecialistDto } from './dto/create-specialist.dto';
-import { SpecialRepository } from './specialist.repository';
+import { SpecialistRepository } from './specialist.repository';
 import { SpecialistFilterDto } from './dto/specialist-filter.dto';
 import { UpdateSpecialistDto } from './dto/update-specialist.dto';
 
 @Injectable()
 export class SpecialistService {
   constructor(
-    @InjectRepository(SpecialRepository)
-    private repository: SpecialRepository
+    @InjectRepository(SpecialistRepository)
+    private repository: SpecialistRepository
   ) {}
 
   async create(
