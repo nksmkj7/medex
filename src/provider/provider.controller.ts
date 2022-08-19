@@ -108,7 +108,7 @@ export class ProviderController {
     return this.providerService.getDaySchedule(id);
   }
 
-  @Get(':id/specialists')
+  @Get(':id/services')
   getProviderCategories(@Param('id', ParseIntPipe) id: number) {
     return this.providerService.providerCategories(id);
   }
