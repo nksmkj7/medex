@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsInt,
   IsNotEmpty,
@@ -16,6 +17,7 @@ import { CategoryEntity } from 'src/category/entity/category.entity';
 import { slugify } from 'src/common/helper/general.helper';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
+import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceEntity } from '../entity/service.entity';
 
 export class ServiceDto {
@@ -73,6 +75,12 @@ export class ServiceDto {
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   price: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  @Validate(IsValidForeignKey, [SpecialistEntity], { each: true })
+  specialistIds: string[];
 
   @ApiProperty({
     default: true

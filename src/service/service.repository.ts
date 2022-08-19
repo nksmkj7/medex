@@ -29,34 +29,6 @@ export class ServiceRepository extends BaseRepository<
     return this.transform(updatedService);
   }
 
-  //   async get(
-  //     id: number | string,
-  //     relations: string[] = [],
-  //     transformOptions = {}
-  //   ): Promise<CategorySerializer | null> {
-  //     return await this.findOne({
-  //       where: {
-  //         id
-  //       },
-  //       relations
-  //     })
-  //       .then((entity) => {
-  //         transformOptions['groups'] = !entity.parentId
-  //           ? ['parent']
-  //           : ['children'];
-  //         if (!entity) {
-  //           return Promise.reject(new NotFoundException());
-  //         }
-
-  //         return Promise.resolve(
-  //           entity ? this.transform(entity, transformOptions) : null
-  //         );
-  //       })
-  //       .catch((error) => {
-  //         return Promise.reject(error);
-  //       });
-  //   }
-
   transform(model: ServiceEntity, transformOption = {}): ServiceSerializer {
     return plainToClass(
       ServiceSerializer,

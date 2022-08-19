@@ -26,7 +26,7 @@ export class ServiceController {
   constructor(private readonly service: ServiceService) {}
 
   @Post()
-  create(@Body() serviceDto: ServiceDto): Promise<ServiceSerializer> {
+  create(@Body() serviceDto: ServiceDto) {
     return this.service.create(serviceDto);
   }
 
