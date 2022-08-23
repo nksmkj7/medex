@@ -3,6 +3,37 @@ import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { CountryEntity } from 'src/country/entities/country.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
+export interface IDaySchedules {
+  sunday?: {
+    startTime: string;
+    endTime: string;
+  };
+  monday?: {
+    startTime: string;
+    endTime: string;
+  };
+  tuesday?: {
+    startTime: string;
+    endTime: string;
+  };
+  wednesday?: {
+    startTime: string;
+    endTime: string;
+  };
+  thursday?: {
+    startTime: string;
+    endTime: string;
+  };
+  friday?: {
+    startTime: string;
+    endTime: string;
+  };
+  saturday?: {
+    startTime: string;
+    endTime: string;
+  };
+}
+
 @Entity('provider_informations')
 export class ProviderInformationEntity extends CustomBaseEntity {
   @Column()
@@ -94,5 +125,5 @@ export class ProviderInformationEntity extends CustomBaseEntity {
   @Column({
     type: 'jsonb'
   })
-  daySchedules: string;
+  daySchedules: IDaySchedules;
 }

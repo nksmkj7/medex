@@ -112,4 +112,17 @@ export class ProviderController {
   getProviderCategories(@Param('id', ParseIntPipe) id: number) {
     return this.providerService.providerCategories(id);
   }
+
+  @Get(':id/week-holidays')
+  getProviderWeekHolidays(@Param('id', ParseIntPipe) id: number) {
+    return this.providerService.providerWeekHolidays(id);
+  }
+
+  @Get(':id/day-start-end-time')
+  getSpecificDayTime(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('day') day: string
+  ) {
+    return this.providerService.dayStartEndTime(id, day);
+  }
 }

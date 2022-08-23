@@ -5,52 +5,59 @@ import {
   IsNotEmpty,
   IsNotEmptyObject,
   IsOptional,
+  ValidateIf,
   ValidateNested
 } from 'class-validator';
 import { IsTime } from 'src/common/validators/time-only.decorator';
 
 class ScheduleDto {
+  @ValidateIf((object) => {
+    return !!object.endTime;
+  })
   @IsNotEmpty()
   @IsTime('24h')
   startTime: string;
 
+  @ValidateIf((object) => {
+    return !!object.startTime;
+  })
   @IsNotEmpty()
   @IsTime('24h')
   endTime: string;
 }
 
 class DayDto {
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ScheduleDto)
   sunday: ScheduleDto;
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ScheduleDto)
   monday: ScheduleDto;
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ScheduleDto)
   tuesday: ScheduleDto;
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ScheduleDto)
   wednesday: ScheduleDto;
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ScheduleDto)
   thursday: ScheduleDto;
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ScheduleDto)
   friday: ScheduleDto;
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ScheduleDto)
   saturday: ScheduleDto;

@@ -19,7 +19,6 @@ export class CustomValidationPipe implements PipeTransform<any> {
     }
     const object = plainToClass(metatype, value);
     const errors = await validate(object);
-    console.log(errors, 'errors are');
     if (errors.length > 0) {
       const translatedError = await this.transformError(errors);
       throw new UnprocessableEntityException(translatedError);
@@ -42,10 +41,10 @@ export class CustomValidationPipe implements PipeTransform<any> {
   }
 
   getError(
-    error,
+    error: ValidationError,
     errorAccumulator: {} | { property: string; constraints: [] | {} } = {}
   ) {
-    const hasChildren = (children: [] | undefined) => {
+    const hasChildren = (children: ValidationError[] | undefined) => {
       return children && children.length > 0;
     };
     if (
@@ -67,17 +66,15 @@ export class CustomValidationPipe implements PipeTransform<any> {
       }
 
       errorAccumulator['children'] = errorAccumulator?.['children'] ?? [];
-      Object.values(error.children).forEach(
-        (childError: typeof error.children) => {
-          let err = { property: childError.property };
-          if (!hasChildren(childError?.['children'])) {
-            err['constraints'] = childError.constraints;
-          } else {
-            this.getError(childError, err);
-          }
-          errorAccumulator['children'].push(err);
+      Object.values(error.children).forEach((childError: ValidationError) => {
+        let err = { property: childError.property };
+        if (!hasChildren(childError?.['children'])) {
+          err['constraints'] = childError.constraints;
+        } else {
+          this.getError(childError, err);
         }
-      );
+        errorAccumulator['children'].push(err);
+      });
     }
 
     // }

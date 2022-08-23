@@ -7,7 +7,9 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
+  min,
   Min,
   Validate,
   ValidateIf
@@ -64,6 +66,7 @@ export class ServiceDto {
   @IsNotEmpty()
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
+  @Max(100, { message: 'min-{"ln":"100","count":"100"}' })
   discount: number;
 
   @IsNotEmpty()

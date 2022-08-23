@@ -8,7 +8,10 @@ import { Pagination } from 'src/paginate';
 import { RoleRepository } from 'src/role/role.repository';
 import { Connection, DeepPartial, EntityManager } from 'typeorm';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
-import { ProviderInformationEntity } from './entity/provider-information.entity';
+import {
+  ProviderInformationEntity,
+  IDaySchedules
+} from './entity/provider-information.entity';
 import { ProviderEntity } from './entity/provider.entity';
 import { ProviderRepository } from './provider.repository';
 import {
@@ -19,6 +22,8 @@ import {
 import { existsSync, unlinkSync } from 'fs';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
 import { ServiceRepository } from 'src/service/service.repository';
+import { weekDays } from 'src/common/constants/weekdays.constants';
+import { NotFoundException } from 'src/exception/not-found.exception';
 
 @Injectable()
 export class ProviderService {
@@ -194,21 +199,18 @@ export class ProviderService {
       .createQueryBuilder()
       .update(ProviderInformationEntity)
       .set({
-        daySchedules: JSON.stringify(providerDayScheduleDto.daySchedules)
+        daySchedules: providerDayScheduleDto.daySchedules
       })
       .where('userId=:id', { id: user.id })
       .execute();
     return providerDayScheduleDto;
   }
 
-  async getDaySchedule(id: number) {
+  async getDaySchedule(id: number): Promise<IDaySchedules> {
     let user = await this.userRepository.findOne(id, {
       relations: ['providerInformation']
     });
-    const daySchedules: ProviderDayScheduleDto = JSON.parse(
-      user.providerInformation.daySchedules
-    );
-    return daySchedules;
+    return user.providerInformation.daySchedules;
   }
 
   async providerCategories(id: number) {
@@ -219,5 +221,23 @@ export class ProviderService {
       throw new BadRequestException('Invalid user or user is not a provider');
     }
     return this.serviceRepository.transformMany(user.services);
+  }
+
+  async providerWeekHolidays(id: number) {
+    const daySchedules = (await this.getDaySchedule(id)) ?? [];
+    const weekDaysSchedules = Object.keys(daySchedules);
+    return weekDays.filter((weekDay) => !weekDaysSchedules.includes(weekDay));
+  }
+
+  async dayStartEndTime(id: number, day: string) {
+    const user = await this.connection.manager
+      .createQueryBuilder(ProviderInformationEntity, 'provider')
+      .where('provider.userId=:id', { id })
+      .select(`provider.daySchedules ::json->'${day}' as schedule`)
+      .getRawOne();
+    if (!user?.schedule) {
+      throw new NotFoundException('Schedule not found.');
+    }
+    return user.schedule;
   }
 }

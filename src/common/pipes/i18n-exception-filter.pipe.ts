@@ -127,13 +127,24 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
               validationKey = title;
               validationArgument = argument;
             }
-            return this.i18n.translate(`validation.${validationKey}`, {
-              lang,
-              args: {
-                ...validationArgument,
-                property: item.property
+            const message = await this.i18n.translate(
+              `validation.${validationKey}`,
+              {
+                lang,
+                args: {
+                  ...validationArgument,
+                  property: item.property
+                }
               }
-            });
+            );
+
+            if (/validation.+/g.test(message)) {
+              if (constraintsValidator.includes(key)) {
+                return message.split('.')[1] ?? '';
+              }
+              return constraints[key];
+            }
+            return message;
           })
         );
       };

@@ -47,7 +47,6 @@ export class BaseRepository<
         );
       })
       .catch((error) => {
-        console.log(error, 'error is');
         return Promise.reject(error);
       });
   }
