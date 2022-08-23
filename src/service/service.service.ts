@@ -43,11 +43,12 @@ export class ServiceService {
       const manager = queryRunner.manager;
       const service = manager.create(ServiceEntity, createServiceDto);
       await manager.save(service);
-      await this.assignSpecialistToService(
-        manager,
-        service,
-        createServiceDto.specialistIds ?? []
-      );
+      await this.assignSpecialistToService(manager, service, {
+        specialistIds: createServiceDto.specialistIds ?? [],
+        additionalTime: createServiceDto.additionalTime ?? 0,
+        startTime: createServiceDto.startTime ?? null,
+        endTime: createServiceDto.endTime ?? null
+      });
       await queryRunner.commitTransaction();
       return this.repository.transform(service);
     } catch (error) {
@@ -110,9 +111,32 @@ export class ServiceService {
         service,
         updateServiceDto
       );
+      let updatedServiceSpecialistsDataPromises = [];
+
+      //syncing specialist id to service and also updating additional, startTime and endTime for
+      //synced specialist of this service
       updatedService.specialists = specialists.filter((specialist) => {
-        return updateServiceDto.specialistIds.includes(specialist.id);
+        if (updateServiceDto.specialistIds.includes(specialist.id)) {
+          updatedServiceSpecialistsDataPromises.push(
+            manager.update(
+              ServiceSpecialistEntity,
+              {
+                serviceId: id,
+                specialistId: specialist.id
+              },
+              {
+                additionalTime: updateServiceDto.additionalTime,
+                startTime: updateServiceDto.startTime ?? null,
+                endTime: updateServiceDto.endTime ?? null
+              }
+            )
+          );
+          return true;
+        }
       });
+
+      await Promise.allSettled(updatedServiceSpecialistsDataPromises);
+
       await manager.save(updatedService);
       await queryRunner.commitTransaction();
       return this.repository.transform(updatedService);
@@ -173,13 +197,22 @@ export class ServiceService {
   assignSpecialistToService(
     manager: EntityManager,
     service: ServiceEntity,
-    specialistIds: string[]
+    serviceSpecialistData: {
+      specialistIds: string[];
+      additionalTime: number;
+      startTime: string | null;
+      endTime: string | null;
+    }
   ) {
+    const { additionalTime, startTime, endTime } = serviceSpecialistData;
     return Promise.all(
-      specialistIds.map((specialistId) => {
+      serviceSpecialistData.specialistIds.map((specialistId) => {
         const serviceWithSpecialist = manager.create(ServiceSpecialistEntity, {
           serviceId: service.id,
-          specialistId
+          specialistId,
+          additionalTime,
+          startTime,
+          endTime
         });
         return manager.save(serviceWithSpecialist);
       })

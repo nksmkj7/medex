@@ -14,6 +14,15 @@ export class ServiceSpecialistEntity extends CustomUuidBaseEntity {
   @Column('boolean', { default: true })
   status: boolean;
 
+  @Column('integer', { default: 0 })
+  additionalTime: number;
+
+  @Column('time', { nullable: true })
+  startTime: string;
+
+  @Column('time', { nullable: true })
+  endTime: string;
+
   @OneToOne(() => ServiceEntity)
   @JoinTable()
   service: ServiceEntity;

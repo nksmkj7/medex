@@ -110,7 +110,8 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
         'maxLength',
         'minLength',
         'isEnum',
-        'min'
+        'min',
+        'max'
       ];
       const item = errors[i];
       let message = [];
@@ -188,20 +189,24 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
         }
       }
     }
-    validationData.forEach((item) => {
-      if (item?.errors && item.errors.length) {
-        const i18nFilePath = path.join(__dirname, '../../../src/i18n/');
-        readdirSync(i18nFilePath).map((file) => {
-          const jsonFilePath = path.join(i18nFilePath, file, 'app.json');
+    // console.log(validationData, 'validation data is --->');
+    // for await (const item of validationData) {
+    //   console.log('from inside --->');
+    //   // validationData.forEach((item) => {
+    //   if (item?.errors && item.errors.length) {
+    //     const i18nFilePath = path.join(__dirname, '../../../src/i18n/');
+    //     readdirSync(i18nFilePath).map((file) => {
+    //       const jsonFilePath = path.join(i18nFilePath, file, 'app.json');
 
-          const jsonData = JSON.parse(readFileSync(jsonFilePath, 'utf-8'));
-          // item.name = startCase(item.name);
-          jsonData[item.name] = startCase(item.name);
-          writeFileSync(jsonFilePath, JSON.stringify(jsonData), 'utf-8');
-          // item.name = startCase(item.name);
-        });
-      }
-    });
+    //       const jsonData = JSON.parse(readFileSync(jsonFilePath, 'utf-8'));
+    //       // item.name = startCase(item.name);
+    //       jsonData[item.name] = startCase(item.name);
+    //       writeFileSync(jsonFilePath, JSON.stringify(jsonData), 'utf-8');
+    //       // item.name = startCase(item.name);
+    //     });
+    //   }
+    //   // });
+    // }
     return validationData;
   }
 }

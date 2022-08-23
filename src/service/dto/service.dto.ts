@@ -16,9 +16,15 @@ import {
 } from 'class-validator';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
-import { slugify } from 'src/common/helper/general.helper';
+import {
+  isGreaterThanTime,
+  isSmallerThanTime,
+  slugify
+} from 'src/common/helper/general.helper';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
+import { RunValidation } from 'src/common/validators/run-validation.validators';
+import { IsTime } from 'src/common/validators/time-only.decorator';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceEntity } from '../entity/service.entity';
 
@@ -66,12 +72,13 @@ export class ServiceDto {
   @IsNotEmpty()
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
-  @Max(100, { message: 'min-{"ln":"100","count":"100"}' })
+  @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
   discount: number;
 
   @IsNotEmpty()
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
+  @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
   serviceCharge: number;
 
   @IsNotEmpty()
@@ -84,6 +91,24 @@ export class ServiceDto {
   @IsUUID('4', { each: true })
   @Validate(IsValidForeignKey, [SpecialistEntity], { each: true })
   specialistIds: string[];
+
+  @IsInt()
+  @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
+  additionalTime: number;
+
+  @IsOptional()
+  @IsTime('24h')
+  @Validate(RunValidation, [isGreaterThanTime, 'endTime'], {
+    message: 'startTime must be greater than endTime'
+  })
+  startTime: string;
+
+  @IsOptional()
+  @IsTime('24h')
+  @Validate(RunValidation, [isSmallerThanTime, 'startTime'], {
+    message: 'endTime must be greater than startTime'
+  })
+  endTime: string;
 
   @ApiProperty({
     default: true
