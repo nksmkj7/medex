@@ -1,6 +1,14 @@
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
 import { CountryEntity } from 'src/country/entities/country.entity';
-import { Column, Entity, JoinColumn, OneToOne, Unique } from 'typeorm';
+import { ServiceSpecialistEntity } from 'src/service/entity/specialist-service.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  Unique
+} from 'typeorm';
 
 @Entity({
   name: 'specialists'
@@ -63,4 +71,10 @@ export class SpecialistEntity extends CustomUuidBaseEntity {
     referencedColumnName: 'id'
   })
   country: CountryEntity;
+
+  @OneToMany(
+    () => ServiceSpecialistEntity,
+    (serviceSpecialistEntity) => serviceSpecialistEntity.specialist
+  )
+  serviceSpecialists!: ServiceSpecialistEntity[];
 }

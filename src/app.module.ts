@@ -37,6 +37,7 @@ import { MenuModule } from './menu/menu.module';
 import winstonConfig from 'src/config/winston';
 import { CategoryModule } from './category/category.module';
 import { ServiceModule } from './service/service.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 const appConfig = config.get('app');
 
@@ -85,7 +86,8 @@ const appConfig = config.get('app');
     MenuModule,
     CategoryModule,
     SpecialistModule,
-    ServiceModule
+    ServiceModule,
+    ScheduleModule
   ],
   providers: [
     {

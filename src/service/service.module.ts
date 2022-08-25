@@ -14,6 +14,7 @@ import { ServiceService } from './service.service';
     TypeOrmModule.forFeature([ServiceRepository, SpecialistRepository]),
     TypeOrmModule.forFeature([CategoryRepository]),
     TypeOrmModule.forFeature([UserRepository])
-  ]
+  ],
+  exports: [ServiceService]
 })
 export class ServiceModule {}

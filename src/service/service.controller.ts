@@ -55,4 +55,14 @@ export class ServiceController {
   findServiceSpecialists(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findServiceSpecialists(id);
   }
+
+  @Get(':serviceId/specialist-service/:specialistId')
+  getSpecialistServiceDetail(
+    @Param('serviceId', ParseUUIDPipe)
+    serviceId: string,
+    @Param('specialistId', ParseUUIDPipe)
+    specialistId: string
+  ) {
+    return this.service.getSpecialistService(serviceId, specialistId);
+  }
 }

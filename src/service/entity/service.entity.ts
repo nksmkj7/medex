@@ -11,10 +11,12 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   Unique
 } from 'typeorm';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
+import { ServiceSpecialistEntity } from './specialist-service.entity';
 
 @Entity('services')
 @Unique(['slug', 'userId'])
@@ -73,6 +75,12 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     inverseJoinColumn: { name: 'specialistId', referencedColumnName: 'id' }
   })
   specialists: SpecialistEntity[];
+
+  @OneToMany(
+    () => ServiceSpecialistEntity,
+    (serviceSpecialistEntity) => serviceSpecialistEntity.service
+  )
+  serviceSpecialists!: ServiceSpecialistEntity[];
 
   @BeforeInsert()
   async generateSlugBeforeInsert() {

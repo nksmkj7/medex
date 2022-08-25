@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from 'src/auth/user.repository';
 import { CategoryRepository } from 'src/category/category.repository';
@@ -224,5 +224,28 @@ export class ServiceService {
       relations: ['specialists']
     });
     return this.specialistRepository.transformMany(service.specialists);
+  }
+
+  async getSpecialistService(serviceId: string, specialistId: string) {
+    const specialistServiceDetail = await this.connection.manager
+      .createQueryBuilder()
+      .from(ServiceSpecialistEntity, 's')
+      .where('s.serviceId = :serviceId', {
+        serviceId
+      })
+      .andWhere('s.specialistId = :specialistId', {
+        specialistId
+      })
+      .innerJoin('s.service', 'service')
+      .select(
+        's."additionalTime", s."startTime",s."endTime",service."durationInMinutes"'
+      )
+      .getRawOne();
+    if (!specialistServiceDetail) {
+      throw new NotFoundException(
+        'Such service for  specialist does not exists.'
+      );
+    }
+    return specialistServiceDetail;
   }
 }

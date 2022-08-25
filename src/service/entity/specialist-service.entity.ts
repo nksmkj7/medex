@@ -1,6 +1,6 @@
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
-import { Column, Entity, JoinTable, OneToOne } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToOne, OneToOne } from 'typeorm';
 import { ServiceEntity } from './service.entity';
 
 @Entity('service_specialist')
@@ -23,11 +23,23 @@ export class ServiceSpecialistEntity extends CustomUuidBaseEntity {
   @Column('time', { nullable: true })
   endTime: string;
 
-  @OneToOne(() => ServiceEntity)
-  @JoinTable()
-  service: ServiceEntity;
+  // @OneToOne(() => ServiceEntity)
+  // @JoinTable()
+  // service: ServiceEntity;
 
-  @OneToOne(() => SpecialistEntity)
-  @JoinTable()
-  specialist: SpecialistEntity;
+  // @OneToOne(() => SpecialistEntity)
+  // @JoinTable()
+  // specialist: SpecialistEntity;
+
+  @ManyToOne(() => ServiceEntity, (service) => service.serviceSpecialists, {
+    primary: true
+  })
+  public service!: ServiceEntity;
+
+  @ManyToOne(
+    () => SpecialistEntity,
+    (specialist) => specialist.serviceSpecialists,
+    { primary: true }
+  )
+  public specialist!: SpecialistEntity;
 }
