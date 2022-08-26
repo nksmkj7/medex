@@ -12,7 +12,7 @@ import { IsTime } from 'src/common/validators/time-only.decorator';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 
-class TimeDto {
+export class TimeDto {
   @IsNotEmpty()
   @IsUUID(4)
   uuid: string;

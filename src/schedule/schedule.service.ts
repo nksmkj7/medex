@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnprocessableEntityException
 } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
@@ -12,6 +13,7 @@ import { Connection } from 'typeorm';
 import { AutoGenerateScheduleDto } from './dto/auto-generate-schedule.dto';
 import { ScheduleEntity } from './entity/schedule.entity';
 import { ScheduleRepository } from './schedule.repository';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class ScheduleService {
@@ -44,11 +46,11 @@ export class ScheduleService {
     }
     const { additionalTime, startTime, endTime, durationInMinutes } =
       await this.serviceService.getSpecialistService(serviceId, specialistId);
-    // daySchedules(startTime, endTime, additionalTime + durationInMinutes);
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     const dates = daysOfTheMonth({ month });
+
     try {
       const manager = queryRunner.manager;
       const schedules = await Promise.all(
@@ -57,11 +59,13 @@ export class ScheduleService {
             date,
             serviceId,
             specialistId,
-            schedules: daySchedules(
-              startTime,
-              endTime,
-              additionalTime + durationInMinutes
-            )
+            schedules: {
+              ...daySchedules(
+                startTime,
+                endTime,
+                additionalTime + durationInMinutes
+              )
+            }
           });
           return manager.save(schedule);
         })
@@ -85,5 +89,33 @@ export class ScheduleService {
       .leftJoin('service.specialists', 'specialist')
       .where('specialist.id = :specialistId', { specialistId })
       .getCount();
+  }
+
+  serviceSpecialistSchedules(serviceId: string, specialistId: string) {
+    return this.repository.allServiceSpecialistSchedule(
+      serviceId,
+      specialistId
+    );
+  }
+
+  async serviceSpecialistDateSchedules(
+    serviceId: string,
+    specialistId: string,
+    date: string
+  ) {
+    if (!dayjs(date, 'YYYY-MM-DD').isValid()) {
+      throw new BadRequestException(
+        'Invalid date. Date should be in `YYYY-MM-DD` format.'
+      );
+    }
+    const schedules = await this.repository.dayServiceSpecialistSchedules(
+      serviceId,
+      specialistId,
+      date
+    );
+    if (!schedules.length) {
+      throw new NotFoundException('Schedules not found.');
+    }
+    return this.repository.transform(schedules[0]);
   }
 }

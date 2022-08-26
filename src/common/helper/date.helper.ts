@@ -1,5 +1,6 @@
 import * as dayjs from 'dayjs';
 import * as duration from 'dayjs/plugin/duration';
+import { v4 as uuidv4 } from 'uuid';
 
 export const daysOfTheMonth = (
   dateObj: { year?: number; month: number },
@@ -47,7 +48,9 @@ export const daySchedules = (
     let formattedEndTime = getTimeFn(startTime, additionalTime);
     times.push({
       startTime: formattedStartTime,
-      endTime: formattedEndTime
+      endTime: formattedEndTime,
+      isBooked: false,
+      uuid: uuidv4()
     });
     startTimeNumber = getTimeDurationFn(formattedEndTime);
     startTime = formattedEndTime;

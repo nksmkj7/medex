@@ -1,23 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import * as config from 'config';
-import { UserSerializer } from 'src/auth/serializer/user.serializer';
-import { CategorySerializer } from 'src/category/serializer/category.serializer';
-
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
-import { SpecialistSerializer } from 'src/specialist/serializer/specialist.serializer';
-import { ServiceSerializer } from 'src/service/service.serializer';
-const appConfig = config.get('app');
+import { TimeDto } from './dto/schedule.dto';
 
 export class ScheduleSerializer extends ModelSerializer {
-  @Type(() => SpecialistSerializer)
-  specialist: SpecialistSerializer;
+  @ApiProperty()
+  serviceId: string;
 
-  @Type(() => ServiceSerializer)
-  service: CategorySerializer;
+  @ApiProperty()
+  specialistId: string;
 
-  @Type(() => UserSerializer)
-  user: UserSerializer;
+  @ApiProperty()
+  date: string;
+
+  @ApiProperty()
+  schedules: TimeDto;
 
   @ApiPropertyOptional()
   createdAt: Date;

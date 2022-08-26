@@ -3,6 +3,7 @@ import { Between, EntityRepository } from 'typeorm';
 import { ScheduleEntity } from './entity/schedule.entity';
 import { ScheduleSerializer } from './schedule.serializer';
 import * as dayjs from 'dayjs';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 @EntityRepository(ScheduleEntity)
 export class ScheduleRepository extends BaseRepository<
@@ -49,6 +50,30 @@ export class ScheduleRepository extends BaseRepository<
         serviceId,
         specialistId,
         date: Between(startDate, endDate)
+      }
+    });
+  }
+
+  async allServiceSpecialistSchedule(serviceId: string, specialistId: string) {
+    const schedules = await this.find({
+      where: {
+        serviceId,
+        specialistId
+      }
+    });
+    return this.transformMany(schedules);
+  }
+
+  async dayServiceSpecialistSchedules(
+    serviceId: string,
+    specialistId: string,
+    date: string
+  ) {
+    return this.find({
+      where: {
+        serviceId,
+        specialistId,
+        date
       }
     });
   }
