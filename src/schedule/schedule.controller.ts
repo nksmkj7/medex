@@ -4,10 +4,12 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
-  Post
+  Post,
+  Put
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AutoGenerateScheduleDto } from './dto/auto-generate-schedule.dto';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleService } from './schedule.service';
 
 @ApiTags('Schedule')
@@ -38,6 +40,23 @@ export class ScheduleController {
       serviceId,
       specialistId,
       date
+    );
+  }
+
+  @Put(':serviceId/:specialistId/:date/:scheduleId')
+  updateSchedule(
+    @Param('serviceId', ParseUUIDPipe) serviceId: string,
+    @Param('specialistId', ParseUUIDPipe) specialistId: string,
+    @Param('date') date: string,
+    @Param('scheduleId', ParseUUIDPipe) scheduleId: string,
+    @Body() updateScheduleDto: UpdateScheduleDto
+  ) {
+    return this.service.updateSchedule(
+      serviceId,
+      specialistId,
+      date,
+      scheduleId,
+      updateScheduleDto
     );
   }
 }

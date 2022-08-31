@@ -1,6 +1,7 @@
 import * as dayjs from 'dayjs';
 import * as duration from 'dayjs/plugin/duration';
 import { v4 as uuidv4 } from 'uuid';
+dayjs.extend(duration);
 
 export const daysOfTheMonth = (
   dateObj: { year?: number; month: number },
@@ -20,26 +21,28 @@ export const daysOfTheMonth = (
   return days;
 };
 
+export const getTimeFn = (time: string, additionalTime = 0) => {
+  const hours = Number(time.split(':')[0]);
+  const minutes = Number(time.split(':')[1]);
+  return dayjs
+    .duration({ hours, minutes })
+    .add(additionalTime, 'minute')
+    .format('HH:mm');
+};
+
+export const getTimeDurationFn = (time: string) => {
+  const hours = Number(time.split(':')[0]);
+  const minutes = Number(time.split(':')[1]);
+  return dayjs.duration({ hours, minutes }).asSeconds();
+};
+
 export const daySchedules = (
   startTime: string,
   endTime: string,
   additionalTime: number
 ) => {
-  dayjs.extend(duration);
   const times = [];
-  const getTimeDurationFn = (time: string) => {
-    const hours = Number(time.split(':')[0]);
-    const minutes = Number(time.split(':')[1]);
-    return dayjs.duration({ hours, minutes }).asSeconds();
-  };
-  const getTimeFn = (time: string, additionalTime = 0) => {
-    const hours = Number(time.split(':')[0]);
-    const minutes = Number(time.split(':')[1]);
-    return dayjs
-      .duration({ hours, minutes })
-      .add(additionalTime, 'minute')
-      .format('HH:mm');
-  };
+
   let startTimeNumber = getTimeDurationFn(startTime);
   let endTimeNumber = getTimeDurationFn(endTime);
 
@@ -50,7 +53,7 @@ export const daySchedules = (
       startTime: formattedStartTime,
       endTime: formattedEndTime,
       isBooked: false,
-      uuid: uuidv4()
+      id: uuidv4()
     });
     startTimeNumber = getTimeDurationFn(formattedEndTime);
     startTime = formattedEndTime;
