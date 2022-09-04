@@ -21,7 +21,6 @@ export class ProviderSerializer extends ModelSerializer {
   phone1: string;
 
   @ApiProperty()
-  @Exclude()
   phone2: string;
 
   @ApiProperty()
@@ -56,7 +55,7 @@ export class ProviderSerializer extends ModelSerializer {
 
   @ApiProperty()
   @Transform(({ value }) =>
-    value ? `${appConfig.appUrl}/images/logo/${value}` : null
+    value ? `${appConfig.appUrl}/images/logos/${value}` : null
   )
   businessLogo: string;
 

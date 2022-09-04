@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
@@ -32,7 +31,7 @@ import { ProviderService } from './provider.service';
 export class ProviderController {
   constructor(private readonly providerService: ProviderService) {}
 
-  @Post('register')
+  @Post()
   @UseInterceptors(
     FileInterceptor(
       'businessLogo',
@@ -48,7 +47,7 @@ export class ProviderController {
   ) {
     const user = await this.providerService.createProvider({
       ...registerProviderDto,
-      businessLogo: file.filename
+      businessLogo: file ? file.filename : null
     });
     return user;
   }
@@ -84,7 +83,7 @@ export class ProviderController {
     file: Express.Multer.File
   ) {
     updateProviderDto = file
-      ? { ...updateProviderDto, businessLogo: file.filename }
+      ? { ...updateProviderDto, businessLogo: file ? file.filename : null }
       : updateProviderDto;
 
     return await this.providerService.update(id, updateProviderDto);

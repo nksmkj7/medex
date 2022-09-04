@@ -4,10 +4,7 @@ import { IsOptional } from 'class-validator';
 import { RegisterProviderDto } from './register-provider.dto';
 
 export class UpdateProviderDto extends OmitType(RegisterProviderDto, [
-  'email',
-  'username',
-  'businessLogo',
-  'name'
+  'businessLogo'
 ] as const) {
   @IsOptional()
   @ApiPropertyOptional({

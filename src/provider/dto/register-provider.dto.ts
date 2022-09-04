@@ -9,8 +9,10 @@ import {
   IsPhoneNumber,
   IsOptional,
   Validate,
-  ValidateIf
+  ValidateIf,
+  IsDate
 } from 'class-validator';
+import dayjs = require('dayjs');
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
 import { CountryEntity } from 'src/country/entities/country.entity';
@@ -19,18 +21,14 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   'password'
 ]) {
   @IsNotEmpty()
-  @MinLength(6, {
-    message: 'minLength-{"ln":6,"count":6}'
-  })
-  @MaxLength(20, {
-    message: 'maxLength-{"ln":20,"count":20}'
-  })
   companyName: string;
 
   @IsNotEmpty()
   @IsPhoneNumber()
   phone1: string;
 
+  @IsOptional()
+  @Transform(({ value }) => dayjs(value).format('YYYY-MM-DD'))
   @IsDateString()
   startDate: Date;
 
@@ -40,7 +38,10 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   countryId: number;
 
   @IsOptional()
-  @ValidateIf((object, value) => value)
+  @ValidateIf((object, value) => {
+    console.log(typeof value, 'phone 2 is');
+    return !!value;
+  })
   @IsPhoneNumber()
   phone2?: string;
 
