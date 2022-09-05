@@ -82,11 +82,7 @@ export class ProviderController {
     @UploadedFile()
     file: Express.Multer.File
   ) {
-    updateProviderDto = file
-      ? { ...updateProviderDto, businessLogo: file ? file.filename : null }
-      : updateProviderDto;
-
-    return await this.providerService.update(id, updateProviderDto);
+    return await this.providerService.update(id, updateProviderDto, file);
   }
 
   @Post(':id/day-schedules')
