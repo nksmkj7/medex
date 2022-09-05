@@ -39,7 +39,6 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
 
   @IsOptional()
   @ValidateIf((object, value) => {
-    console.log(typeof value, 'phone 2 is');
     return !!value;
   })
   @IsPhoneNumber()

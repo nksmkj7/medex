@@ -141,6 +141,7 @@ export class ProviderService {
   }
 
   async update(id: number, updateProviderDto: DeepPartial<ProviderEntity>) {
+    const { username, email, name, ...providerDto } = updateProviderDto;
     const user = await this.userRepository.get(id, ['providerInformation'], {
       groups: [
         ...ownerUserGroupsForSerializing,
@@ -148,20 +149,17 @@ export class ProviderService {
       ]
     });
 
-    // const updateUserDto: DeepPartial<UserEntity> = {
-    //   username,
-    //   email,
-    //   name,
-    //   address,
-    //   contact,
-    //   avatar
-    // };
+    const updateUserDto: DeepPartial<UserEntity> = {
+      username,
+      email,
+      name
+    };
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
-      // await manager.update(UserEntity, id, updateUserDto);
+      await manager.update(UserEntity, id, updateUserDto);
       const provider = await manager.findOne(ProviderInformationEntity, {
         where: {
           userId: user.id
@@ -170,16 +168,16 @@ export class ProviderService {
       await manager.update(
         ProviderInformationEntity,
         { userId: user.id },
-        updateProviderDto
+        providerDto
       );
       await queryRunner.commitTransaction();
-      if (updateProviderDto.businessLogo && provider.businessLogo) {
+      if (providerDto.businessLogo && provider.businessLogo) {
         const path = `public/images/profile/${provider.businessLogo}`;
         if (existsSync(path)) {
           unlinkSync(`public/images/profile/${provider.businessLogo}`);
         }
       }
-      return manager.merge(ProviderEntity, user, updateProviderDto);
+      return manager.merge(ProviderEntity, user, providerDto);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
