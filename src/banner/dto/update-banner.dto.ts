@@ -16,7 +16,7 @@ export class UpdateBannerDto extends OmitType(BannerDto, [
   })
   image: string;
 
-  @Transform((value) => (Number.isNaN(+value) ? null : +value))
+  @Transform(({ value }) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
   @IsNumber(
     {
