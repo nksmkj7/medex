@@ -39,20 +39,24 @@ export class BannerService implements CommonServiceInterface<BannerSerializer> {
 
   async update(
     id: number,
-    updateRoleDto: UpdateBannerDto
+    updateBannerDto: UpdateBannerDto,
+    file?: Express.Multer.File
   ): Promise<BannerSerializer> {
     const banner = await this.repository.findOne(id);
     if (!banner) {
       throw new NotFoundException();
     }
-    if (banner.image) {
+    updateBannerDto = file
+      ? { ...updateBannerDto, image: file.filename }
+      : { ...updateBannerDto, image: banner.image };
+    if (banner.image && file) {
       const path = `public/images/banner/${banner.image}`;
       if (existsSync(path)) {
         unlinkSync(`public/images/banner/${banner.image}`);
       }
     }
 
-    return this.repository.updateItem(banner, updateRoleDto);
+    return this.repository.updateItem(banner, updateBannerDto);
   }
 
   async remove(id: number): Promise<void> {

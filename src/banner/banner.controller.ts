@@ -86,10 +86,7 @@ export class BannerController {
     @Body()
     updateBannerDto: UpdateBannerDto
   ): Promise<BannerSerializer> {
-    updateBannerDto = file
-      ? { ...updateBannerDto, image: file.filename }
-      : { ...updateBannerDto };
-    return this.bannerService.update(id, updateBannerDto);
+    return this.bannerService.update(id, updateBannerDto, file);
   }
 
   @Delete(':id')
