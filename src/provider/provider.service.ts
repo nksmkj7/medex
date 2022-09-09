@@ -145,7 +145,7 @@ export class ProviderService {
     updateProviderDto: DeepPartial<ProviderEntity>,
     file: Express.Multer.File
   ) {
-    let { username, email, name, ...providerDto } = updateProviderDto;
+    let { username, email, name, status, ...providerDto } = updateProviderDto;
     const user = await this.userRepository.get(id, ['providerInformation'], {
       groups: [
         ...ownerUserGroupsForSerializing,
@@ -156,7 +156,8 @@ export class ProviderService {
     const updateUserDto: DeepPartial<UserEntity> = {
       username,
       email,
-      name
+      name,
+      status
     };
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
