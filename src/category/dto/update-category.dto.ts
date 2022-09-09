@@ -39,7 +39,7 @@ export class UpdateCategoryDto extends OmitType(CategoryDto, [
   )
   title: string;
 
-  @Transform((value) => (Number.isNaN(+value) ? null : +value))
+  @Transform(({ value }) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
   @IsNumber(
     {

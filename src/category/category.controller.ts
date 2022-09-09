@@ -88,10 +88,7 @@ export class CategoryController {
     @UploadedFile()
     file: Express.Multer.File
   ) {
-    updateCategoryDto = file
-      ? { ...updateCategoryDto, image: file?.filename ?? null }
-      : { ...updateCategoryDto };
-    return this.categoryService.update(id, updateCategoryDto);
+    return this.categoryService.update(id, updateCategoryDto, file);
   }
 
   @Delete(':id')
