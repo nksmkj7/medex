@@ -1,4 +1,4 @@
-import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { IsEnum, IsString, Min, ValidateIf } from 'class-validator';
 
 import { CommonSearchFieldDto } from 'src/common/extra/common-search-field.dto';
@@ -30,3 +30,5 @@ export class MenuFilterDto extends PartialType(CommonSearchFieldDto) {
   @IsEnum(Mode)
   mode: Mode;
 }
+
+export class SubMenuFilterDto extends OmitType(MenuFilterDto, ['mode']) {}

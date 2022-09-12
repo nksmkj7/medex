@@ -126,4 +126,28 @@ export class CategoryService {
     }
     await this.repository.delete(id);
   }
+
+  async subCategories(parentCategoryId: string, categoryFilterDto) {
+    const category = await this.repository.findOne(parentCategoryId, {
+      relations: ['children']
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    const searchCriteria = {};
+    searchCriteria['parentId'] = parentCategoryId;
+
+    const subCategories = await this.repository.paginate(
+      categoryFilterDto,
+      [],
+      ['title', 'color'],
+      {},
+      searchCriteria
+    );
+    return {
+      category,
+      subCategories
+    };
+  }
 }

@@ -1,18 +1,20 @@
+import { Optional } from '@nestjs/common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsEmpty,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   MaxLength,
   Min,
-  Validate
+  Validate,
+  ValidateIf
 } from 'class-validator';
 import { slugify } from 'src/common/helper/general.helper';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
+import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
 import { CategoryEntity } from '../entity/category.entity';
 
 export class CategoryDto {
@@ -23,7 +25,8 @@ export class CategoryDto {
     if (!value) return null;
     return value;
   })
-  @IsEmpty()
+  @ValidateIf((object, value) => !!value)
+  @Validate(IsValidForeignKey, [CategoryEntity])
   parentId: string | null;
 
   @IsNotEmpty()

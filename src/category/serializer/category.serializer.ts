@@ -34,7 +34,9 @@ export class CategorySerializer extends ModelSerializer {
   position: string;
 
   @ApiProperty()
-  @Transform(({ value }) => `${appConfig.appUrl}/images/category/${value}`)
+  @Transform(({ value }) =>
+    value ? `${appConfig.appUrl}/images/category/${value}` : null
+  )
   image: string;
 
   @ApiProperty({

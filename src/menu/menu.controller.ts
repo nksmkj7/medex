@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -19,7 +20,7 @@ import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { CreateMenuDto } from './dto/create-menu.dto';
-import { MenuFilterDto } from './dto/menu-filter.dto';
+import { MenuFilterDto, SubMenuFilterDto } from './dto/menu-filter.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { MenuService } from './menu.service';
 import { MenuSerializer } from './serializer/menu.serializer';
@@ -72,5 +73,14 @@ export class MenuController {
     id: string
   ): Promise<void> {
     return this.menuService.remove(+id);
+  }
+
+  @Get(':id/sub-menus')
+  getSubCategories(
+    @Param('id', ParseIntPipe) id: number,
+    @Query()
+    menuFilterDto: SubMenuFilterDto
+  ) {
+    return this.menuService.subMenus(id, menuFilterDto);
   }
 }

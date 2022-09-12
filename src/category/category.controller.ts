@@ -21,7 +21,10 @@ import { Pagination } from 'src/paginate';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { CategoryService } from './category.service';
-import { CategoryFilterDto } from './dto/category-filter.dto';
+import {
+  CategoryFilterDto,
+  SubCategoryFilterDto
+} from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategorySerializer } from './serializer/category.serializer';
@@ -98,5 +101,14 @@ export class CategoryController {
     id: string
   ): Promise<void> {
     return this.categoryService.remove(id);
+  }
+
+  @Get(':id/sub-categories')
+  getSubCategories(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query()
+    categoryFilterDto: SubCategoryFilterDto
+  ) {
+    return this.categoryService.subCategories(id, categoryFilterDto);
   }
 }

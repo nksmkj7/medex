@@ -14,7 +14,8 @@ import {
   IsString,
   MaxLength,
   Min,
-  Validate
+  Validate,
+  ValidateIf
 } from 'class-validator';
 import { slugify } from 'src/common/helper/general.helper';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
@@ -33,7 +34,7 @@ export class MenuDto {
     if (!value) return null;
     return value;
   })
-  @IsEmpty()
+  @ValidateIf((object, value) => !!value)
   parentId: number | null;
 
   @IsNotEmpty()
@@ -50,7 +51,7 @@ export class MenuDto {
   )
   title: string;
 
-  @Transform((value) => (Number.isNaN(+value) ? null : +value))
+  @Transform(({ value }) => (Number.isNaN(+value) ? null : +value))
   @IsNotEmpty()
   @IsNumber(
     {

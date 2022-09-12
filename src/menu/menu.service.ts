@@ -12,7 +12,7 @@ import { CreateMenuDto } from './dto/create-menu.dto';
 // import { MenuSerializer } from './serializer/menu.serializer';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { MenuSerializer } from './serializer/menu.serializer';
-import { MenuFilterDto } from './dto/menu-filter.dto';
+import { MenuFilterDto, SubMenuFilterDto } from './dto/menu-filter.dto';
 import { IsNull, Not } from 'typeorm';
 import { MenuEntity } from './entity/menu.entity';
 
@@ -122,7 +122,7 @@ export class MenuService {
       !menu.parentId &&
       (await this.repository.count({
         where: {
-          id: menu.id
+          parentId: menu.id
         }
       })) > 0
     ) {
@@ -131,5 +131,27 @@ export class MenuService {
       );
     }
     await this.repository.delete(id);
+  }
+
+  async subMenus(parentMenuId: number, menuFilterDto: SubMenuFilterDto) {
+    const menu = await this.repository.findOne(parentMenuId);
+    if (!menu) {
+      throw new NotFoundException('Menu not found');
+    }
+
+    const searchCriteria = {};
+    searchCriteria['parentId'] = parentMenuId;
+
+    const subMenus = await this.repository.paginate(
+      menuFilterDto,
+      [],
+      ['title', 'link'],
+      {},
+      searchCriteria
+    );
+    return {
+      menu,
+      subMenus
+    };
   }
 }
