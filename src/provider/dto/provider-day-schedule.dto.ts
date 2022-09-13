@@ -166,12 +166,12 @@ export class ProviderDayScheduleDto {
   @Type(() => DayDto)
   daySchedules: DayDto;
 
-  @ApiProperty({
-    nullable: false,
-    type: Boolean,
-    default: false
-  })
-  @IsNotEmpty()
-  @IsBoolean()
-  is24Hr: boolean;
+  // @ApiProperty({
+  //   nullable: false,
+  //   type: Boolean,
+  //   default: false
+  // })
+  // @IsNotEmpty()
+  // @IsBoolean()
+  // is24Hr: boolean;
 }
