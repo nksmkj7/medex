@@ -1,3 +1,5 @@
+import { ObjectLiteral } from 'typeorm';
+
 export const slugify = (...args: (string | number)[]): string => {
   const value = args.join(' ');
   return value
@@ -33,4 +35,42 @@ export const isSmallerThanTime = (
     return timeToCompare <= timeToCompareWith;
   }
   return timeToCompare < timeToCompareWith;
+};
+
+export const generateUniqueToken = async (
+  length: number,
+  uniqueCheckFunction?: (token: string) => Promise<boolean>
+) => {
+  const token = generateRandomCode(length);
+  if (uniqueCheckFunction && !(await uniqueCheckFunction(token))) {
+    await generateUniqueToken(length);
+  }
+  return token;
+};
+
+export const generateRandomCode = (
+  length: number,
+  uppercase = true,
+  lowercase = true,
+  numerical = true
+): string => {
+  let result = '';
+  const lowerCaseAlphabets = 'abcdefghijklmnopqrstuvwxyz';
+  const upperCaseAlphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numericalLetters = '0123456789';
+  let characters = '';
+  if (uppercase) {
+    characters += upperCaseAlphabets;
+  }
+  if (lowercase) {
+    characters += lowerCaseAlphabets;
+  }
+  if (numerical) {
+    characters += numericalLetters;
+  }
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 };
