@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomerService } from './customer.service';
+import { CustomerLoginDto } from './dto/customer-login.dto';
 import { CustomerSignupDto } from './dto/customer-signup.dto';
 
 @ApiTags('customer')
@@ -15,5 +16,10 @@ export class CustomerController {
   @Get('/activate-account')
   activateAccount(@Query('token') token: string) {
     return this.service.activateAccount(token);
+  }
+
+  @Post('/login')
+  login(@Body() customerLoginDto: CustomerLoginDto) {
+    return this.service.login(customerLoginDto);
   }
 }

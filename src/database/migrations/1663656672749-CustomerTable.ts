@@ -95,6 +95,11 @@ export class CustomerTable1663656672749 implements MigrationInterface {
             default: `'inactive'`
           },
           {
+            name: 'salt',
+            type: 'varchar',
+            isNullable: true
+          },
+          {
             name: 'createdAt',
             type: 'timestamp',
             default: 'now()'

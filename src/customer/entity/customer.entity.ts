@@ -1,7 +1,8 @@
 import { Exclude } from 'class-transformer';
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
-import { Column, Entity, Index } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index } from 'typeorm';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
+import * as bcrypt from 'bcrypt';
 
 export enum GenderEnum {
   MALE = 'male',
@@ -63,4 +64,27 @@ export class CustomerEntity extends CustomUuidBaseEntity {
 
   @Column()
   status: UserStatusEnum;
+
+  @Column()
+  @Exclude({
+    toPlainOnly: true
+  })
+  salt: string;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPasswordBeforeInsert() {
+    if (this.password) {
+      await this.hashPassword();
+    }
+  }
+
+  async validatePassword(password: string): Promise<boolean> {
+    const hash = await bcrypt.hash(password, this.salt);
+    return hash === this.password;
+  }
+
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, this.salt);
+  }
 }

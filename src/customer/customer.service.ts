@@ -1,4 +1,10 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  UnprocessableEntityException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { generateUniqueToken } from 'src/common/helper/general.helper';
 import { MailJobInterface } from 'src/mail/interface/mail-job.interface';
@@ -8,8 +14,21 @@ import { CustomerSerializer } from './serializer/customer.serializer';
 import * as dayjs from 'dayjs';
 import * as config from 'config';
 import { MailService } from 'src/mail/mail.service';
-import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { MoreThanOrEqual } from 'typeorm';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
+import { CustomerLoginDto } from './dto/customer-login.dto';
+import * as bcrypt from 'bcrypt';
+import { CustomerEntity } from './entity/customer.entity';
+import { SignOptions } from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
+
+const jwtConfig = config.get('jwt');
+const appConfig = config.get('app');
+
+const BASE_OPTIONS: SignOptions = {
+  issuer: appConfig.appUrl,
+  audience: appConfig.frontendUrl
+};
 
 @Injectable()
 export class CustomerService {
@@ -17,7 +36,8 @@ export class CustomerService {
   constructor(
     @InjectRepository(CustomerRepository)
     private repository: CustomerRepository,
-    protected readonly mailService: MailService
+    protected readonly mailService: MailService,
+    private readonly jwt: JwtService
   ) {
     this.tokenExpirationTime = 60;
   }
@@ -34,15 +54,15 @@ export class CustomerService {
     const customer = await this.repository.store({
       ...customerDto,
       token,
-      tokenValidityDate
+      tokenValidityDate,
+      salt: await bcrypt.genSalt()
     });
     const subject = 'Account created';
     const link = `customer/verify/${token}`;
     const slug = 'activate-account';
     const linkLabel = 'Activate Account';
     await this.sendMailToUser(customer, subject, link, slug, linkLabel);
-    return;
-    // console.log(customer);
+    return customer;
   }
 
   async sendMailToUser(
@@ -71,14 +91,48 @@ export class CustomerService {
     const customer = await this.repository.findOne({
       where: {
         token: code,
-        tokenValidityDate: LessThanOrEqual(dayjs())
+        tokenValidityDate: MoreThanOrEqual(dayjs())
       }
     });
     if (!customer) {
       throw new UnprocessableEntityException('Invalid code.');
     }
     customer.status = UserStatusEnum.ACTIVE;
+    customer.token = null;
+    customer.tokenValidityDate = null;
     await customer.save();
     return this.repository.transform(customer);
+  }
+
+  async login(customerLoginDto: CustomerLoginDto) {
+    const { email, password } = customerLoginDto;
+    const customer = await this.repository.findOne({
+      email
+    });
+    if (!customer) {
+      throw new NotFoundException("user with that email doesn't exist");
+    }
+    switch (customer.status) {
+      case UserStatusEnum.BLOCKED:
+        throw new BadRequestException('Your account has been blocked.');
+      case UserStatusEnum.INACTIVE:
+        throw new BadRequestException(
+          'Your account has not been activated yet.'
+        );
+    }
+    if (!(await customer.validatePassword(password))) {
+      throw new UnauthorizedException('Invalid password');
+    }
+    return { accessToken: await this.generateAccessToken(customer) };
+  }
+
+  public async generateAccessToken(user: CustomerEntity): Promise<string> {
+    const opts: SignOptions = {
+      ...BASE_OPTIONS,
+      subject: String(user.id)
+    };
+    return this.jwt.signAsync({
+      ...opts
+    });
   }
 }
