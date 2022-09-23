@@ -6,6 +6,7 @@ import { BaseRepository } from 'src/common/repository/base.repository';
 import { CustomerEntity } from './entity/customer.entity';
 import { CustomerSignupDto } from './dto/customer-signup.dto';
 import { CustomerSerializer } from './serializer/customer.serializer';
+import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 
 @EntityRepository(CustomerEntity)
 export class CustomerRepository extends BaseRepository<
@@ -41,5 +42,17 @@ export class CustomerRepository extends BaseRepository<
     transformOption = {}
   ): CustomerSerializer[] {
     return models.map((model) => this.transform(model, transformOption));
+  }
+
+  async getUserForResetPassword(
+    resetPasswordDto: ResetPasswordDto
+  ): Promise<CustomerEntity> {
+    const { token } = resetPasswordDto;
+    const query = this.createQueryBuilder('customers');
+    query.where('customers.token = :token', { token });
+    query.andWhere('customers.tokenValidityDate > :date', {
+      date: new Date()
+    });
+    return query.getOne();
   }
 }

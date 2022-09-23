@@ -7,6 +7,7 @@ import { CustomerController } from './customer.controller';
 import { CustomerRepository } from './customer.repository';
 import { CustomerService } from './customer.service';
 import * as config from 'config';
+import { CustomerRefreshTokenModule } from 'src/customer-refresh-token/customer-refresh-token.module';
 
 const jwtConfig = config.get('jwt');
 @Module({
@@ -25,7 +26,16 @@ const jwtConfig = config.get('jwt');
     }),
     PassportModule.register({
       defaultStrategy: 'jwt'
-    })
+    }),
+    CustomerRefreshTokenModule
+  ],
+  // exports: [CustomerService]
+  exports: [
+    CustomerService,
+    // JwtTwoFactorStrategy,
+    // JwtStrategy,
+    PassportModule,
+    JwtModule
   ]
 })
 export class CustomerModule {}

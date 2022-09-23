@@ -14,6 +14,7 @@ export enum GenderEnum {
   name: 'customers'
 })
 export class CustomerEntity extends CustomUuidBaseEntity {
+  [x: string]: any;
   @Index({
     unique: true
   })
@@ -60,7 +61,7 @@ export class CustomerEntity extends CustomUuidBaseEntity {
   token: string;
 
   @Column()
-  tokenValidityDate: string;
+  tokenValidityDate: Date;
 
   @Column()
   status: UserStatusEnum;
@@ -70,6 +71,7 @@ export class CustomerEntity extends CustomUuidBaseEntity {
     toPlainOnly: true
   })
   salt: string;
+  user: any;
 
   @BeforeInsert()
   @BeforeUpdate()

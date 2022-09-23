@@ -56,12 +56,12 @@ export class CustomerSerializer extends ModelSerializer {
   @Exclude({
     toClassOnly: true
   })
-  otp: Date;
+  token: Date;
 
   @Exclude({
     toClassOnly: true
   })
-  otpSentTime: Date;
+  tokenValidityDate: Date;
 
   @ApiPropertyOptional()
   createdAt: Date;
