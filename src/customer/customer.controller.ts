@@ -6,7 +6,7 @@ import {
   Put,
   Query,
   Req,
-  Res
+  UseGuards
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CustomerRefreshToken } from 'src/customer-refresh-token/entities/customer-refresh-token.entity';
@@ -14,9 +14,12 @@ import UAParser = require('ua-parser-js');
 import { CustomerService } from './customer.service';
 import { CustomerLoginDto } from './dto/customer-login.dto';
 import { CustomerSignupDto } from './dto/customer-signup.dto';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { ForgetPasswordDto } from 'src/auth/dto/forget-password.dto';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
+import { CustomerJwtAuthGuard } from 'src/common/guard/customer-jwt-auth.guard';
+import { GetCustomer } from 'src/common/decorators/get-customer.decorator';
+import { CustomerSerializer } from './serializer/customer.serializer';
 
 @ApiTags('customer')
 @Controller('customer')
@@ -66,5 +69,14 @@ export class CustomerController {
     resetPasswordDto: ResetPasswordDto
   ): Promise<void> {
     return this.service.resetPassword(resetPasswordDto);
+  }
+
+  @UseGuards(CustomerJwtAuthGuard)
+  @Get('/profile')
+  profile(
+    @GetCustomer()
+    customer: CustomerSerializer
+  ) {
+    return customer;
   }
 }

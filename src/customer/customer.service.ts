@@ -18,7 +18,6 @@ import { MoreThanOrEqual } from 'typeorm';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { CustomerLoginDto } from './dto/customer-login.dto';
 import * as bcrypt from 'bcrypt';
-import { CustomerEntity } from './entity/customer.entity';
 import { SignOptions } from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
 import { CustomerRefreshToken } from 'src/customer-refresh-token/entities/customer-refresh-token.entity';

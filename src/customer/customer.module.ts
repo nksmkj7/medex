@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailModule } from 'src/mail/mail.module';
 import { CustomerController } from './customer.controller';
@@ -24,17 +23,18 @@ const jwtConfig = config.get('jwt');
         }
       })
     }),
-    PassportModule.register({
-      defaultStrategy: 'jwt'
-    }),
+    // PassportModule.register({
+    //   defaultStrategy: 'jwt'
+    // }),
     CustomerRefreshTokenModule
+    // CustomerJwtStrategy
   ],
   // exports: [CustomerService]
   exports: [
     CustomerService,
     // JwtTwoFactorStrategy,
-    // JwtStrategy,
-    PassportModule,
+    // CustomerJwtStrategy,
+    // PassportModule,
     JwtModule
   ]
 })

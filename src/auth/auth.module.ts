@@ -16,6 +16,8 @@ import { JwtTwoFactorStrategy } from 'src/common/strategy/jwt-two-factor.strateg
 import { JwtStrategy } from 'src/common/strategy/jwt.strategy';
 import { RoleRepository } from 'src/role/role.repository';
 import { ServiceRepository } from 'src/service/service.repository';
+import { CustomerJwtStrategy } from 'src/common/strategy/customer-jwt.strategy';
+import { CustomerRepository } from 'src/customer/customer.repository';
 
 const throttleConfig = config.get('throttle.login');
 const redisConfig = config.get('queue');
@@ -53,7 +55,11 @@ const LoginThrottleFactory = {
     PassportModule.register({
       defaultStrategy: 'jwt'
     }),
-    TypeOrmModule.forFeature([UserRepository, ServiceRepository]),
+    TypeOrmModule.forFeature([
+      UserRepository,
+      ServiceRepository,
+      CustomerRepository
+    ]),
     TypeOrmModule.forFeature([RoleRepository]),
     MailModule,
     RefreshTokenModule
@@ -63,6 +69,7 @@ const LoginThrottleFactory = {
     AuthService,
     JwtTwoFactorStrategy,
     JwtStrategy,
+    CustomerJwtStrategy,
     UniqueValidatorPipe,
     LoginThrottleFactory
   ],
@@ -70,6 +77,7 @@ const LoginThrottleFactory = {
     AuthService,
     JwtTwoFactorStrategy,
     JwtStrategy,
+    CustomerJwtStrategy,
     PassportModule,
     JwtModule
   ]
