@@ -85,9 +85,9 @@ export class CustomerController {
   @Get('/profile')
   profile(
     @GetCustomer()
-    customer: CustomerSerializer
+    customer: CustomerEntity
   ) {
-    return customer;
+    return this.service.getProfile(customer);
   }
 
   @UseGuards(CustomerJwtAuthGuard)

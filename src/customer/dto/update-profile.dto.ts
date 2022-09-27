@@ -54,4 +54,16 @@ export class UpdateProfileDto extends OmitType(CustomerSignupDto, [
   @IsOptional()
   @IsEnum(GenderEnum)
   gender: GenderEnum;
+
+  @IsOptional()
+  @IsString()
+  facebook: string;
+
+  @IsOptional()
+  @IsString()
+  twitter: string;
+
+  @IsOptional()
+  @IsString()
+  instagram: string;
 }

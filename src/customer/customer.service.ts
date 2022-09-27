@@ -253,6 +253,10 @@ export class CustomerService {
   ) {
     this.repository.merge(customer, updateProfileDto);
     await customer.save();
-    return customer;
+    return this.repository.transform(customer);
+  }
+
+  getProfile(customer: CustomerEntity) {
+    return this.repository.transform(customer);
   }
 }
