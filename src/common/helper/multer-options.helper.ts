@@ -9,7 +9,8 @@ import { StatusCodesList } from 'src/common/constants/status-codes-list.constant
 
 export const multerOptionsHelper = (
   destinationPath: string,
-  maxFileSize: number
+  maxFileSize: number,
+  required = false
 ) => ({
   limits: {
     fileSize: +maxFileSize

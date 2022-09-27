@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -24,6 +25,13 @@ import { CustomerRefreshToken } from 'src/customer-refresh-token/entities/custom
 import { CustomerRefreshTokenService } from 'src/customer-refresh-token/customer-refresh-token.service';
 import { ForgetPasswordDto } from 'src/auth/dto/forget-password.dto';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
+import { CustomerEntity } from './entity/customer.entity';
+import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
+import { CustomHttpException } from 'src/exception/custom-http.exception';
+import { ExceptionTitleList } from 'src/common/constants/exception-title-list.constants';
+import { StatusCodesList } from 'src/common/constants/status-codes-list.constants';
+import { existsSync, unlinkSync } from 'fs';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 // const jwtConfig = config.get('jwt');
 const appConfig = config.get('app');
@@ -205,5 +213,46 @@ export class CustomerService {
     user.token = await generateUniqueToken(6, this.checkUniqueFn);
     user.password = password;
     await user.save();
+  }
+
+  async changePassword(
+    customer: CustomerEntity,
+    changePasswordDto: ChangePasswordDto
+  ): Promise<void> {
+    const { oldPassword, password } = changePasswordDto;
+    const checkOldPwdMatches = await customer.validatePassword(oldPassword);
+    if (!checkOldPwdMatches) {
+      throw new CustomHttpException(
+        ExceptionTitleList.IncorrectOldPassword,
+        HttpStatus.PRECONDITION_FAILED,
+        StatusCodesList.IncorrectOldPassword
+      );
+    }
+    customer.password = password;
+    await customer.save();
+  }
+
+  async uploadProfileImage(
+    file: Express.Multer.File,
+    customer: CustomerEntity
+  ) {
+    if (customer.profilePicture) {
+      const path = `public/images/customer-profile/${customer.profilePicture}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/customer-profile/${customer.profilePicture}`);
+      }
+    }
+    customer.profilePicture = file.filename;
+    customer.save();
+    return this.repository.transform(customer);
+  }
+
+  async updateProfile(
+    updateProfileDto: UpdateProfileDto,
+    customer: CustomerEntity
+  ) {
+    this.repository.merge(customer, updateProfileDto);
+    await customer.save();
+    return customer;
   }
 }

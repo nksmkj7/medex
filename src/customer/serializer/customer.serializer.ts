@@ -10,6 +10,9 @@ export enum GenderEnum {
   OTHER = 'other'
 }
 
+import * as config from 'config';
+const appConfig = config.get('app');
+
 export class CustomerSerializer extends ModelSerializer {
   id: number;
 
@@ -32,6 +35,9 @@ export class CustomerSerializer extends ModelSerializer {
 
   @ApiProperty()
   @Transform(({ value }) => (value !== 'null' ? value : ''))
+  @Transform(
+    ({ value }) => `${appConfig.appUrl}/images/customer-profile/${value}`
+  )
   profilePicture: string;
 
   @ApiProperty()

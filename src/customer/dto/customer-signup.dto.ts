@@ -33,7 +33,6 @@ export class CustomerSignupDto {
 
   @IsNotEmpty()
   @IsPhoneNumber()
-  @IsLowercase()
   phoneNumber: string;
 
   @IsNotEmpty()
