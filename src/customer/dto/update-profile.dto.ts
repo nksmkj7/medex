@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsOptional,
+  IsPhoneNumber,
   IsString
 } from 'class-validator';
 import { CustomerSignupDto } from './customer-signup.dto';
@@ -18,6 +19,18 @@ export class UpdateProfileDto extends OmitType(CustomerSignupDto, [
   'password',
   'confirmPassword'
 ]) {
+  @IsNotEmpty()
+  @IsString()
+  firstName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
+
+  @IsNotEmpty()
+  @IsPhoneNumber()
+  phoneNumber: string;
+
   @IsOptional()
   @IsString()
   address: string;

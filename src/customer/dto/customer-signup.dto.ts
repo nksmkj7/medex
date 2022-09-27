@@ -3,8 +3,6 @@ import {
   IsEmail,
   IsLowercase,
   IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
   Matches,
   MaxLength,
   MinLength,
@@ -16,24 +14,12 @@ import { CustomerEntity } from '../entity/customer.entity';
 
 export class CustomerSignupDto {
   @IsNotEmpty()
-  @IsString()
-  firstName: string;
-
-  @IsNotEmpty()
-  @IsString()
-  lastName: string;
-
-  @IsNotEmpty()
   @IsEmail()
   @IsLowercase()
   @Validate(UniqueValidatorPipe, [CustomerEntity], {
     message: 'already taken'
   })
   email: string;
-
-  @IsNotEmpty()
-  @IsPhoneNumber()
-  phoneNumber: string;
 
   @IsNotEmpty()
   @MinLength(6, {

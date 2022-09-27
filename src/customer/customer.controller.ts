@@ -39,7 +39,7 @@ export class CustomerController {
     return this.service.store(customerSignupDto);
   }
 
-  @Get('/activate-account')
+  @Post('/activate-account')
   activateAccount(@Query('token') token: string) {
     return this.service.activateAccount(token);
   }

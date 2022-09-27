@@ -36,7 +36,8 @@ export class CustomerSerializer extends ModelSerializer {
   @ApiProperty()
   @Transform(({ value }) => (value !== 'null' ? value : ''))
   @Transform(
-    ({ value }) => `${appConfig.appUrl}/images/customer-profile/${value}`
+    ({ value }) =>
+      value && `${appConfig.appUrl}/images/customer-profile/${value}`
   )
   profilePicture: string;
 

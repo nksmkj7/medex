@@ -67,6 +67,15 @@ export class CustomerEntity extends CustomUuidBaseEntity {
   status: UserStatusEnum;
 
   @Column()
+  facebook: string;
+
+  @Column()
+  instagram: string;
+
+  @Column()
+  twitter: string;
+
+  @Column()
   @Exclude({
     toPlainOnly: true
   })
@@ -74,7 +83,7 @@ export class CustomerEntity extends CustomUuidBaseEntity {
   user: any;
 
   @BeforeInsert()
-  @BeforeUpdate()
+  // @BeforeUpdate()
   async hashPasswordBeforeInsert() {
     if (this.password) {
       await this.hashPassword();

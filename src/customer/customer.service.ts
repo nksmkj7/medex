@@ -93,7 +93,7 @@ export class CustomerService {
       slug,
       context: {
         email: user.email,
-        link: `<a href="${appConfig.frontendUrl}/${url}">${linkLabel} →</a>`,
+        link: `<a href="${appConfig.customerEndUrl}/${url}">${linkLabel} →</a>`,
         username: user.username,
         subject
       }
