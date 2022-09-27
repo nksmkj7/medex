@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
@@ -53,6 +54,7 @@ export class BannerController {
     });
   }
 
+  @Public()
   @Get()
   findAll(
     @Query()

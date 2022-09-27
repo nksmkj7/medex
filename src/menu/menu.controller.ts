@@ -15,6 +15,7 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
@@ -39,6 +40,7 @@ export class MenuController {
     return this.menuService.create(createMenuDto);
   }
 
+  @Public()
   @Get()
   findAll(
     @Query()

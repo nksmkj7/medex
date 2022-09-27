@@ -5,10 +5,23 @@ import { TokenExpiredError } from 'jsonwebtoken';
 import { ForbiddenException } from 'src/exception/forbidden.exception';
 import { UnauthorizedException } from 'src/exception/unauthorized.exception';
 import { StatusCodesList } from 'src/common/constants/status-codes-list.constants';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export default class JwtTwoFactorGuard extends AuthGuard('jwt-two-factor') {
+  constructor(private reflector: Reflector) {
+    super();
+  }
+
   canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass()
+    ]);
+    if (isPublic) {
+      return true;
+    }
     return super.canActivate(context);
   }
 

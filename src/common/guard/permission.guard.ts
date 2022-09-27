@@ -5,9 +5,14 @@ import {
   RoutePayloadInterface
 } from 'src/config/permission-config';
 import { UserEntity } from 'src/auth/entity/user.entity';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
+  constructor(private reflector: Reflector) {
+    // super();
+  }
   /**
    * check if user authorized
    * @param context
@@ -15,6 +20,13 @@ export class PermissionGuard implements CanActivate {
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass()
+    ]);
+    if (isPublic) {
+      return true;
+    }
     const request = context.switchToHttp().getRequest();
     const path = request.route.path;
     const method = request.method.toLowerCase();
