@@ -32,6 +32,8 @@ import { ExceptionTitleList } from 'src/common/constants/exception-title-list.co
 import { StatusCodesList } from 'src/common/constants/status-codes-list.constants';
 import { existsSync, unlinkSync } from 'fs';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { CustomerFilterDto } from './dto/customer-filter.dto';
+import { Pagination } from 'src/paginate';
 
 // const jwtConfig = config.get('jwt');
 const appConfig = config.get('app');
@@ -258,5 +260,15 @@ export class CustomerService {
 
   getProfile(customer: CustomerEntity) {
     return this.repository.transform(customer);
+  }
+
+  async findAll(
+    customerFilterDto: CustomerFilterDto
+  ): Promise<Pagination<CustomerSerializer>> {
+    return this.repository.paginate(
+      customerFilterDto,
+      [],
+      ['email', 'firstName', 'lastName']
+    );
   }
 }

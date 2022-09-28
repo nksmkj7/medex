@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Put,
   Query,
@@ -29,6 +30,9 @@ import { CustomerProfileImageDto } from './dto/profile-image.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
+import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { CustomerFilterDto } from './dto/customer-filter.dto';
 
 @ApiTags('customer')
 @Controller('customer')
@@ -138,5 +142,14 @@ export class CustomerController {
     updateProfileDto: UpdateProfileDto
   ) {
     return this.service.updateProfile(updateProfileDto, customer);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, PermissionGuard)
+  @Get('/')
+  getCustomer(
+    @Param()
+    customerFilterDto: CustomerFilterDto
+  ) {
+    return this.service.findAll(customerFilterDto);
   }
 }
