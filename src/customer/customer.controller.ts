@@ -4,6 +4,8 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -33,6 +35,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { CustomerFilterDto } from './dto/customer-filter.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @ApiTags('customer')
 @Controller('customer')
@@ -146,10 +149,26 @@ export class CustomerController {
 
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)
   @Get('/')
-  getCustomer(
+  getCustomers(
     @Param()
     customerFilterDto: CustomerFilterDto
   ) {
     return this.service.findAll(customerFilterDto);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, PermissionGuard)
+  @Get('/:id')
+  getCustomerDetail(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.findOne(id);
+  }
+
+  @Put(':id')
+  update(
+    @Param('id', ParseUUIDPipe)
+    id: string,
+    @Body()
+    updateCustomerDto: UpdateCustomerDto
+  ): Promise<CustomerSerializer> {
+    return this.service.update(id, updateCustomerDto);
   }
 }

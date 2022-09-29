@@ -400,6 +400,40 @@ export const PermissionConfiguration: PermissionConfigInterface = {
       ]
     },
     {
+      name: 'Customer Management',
+      resource: 'customer',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all customers',
+          route: [
+            {
+              path: '/customer',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View customer by id',
+          route: [
+            {
+              path: '/customer/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Update customer by id',
+          route: [
+            {
+              path: '/customer/:id',
+              method: MethodList.PUT
+            }
+          ]
+        }
+      ]
+    },
+    {
       name: 'Banner management',
       resource: 'banner',
       hasSubmodules: false,

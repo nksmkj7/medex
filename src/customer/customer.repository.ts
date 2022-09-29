@@ -7,6 +7,7 @@ import { CustomerEntity } from './entity/customer.entity';
 import { CustomerSignupDto } from './dto/customer-signup.dto';
 import { CustomerSerializer } from './serializer/customer.serializer';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @EntityRepository(CustomerEntity)
 export class CustomerRepository extends BaseRepository<
@@ -54,5 +55,14 @@ export class CustomerRepository extends BaseRepository<
       date: new Date()
     });
     return query.getOne();
+  }
+
+  async updateItem(
+    customer: CustomerEntity,
+    updateCustomerDto: UpdateCustomerDto
+  ): Promise<CustomerSerializer> {
+    const updatedBanner = this.merge(customer, updateCustomerDto);
+    await updatedBanner.save();
+    return this.transform(updatedBanner);
   }
 }

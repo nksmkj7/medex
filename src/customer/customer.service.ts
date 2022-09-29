@@ -34,6 +34,7 @@ import { existsSync, unlinkSync } from 'fs';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CustomerFilterDto } from './dto/customer-filter.dto';
 import { Pagination } from 'src/paginate';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 // const jwtConfig = config.get('jwt');
 const appConfig = config.get('app');
@@ -270,5 +271,20 @@ export class CustomerService {
       [],
       ['email', 'firstName', 'lastName']
     );
+  }
+
+  async findOne(id: string): Promise<CustomerSerializer> {
+    return this.repository.get(id);
+  }
+
+  async update(
+    id: string,
+    updateCustomerDto: UpdateCustomerDto
+  ): Promise<CustomerSerializer> {
+    const customer = await this.repository.findOne(id);
+    if (!customer) {
+      throw new NotFoundException();
+    }
+    return this.repository.updateItem(customer, updateCustomerDto);
   }
 }
