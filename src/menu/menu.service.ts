@@ -65,7 +65,7 @@ export class MenuService {
     }
     return this.repository.paginate(
       menuFilterDto,
-      [],
+      ['children'],
       ['title', 'link'],
       {},
       searchCriteria

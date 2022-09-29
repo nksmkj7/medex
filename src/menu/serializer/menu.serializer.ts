@@ -34,9 +34,9 @@ export class MenuSerializer extends ModelSerializer {
   parent: MenuSerializer;
 
   @ApiHideProperty()
-  @Expose({
-    groups: ['parent']
-  })
+  // @Expose({
+  //   groups: ['parent']
+  // })
   @Type(() => MenuSerializer)
   children: MenuSerializer;
 

@@ -31,6 +31,7 @@ import { CategorySerializer } from './serializer/category.serializer';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Category')
 @Controller('category')
@@ -58,6 +59,7 @@ export class CategoryController {
     });
   }
 
+  @Public()
   @Get()
   findAll(
     @Query()
