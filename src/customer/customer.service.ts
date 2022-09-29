@@ -75,7 +75,7 @@ export class CustomerService {
       salt: await bcrypt.genSalt()
     });
     const subject = 'Account created';
-    const link = `customer/verify/${token}`;
+    const link = `?token={token}`;
     const slug = 'activate-account';
     const linkLabel = 'Activate Account';
     await this.sendMailToUser(customer, subject, link, slug, linkLabel);
