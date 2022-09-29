@@ -54,9 +54,9 @@ export class CategorySerializer extends ModelSerializer {
   parent: CategorySerializer;
 
   @ApiHideProperty()
-  @Expose({
-    groups: ['parent']
-  })
+  // @Expose({
+  //   groups: ['parent']
+  // })
   @Type(() => CategorySerializer)
   children: CategorySerializer;
 

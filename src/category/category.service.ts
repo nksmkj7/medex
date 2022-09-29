@@ -49,7 +49,7 @@ export class CategoryService {
     }
     return this.repository.paginate(
       categoryFilterDto,
-      [],
+      ['children', 'parent'],
       ['title', 'color'],
       {},
       searchCriteria
