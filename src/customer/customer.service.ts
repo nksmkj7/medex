@@ -75,7 +75,7 @@ export class CustomerService {
       salt: await bcrypt.genSalt()
     });
     const subject = 'Account created';
-    const link = `?token={token}`;
+    const link = `?verify-token=${token}`;
     const slug = 'activate-account';
     const linkLabel = 'Activate Account';
     await this.sendMailToUser(customer, subject, link, slug, linkLabel);
@@ -199,7 +199,7 @@ export class CustomerService {
     await this.sendMailToUser(
       this.repository.transform(user),
       subject,
-      `customer/reset/${token}`,
+      `?reset-token=${token}`,
       'reset-password',
       subject
     );
