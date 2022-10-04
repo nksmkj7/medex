@@ -170,14 +170,6 @@ export class BaseRepository<
             ...searchCondition
           });
         }
-        if (Object.keys(relationalSearchCriteria).length) {
-          for (const [key, value] of Object.entries(relationalSearchCriteria)) {
-            whereCondition.push({
-              [key]: value,
-              ...searchCondition
-            });
-          }
-        }
       } else {
         for (const key of searchCriteria) {
           whereCondition.push({
@@ -194,6 +186,14 @@ export class BaseRepository<
       }
     } else {
       whereCondition.push({ ...searchCondition });
+      // if (Object.keys(relationalSearchCriteria).length) {
+      //   for (const [key, value] of Object.entries(relationalSearchCriteria)) {
+      //     whereCondition.push({
+      //       [key]: value,
+      //       ...searchCondition
+      //     });
+      //   }
+      // }
     }
     const paginationInfo: PaginationInfoInterface =
       this.getPaginationInfo(searchFilter);

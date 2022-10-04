@@ -3,12 +3,13 @@ import {
   ApiProperty,
   ApiPropertyOptional
 } from '@nestjs/swagger';
-import { Expose, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import * as config from 'config';
 import { UserSerializer } from 'src/auth/serializer/user.serializer';
 import { CategorySerializer } from 'src/category/serializer/category.serializer';
 
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
+import { SpecialistSerializer } from 'src/specialist/serializer/specialist.serializer';
 const appConfig = config.get('app');
 
 export class ServiceSerializer extends ModelSerializer {
@@ -63,4 +64,7 @@ export class ServiceSerializer extends ModelSerializer {
 
   @ApiPropertyOptional()
   updatedAt: Date;
+
+  @Exclude()
+  specialists: SpecialistSerializer[];
 }

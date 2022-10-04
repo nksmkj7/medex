@@ -3,7 +3,7 @@ import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from 'src/auth/user.repository';
 import { CategoryRepository } from 'src/category/category.repository';
 import { Pagination } from 'src/paginate';
-import { Connection, EntityManager, ILike } from 'typeorm';
+import { Connection, EntityManager, ILike, In } from 'typeorm';
 import { ServiceFilterDto } from './dto/service-filter.dto';
 import { ServiceDto } from './dto/service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -13,6 +13,7 @@ import { ServiceRepository } from './service.repository';
 import { ServiceSerializer } from './service.serializer';
 import { difference } from 'lodash';
 import { SpecialistRepository } from 'src/specialist/specialist.repository';
+import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 
 interface ICheckIds {
   userId: number;
@@ -71,12 +72,15 @@ export class ServiceService {
         },
         category: {
           title: ILike(`%${keywords}%`)
+        },
+        subCategory: {
+          title: ILike(`%${keywords}%`)
         }
       };
     }
     return this.repository.paginate(
       serviceFilterDto,
-      ['user', 'category'],
+      ['user', 'category', 'subCategory'],
       ['title'],
       {},
       {
@@ -219,11 +223,35 @@ export class ServiceService {
     );
   }
 
-  async findServiceSpecialists(id: string) {
+  async findServiceSpecialists(
+    id: string,
+    specialistFilterDto: SpecialistFilterDto
+  ) {
     const service = await this.repository.findOneOrFail(id, {
       relations: ['specialists']
     });
-    return this.specialistRepository.transformMany(service.specialists);
+    const relatedSpecialistId = service.specialists.map(
+      (specialist) => specialist.id
+    );
+    const specialists = await this.specialistRepository.paginate(
+      specialistFilterDto,
+      [],
+      [
+        'fullName',
+        'contactNo',
+        'licenseRegistrationNumber',
+        'educationTraining',
+        'experienceExpertise',
+        'publicAwards',
+        'membershipActivities'
+      ],
+      {},
+      {
+        id: In(relatedSpecialistId)
+      }
+    );
+    const transformedService = this.repository.transform(service);
+    return { ...specialists, service: transformedService };
   }
 
   async getSpecialistService(serviceId: string, specialistId: string) {

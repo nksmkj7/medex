@@ -672,6 +672,15 @@ export const PermissionConfiguration: PermissionConfigInterface = {
               method: MethodList.PUT
             }
           ]
+        },
+        {
+          name: 'Get service specialist by service id',
+          route: [
+            {
+              path: '/service/:id/specialists',
+              method: MethodList.GET
+            }
+          ]
         }
       ]
     }

@@ -1,10 +1,13 @@
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
 import { CountryEntity } from 'src/country/entities/country.entity';
+import { ServiceEntity } from 'src/service/entity/service.entity';
 import { ServiceSpecialistEntity } from 'src/service/entity/specialist-service.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   OneToOne,
   Unique

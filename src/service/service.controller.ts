@@ -13,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { Pagination } from 'src/paginate';
+import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 import { ServiceFilterDto } from './dto/service-filter.dto';
 import { ServiceDto } from './dto/service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -52,8 +53,11 @@ export class ServiceController {
   }
 
   @Get(':id/specialists')
-  findServiceSpecialists(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.findServiceSpecialists(id);
+  findServiceSpecialists(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() specialistFilterDto: SpecialistFilterDto
+  ) {
+    return this.service.findServiceSpecialists(id, specialistFilterDto);
   }
 
   @Get(':serviceId/specialist-service/:specialistId')
