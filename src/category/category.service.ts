@@ -150,4 +150,14 @@ export class CategoryService {
       subCategories
     };
   }
+
+  activeCategories() {
+    return this.repository.find({
+      where: {
+        status: true,
+        parentId: null
+      },
+      relations: ['children']
+    });
+  }
 }

@@ -65,4 +65,12 @@ export class SpecialistService {
 
     return this.repository.updateItem(specialist, updateSpecialistDto);
   }
+
+  activeSpecialists() {
+    return this.repository.find({
+      where: {
+        status: true
+      }
+    });
+  }
 }

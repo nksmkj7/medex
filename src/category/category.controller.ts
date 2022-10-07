@@ -68,6 +68,11 @@ export class CategoryController {
     return this.categoryService.findAll(categoryFilterDto);
   }
 
+  @Get('active')
+  getActiveCategories() {
+    return this.categoryService.activeCategories();
+  }
+
   @Get(':id')
   findOne(
     @Param('id', ParseUUIDPipe)

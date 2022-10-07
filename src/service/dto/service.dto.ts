@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -9,7 +10,6 @@ import {
   IsUUID,
   Max,
   MaxLength,
-  min,
   Min,
   Validate,
   ValidateIf
@@ -27,6 +27,7 @@ import { RunValidation } from 'src/common/validators/run-validation.validators';
 import { IsTime } from 'src/common/validators/time-only.decorator';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceEntity } from '../entity/service.entity';
+import * as dayjs from 'dayjs';
 
 export class ServiceDto {
   @IsNotEmpty()
@@ -48,6 +49,7 @@ export class ServiceDto {
   @Validate(IsValidForeignKey, [CategoryEntity])
   categoryId: string;
 
+  @IsOptional()
   @ValidateIf((object, value) => {
     return value;
   })
@@ -64,18 +66,18 @@ export class ServiceDto {
   @IsString()
   description: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   durationInMinutes: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
   discount: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
@@ -92,18 +94,19 @@ export class ServiceDto {
   @Validate(IsValidForeignKey, [SpecialistEntity], { each: true })
   specialistIds: string[];
 
+  @IsOptional()
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   additionalTime: number;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsTime('24h')
   @Validate(RunValidation, [isGreaterThanTime, 'endTime'], {
     message: 'startTime must be greater than endTime'
   })
   startTime: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsTime('24h')
   @Validate(RunValidation, [isSmallerThanTime, 'startTime'], {
     message: 'endTime must be greater than startTime'

@@ -681,6 +681,58 @@ export const PermissionConfiguration: PermissionConfigInterface = {
               method: MethodList.GET
             }
           ]
+        },
+        {
+          name: 'Get service specialist by service id',
+          route: [
+            {
+              path: '/service/:id/specialists',
+              method: MethodList.GET
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Schedule management',
+      resource: 'schedule',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all specialist/doctors schedules',
+          route: [
+            {
+              path: '/schedule/:serviceId/:specialistId',
+              method: MethodList.GET 
+            }
+          ]
+        },
+        {
+          name: 'View specific date schedules of specialist detail by date',
+          route: [
+            {
+              path: 'schedule/:serviceId/:specialistId/:date',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Edit schedule of specialist for the specific date',
+          route: [
+            {
+              path: 'schedule/:serviceId/:specialistId/:date/:scheduleId',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Generate schedule for specialist',
+          route: [
+            {
+              path: '/schedule/generate-schedule',
+              method: MethodList.POST
+            }
+          ]
         }
       ]
     }

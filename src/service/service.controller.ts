@@ -7,11 +7,13 @@ import {
   Post,
   Put,
   Query,
-  UseGuards
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 import { ServiceFilterDto } from './dto/service-filter.dto';
@@ -39,6 +41,7 @@ export class ServiceController {
     return this.service.findAll(serviceFilterDto);
   }
 
+  @UseInterceptors(new InjectRequestInterceptor(['params']))
   @Put(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,

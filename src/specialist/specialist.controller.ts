@@ -59,6 +59,11 @@ export class SpecialistController {
     return this.specialistService.findAll(specialistFilterDto);
   }
 
+  @Get('active')
+  getActiveSpecialists() {
+    return this.specialistService.activeSpecialists();
+  }
+
   @Get(':id')
   findOne(
     @Param('id', ParseUUIDPipe)

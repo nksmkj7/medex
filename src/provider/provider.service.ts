@@ -24,6 +24,7 @@ import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
 import { ServiceRepository } from 'src/service/service.repository';
 import { weekDays } from 'src/common/constants/weekdays.constants';
 import { NotFoundException } from 'src/exception/not-found.exception';
+import { UserStatusEnum } from 'src/auth/user-status.enum';
 
 @Injectable()
 export class ProviderService {
@@ -250,5 +251,24 @@ export class ProviderService {
       throw new NotFoundException('Schedule not found.');
     }
     return user.schedule;
+  }
+
+  async activeProviders() {
+    const providers = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.username', 'providerInformation.companyName'])
+      .where('user.status = :status', { status: UserStatusEnum.ACTIVE })
+      .innerJoin('user.providerInformation', 'providerInformation')
+      .innerJoin('user.role', 'role', 'role.name=:roleName', {
+        roleName: 'provider'
+      })
+      .getMany();
+    return this.userRepository.transformMany(providers, {
+      groups: [
+        ...adminUserGroupsForSerializing,
+        ...ownerUserGroupsForSerializing,
+        ...defaultUserGroupsForSerializing
+      ]
+    });
   }
 }

@@ -54,6 +54,7 @@ export class ServiceService {
       return this.repository.transform(service);
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -115,31 +116,31 @@ export class ServiceService {
         service,
         updateServiceDto
       );
-      let updatedServiceSpecialistsDataPromises = [];
+      // let updatedServiceSpecialistsDataPromises = [];
 
-      //syncing specialist id to service and also updating additional, startTime and endTime for
-      //synced specialist of this service
-      updatedService.specialists = specialists.filter((specialist) => {
-        if (updateServiceDto.specialistIds.includes(specialist.id)) {
-          updatedServiceSpecialistsDataPromises.push(
-            manager.update(
-              ServiceSpecialistEntity,
-              {
-                serviceId: id,
-                specialistId: specialist.id
-              },
-              {
-                additionalTime: updateServiceDto.additionalTime,
-                startTime: updateServiceDto.startTime ?? null,
-                endTime: updateServiceDto.endTime ?? null
-              }
-            )
-          );
-          return true;
-        }
-      });
+      // //syncing specialist id to service and also updating additional, startTime and endTime for
+      // //synced specialist of this service
+      // updatedService.specialists = specialists.filter((specialist) => {
+      //   if (updateServiceDto.specialistIds.includes(specialist.id)) {
+      //     updatedServiceSpecialistsDataPromises.push(
+      //       manager.update(
+      //         ServiceSpecialistEntity,
+      //         {
+      //           serviceId: id,
+      //           specialistId: specialist.id
+      //         },
+      //         {
+      //           additionalTime: updateServiceDto.additionalTime,
+      //           startTime: updateServiceDto.startTime ?? null,
+      //           endTime: updateServiceDto.endTime ?? null
+      //         }
+      //       )
+      //     );
+      //     return true;
+      //   }
+      // });
 
-      await Promise.allSettled(updatedServiceSpecialistsDataPromises);
+      // await Promise.allSettled(updatedServiceSpecialistsDataPromises);
 
       await manager.save(updatedService);
       await queryRunner.commitTransaction();

@@ -52,6 +52,11 @@ export class ProviderController {
     return user;
   }
 
+  @Get('active')
+  getActiveProviders() {
+    return this.providerService.activeProviders();
+  }
+
   @Get(':id')
   async getProviderDetail(@Param('id', ParseIntPipe) id: number) {
     return await this.providerService.getProviderDetail(id);
