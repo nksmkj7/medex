@@ -146,7 +146,9 @@ export class ServiceService {
       await queryRunner.commitTransaction();
       return this.repository.transform(updatedService);
     } catch (error) {
+      console.log(error);
       await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }

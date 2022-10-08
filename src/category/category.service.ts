@@ -154,7 +154,7 @@ export class CategoryService {
   activeCategories() {
     return this.repository.find({
       where: {
-        status: true,
+        // status: true,
         parentId: null
       },
       relations: ['children']

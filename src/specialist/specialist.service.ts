@@ -69,7 +69,7 @@ export class SpecialistService {
   activeSpecialists() {
     return this.repository.find({
       where: {
-        status: true
+        // status: true
       }
     });
   }

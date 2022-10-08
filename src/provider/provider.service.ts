@@ -257,7 +257,7 @@ export class ProviderService {
     const providers = await this.userRepository
       .createQueryBuilder('user')
       .select(['user.id', 'user.username', 'providerInformation.companyName'])
-      .where('user.status = :status', { status: UserStatusEnum.ACTIVE })
+      // .where('user.status = :status', { status: UserStatusEnum.ACTIVE })
       .innerJoin('user.providerInformation', 'providerInformation')
       .innerJoin('user.role', 'role', 'role.name=:roleName', {
         roleName: 'provider'
