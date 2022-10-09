@@ -72,4 +72,7 @@ export class ServiceController {
   ) {
     return this.service.getSpecialistService(serviceId, specialistId);
   }
+
+  @Post(':serviceId/assign-specialist')
+  assignServiceSpecialist() {}
 }

@@ -99,14 +99,14 @@ export class ServiceDto {
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   additionalTime: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsTime('24h')
   @Validate(RunValidation, [isGreaterThanTime, 'endTime'], {
     message: 'startTime must be greater than endTime'
   })
   startTime: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsTime('24h')
   @Validate(RunValidation, [isSmallerThanTime, 'startTime'], {
     message: 'endTime must be greater than startTime'
