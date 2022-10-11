@@ -16,8 +16,10 @@ import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
+import { AssignSpecialistDto } from './dto/assign-specialist.dto';
 import { ServiceFilterDto } from './dto/service-filter.dto';
 import { ServiceDto } from './dto/service.dto';
+import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { ServiceSerializer } from './service.serializer';
 import { ServiceService } from './service.service';
@@ -74,5 +76,25 @@ export class ServiceController {
   }
 
   @Post(':serviceId/assign-specialist')
-  assignServiceSpecialist() {}
+  assignServiceSpecialist(
+    @Body() assignSpecialistDto: AssignSpecialistDto,
+    @Param('serviceId', ParseUUIDPipe) serviceId: string
+  ) {
+    return this.service.assignServiceSpecialist(serviceId, assignSpecialistDto);
+  }
+
+  @Put(':serviceId/assign-specialist/:specialistId')
+  updateSpecialistService(
+    @Param('serviceId', ParseUUIDPipe)
+    serviceId: string,
+    @Param('specialistId', ParseUUIDPipe)
+    specialistId: string,
+    @Body() updateAssignSpecialistDto: UpdateAssignSpecialistDto
+  ) {
+    return this.service.updateSpecialistService(
+      serviceId,
+      specialistId,
+      updateAssignSpecialistDto
+    );
+  }
 }

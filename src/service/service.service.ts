@@ -14,6 +14,8 @@ import { ServiceSerializer } from './service.serializer';
 import { difference } from 'lodash';
 import { SpecialistRepository } from 'src/specialist/specialist.repository';
 import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
+import { AssignSpecialistDto } from './dto/assign-specialist.dto';
+import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
 
 interface ICheckIds {
   userId: number;
@@ -209,6 +211,7 @@ export class ServiceService {
       additionalTime: number;
       startTime: string | null;
       endTime: string | null;
+      status?: boolean;
     }
   ) {
     const { additionalTime, startTime, endTime } = serviceSpecialistData;
@@ -278,5 +281,67 @@ export class ServiceService {
       );
     }
     return specialistServiceDetail;
+  }
+
+  async assignServiceSpecialist(
+    serviceId: string,
+    assignSpecialistDto: AssignSpecialistDto
+  ) {
+    const service = await this.repository.findOne(serviceId, {
+      relations: ['specialists']
+    });
+    const serviceSpecialistIds = service.specialists.map(
+      (specialist) => specialist.id
+    );
+    for (const specialistId of assignSpecialistDto.specialistIds) {
+      if (serviceSpecialistIds.includes(specialistId)) {
+        throw new BadRequestException(
+          'One of the specialist has already been assigned to the service'
+        );
+      }
+    }
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const manager = queryRunner.manager;
+      await this.assignSpecialistToService(manager, service, {
+        specialistIds: assignSpecialistDto.specialistIds ?? [],
+        additionalTime: assignSpecialistDto.additionalTime ?? 0,
+        startTime: assignSpecialistDto.startTime ?? null,
+        endTime: assignSpecialistDto.endTime ?? null,
+        status: assignSpecialistDto.status ?? true
+      });
+      await queryRunner.commitTransaction();
+      return this.repository.transform(service);
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updateSpecialistService(
+    serviceId: string,
+    specialistId: string,
+    updateAssignSpecialistDto: UpdateAssignSpecialistDto
+  ) {
+    try {
+      const manager = this.connection.manager;
+      const serviceSpecialist = await manager.findOne(ServiceSpecialistEntity, {
+        serviceId,
+        specialistId
+      });
+      manager.merge(
+        ServiceSpecialistEntity,
+        serviceSpecialist,
+        updateAssignSpecialistDto
+      );
+      await manager.save(serviceSpecialist);
+      return serviceSpecialist;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
