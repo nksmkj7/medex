@@ -66,7 +66,8 @@ export class ScheduleService {
     await queryRunner.startTransaction();
     const dates = daysOfTheMonth({
       year,
-      month,
+      startDate: dayjs(startDate),
+      endDate: dayjs(endDate),
       holidays: serviceHolidays.map((holiday) => weekDays.indexOf(holiday))
     });
     try {

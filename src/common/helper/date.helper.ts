@@ -4,17 +4,28 @@ import { v4 as uuidv4 } from 'uuid';
 dayjs.extend(duration);
 
 export const daysOfTheMonth = (
-  dateObj: { year?: number; month: number; holidays?: number[] },
+  dateObj: {
+    year?: number;
+    // month: number;
+    holidays?: number[];
+    startDate: dayjs.Dayjs;
+    endDate: dayjs.Dayjs;
+  },
   format = 'YYYY-MM-DD'
 ) => {
-  let { year, month, holidays = [] } = dateObj;
-  month += 1;
+  let { year, startDate, endDate, holidays = [] } = dateObj;
+  // month is always one less than expected. 0 for jan and 11 for dec
+  const month = dayjs(startDate).month();
   year = year ?? dayjs().year();
   const startOfMonth = dayjs(`${year}-${month}`, 'YYYY-M').startOf('month');
   const endOfMonth = dayjs(`${year}-${month}`, 'YYYY-M').endOf('month');
-  let startDate = dayjs(`${year}-${month}-${startOfMonth.date()}`, 'YYYY-M-D');
-  const endDate = dayjs(`${year}-${month}-${endOfMonth.date()}`, 'YYYY-M-D');
-  let days = [startDate.format(format)];
+  startDate =
+    startDate ?? dayjs(`${year}-${month}-${startOfMonth.date()}`, 'YYYY-M-D');
+  endDate =
+    endDate ?? dayjs(`${year}-${month}-${endOfMonth.date()}`, 'YYYY-M-D');
+  let days = [];
+  if (!isHoliday(holidays, startDate.day()))
+    days.push(startDate.format(format));
   while (!startDate.isSame(endDate)) {
     startDate = startDate.add(1, 'day');
     if (isHoliday(holidays, startDate.day())) {
