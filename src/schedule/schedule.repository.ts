@@ -28,21 +28,17 @@ export class ScheduleRepository extends BaseRepository<
   async getSchedulesForMonth(
     serviceId: string,
     specialistId: string,
-    month: number
+    month: number,
+    year = dayjs().year()
   ) {
-    const currentYear = dayjs().year();
-    const startOfMonth = dayjs(`${currentYear}-${month}`, 'YYYY-M').startOf(
-      'month'
-    );
-    const endOfMonth = dayjs(`${currentYear}-${month}`, 'YYYY-M').endOf(
-      'month'
-    );
+    const startOfMonth = dayjs(`${year}-${month}`, 'YYYY-M').startOf('month');
+    const endOfMonth = dayjs(`${year}-${month}`, 'YYYY-M').endOf('month');
     const startDate = dayjs(
-      `${currentYear}-${month}-${startOfMonth.date()}`,
+      `${year}-${month}-${startOfMonth.date()}`,
       'YYYY-M-D'
     ).format('YYYY-MM-DD');
     const endDate = dayjs(
-      `${currentYear}-${month}-${endOfMonth.date()}`,
+      `${year}-${month}-${endOfMonth.date()}`,
       'YYYY-M-D'
     ).format('YYYY-MM-DD');
     return this.find({

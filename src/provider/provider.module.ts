@@ -18,6 +18,7 @@ import { ServiceRepository } from 'src/service/service.repository';
     IsValidForeignKey
   ],
   controllers: [ProviderController],
-  providers: [ProviderService, ProviderRepository]
+  providers: [ProviderService, ProviderRepository],
+  exports: [ProviderService]
 })
 export class ProviderModule {}

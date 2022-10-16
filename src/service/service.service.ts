@@ -148,7 +148,6 @@ export class ServiceService {
       await queryRunner.commitTransaction();
       return this.repository.transform(updatedService);
     } catch (error) {
-      console.log(error);
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
@@ -341,7 +340,7 @@ export class ServiceService {
       await manager.save(serviceSpecialist);
       return serviceSpecialist;
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   }
 }

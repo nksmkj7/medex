@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Put
@@ -30,6 +31,7 @@ export class ScheduleController {
     return this.service.serviceSpecialistSchedules(serviceId, specialistId);
   }
 
+  //get schedule of specific date
   @Get(':serviceId/:specialistId/:date')
   getServiceSpecialistDateSchedules(
     @Param('serviceId', ParseUUIDPipe) serviceId: string,
@@ -57,6 +59,22 @@ export class ScheduleController {
       date,
       scheduleId,
       updateScheduleDto
+    );
+  }
+
+  //get schedule of specific month
+  @Get(':serviceId/:specialistId/year/:year/month/:month')
+  getServiceSpecialistMonthSchedules(
+    @Param('serviceId', ParseUUIDPipe) serviceId: string,
+    @Param('specialistId', ParseUUIDPipe) specialistId: string,
+    @Param('month', ParseIntPipe) month: number,
+    @Param('year', ParseIntPipe) year: number
+  ) {
+    return this.service.serviceSpecialistMonthSchedules(
+      serviceId,
+      specialistId,
+      month,
+      year
     );
   }
 }

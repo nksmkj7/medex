@@ -6,6 +6,7 @@ import { ServiceRepository } from 'src/service/service.repository';
 import { SpecialistRepository } from 'src/specialist/specialist.repository';
 import { ScheduleRepository } from './schedule.repository';
 import { ServiceModule } from 'src/service/service.module';
+import { ProviderModule } from 'src/provider/provider.module';
 
 @Module({
   providers: [ScheduleService],
@@ -16,7 +17,8 @@ import { ServiceModule } from 'src/service/service.module';
       SpecialistRepository,
       ScheduleRepository
     ]),
-    ServiceModule
+    ServiceModule,
+    ProviderModule
   ]
 })
 export class ScheduleModule {}

@@ -4,10 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 dayjs.extend(duration);
 
 export const daysOfTheMonth = (
-  dateObj: { year?: number; month: number },
+  dateObj: { year?: number; month: number; holidays?: number[] },
   format = 'YYYY-MM-DD'
 ) => {
-  let { year, month } = dateObj;
+  let { year, month, holidays = [] } = dateObj;
+  month += 1;
   year = year ?? dayjs().year();
   const startOfMonth = dayjs(`${year}-${month}`, 'YYYY-M').startOf('month');
   const endOfMonth = dayjs(`${year}-${month}`, 'YYYY-M').endOf('month');
@@ -16,10 +17,16 @@ export const daysOfTheMonth = (
   let days = [startDate.format(format)];
   while (!startDate.isSame(endDate)) {
     startDate = startDate.add(1, 'day');
+    if (isHoliday(holidays, startDate.day())) {
+      continue;
+    }
     days.push(startDate.format(format));
   }
   return days;
 };
+
+const isHoliday = (holidays: number[], currentDay: number) =>
+  holidays.includes(currentDay);
 
 export const getTimeFn = (time: string, additionalTime = 0) => {
   const hours = Number(time.split(':')[0]);

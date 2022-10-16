@@ -19,6 +19,8 @@ import { ISchedule, ScheduleEntity } from './entity/schedule.entity';
 import { ScheduleRepository } from './schedule.repository';
 import * as dayjs from 'dayjs';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { ProviderService } from 'src/provider/provider.service';
+import { weekDays } from 'src/common/constants/weekdays.constants';
 
 @Injectable()
 export class ScheduleService {
@@ -27,11 +29,12 @@ export class ScheduleService {
     private readonly serviceRepository: ServiceRepository,
     private readonly specialistRepository: SpecialistRepository,
     private readonly serviceService: ServiceService,
+    private readonly providerService: ProviderService,
     @InjectConnection() private readonly connection: Connection
   ) {}
 
   async generateSchedules(generateScheduleDto: AutoGenerateScheduleDto) {
-    const { serviceId, specialistId, month } = generateScheduleDto;
+    const { serviceId, specialistId, startDate, endDate } = generateScheduleDto;
     const validServiceSpecialist = await this.checkIfValidServiceSpecialist(
       serviceId,
       specialistId
@@ -39,6 +42,12 @@ export class ScheduleService {
     if (!validServiceSpecialist) {
       throw new BadRequestException('Invalid service ID or specialist ID');
     }
+
+    //month is always one less than expected. 0 for jan and 11 for dec
+    const month = dayjs(startDate).month();
+
+    const year = dayjs(startDate).year();
+
     const schedulesOfTheMonth = await this.repository.getSchedulesForMonth(
       serviceId,
       specialistId,
@@ -51,11 +60,15 @@ export class ScheduleService {
     }
     const { additionalTime, startTime, endTime, durationInMinutes } =
       await this.serviceService.getSpecialistService(serviceId, specialistId);
+    const serviceHolidays = await this.getServiceHolidays(serviceId);
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    const dates = daysOfTheMonth({ month });
-
+    const dates = daysOfTheMonth({
+      year,
+      month,
+      holidays: serviceHolidays.map((holiday) => weekDays.indexOf(holiday))
+    });
     try {
       const manager = queryRunner.manager;
       const schedules = await Promise.all(
@@ -197,5 +210,24 @@ export class ScheduleService {
       ? endTimeNumber < convertTimeToNumber(nextSchedule.startTime)
       : true;
     return prevTimeStatus && nextTimeStatus;
+  }
+
+  async serviceSpecialistMonthSchedules(
+    serviceId: string,
+    specialistId: string,
+    month: number,
+    year?: number
+  ) {
+    return this.repository.getSchedulesForMonth(
+      serviceId,
+      specialistId,
+      month,
+      year
+    );
+  }
+
+  async getServiceHolidays(serviceId: string) {
+    const service = await this.serviceRepository.findOneOrFail(serviceId);
+    return this.providerService.providerWeekHolidays(service.userId);
   }
 }
