@@ -145,7 +145,8 @@ export class ScheduleService {
     scheduleId: string,
     updateScheduleDto: DeepPartial<UpdateScheduleDto>
   ) {
-    let { startTime, endTime, additionalTime } = updateScheduleDto;
+    let { startTime, endTime } = updateScheduleDto;
+    let additionalTime = 0;
     endTime = getTimeFn(endTime, additionalTime);
     if (!dayjs(date, 'YYYY-MM-DD').isValid()) {
       throw new BadRequestException(
@@ -205,10 +206,10 @@ export class ScheduleService {
     const prevSchedule = schedules[scheduleIndex - 1] ?? null;
     const nextSchedule = schedules[scheduleIndex + 1] ?? null;
     let prevTimeStatus = prevSchedule
-      ? startTimeNumber > convertTimeToNumber(prevSchedule.endTime)
+      ? startTimeNumber >= convertTimeToNumber(prevSchedule.endTime)
       : true;
     let nextTimeStatus = nextSchedule
-      ? endTimeNumber < convertTimeToNumber(nextSchedule.startTime)
+      ? endTimeNumber <= convertTimeToNumber(nextSchedule.startTime)
       : true;
     return prevTimeStatus && nextTimeStatus;
   }

@@ -22,13 +22,13 @@ export class UpdateScheduleDto {
   })
   endTime: string;
 
-  @ApiProperty({
-    description: 'Additional time in minutes'
-  })
-  @IsNotEmpty()
-  @IsInt()
-  @Min(0, {
-    message: 'min-{"ln":0,"count":0}'
-  })
-  additionalTime: number;
+  // @ApiProperty({
+  //   description: 'Additional time in minutes'
+  // })
+  // @IsNotEmpty()
+  // @IsInt()
+  // @Min(0, {
+  //   message: 'min-{"ln":0,"count":0}'
+  // })
+  // additionalTime: number;
 }
