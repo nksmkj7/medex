@@ -362,9 +362,13 @@ export class ServiceService {
       limit = 4
     } = categoryProviderServiceDto;
     const query = this.connection.createQueryBuilder(ServiceEntity, 'service');
-    query.where(`service.categoryId=:categoryId`, {
-      categoryId
-    });
+    query
+      .where(`service.categoryId=:categoryId`, {
+        categoryId
+      })
+      .andWhere('service.status = :status', {
+        status: true
+      });
     if (subCategoryId) {
       query.andWhere('service.subCategoryId = :subCategoryId', {
         subCategoryId
@@ -391,6 +395,10 @@ export class ServiceService {
         'service.title as title',
         'service.price as price',
         'service.userId as provider_id',
+        'service.durationInMinutes as duration_in_minutes',
+        'service.description as description',
+        'service.discount as discount',
+        'service.serviceCharge as service_charge',
         'provider.companyName as company_name',
         'ROW_NUMBER() OVER (PARTITION BY service.userId)'
       ])
