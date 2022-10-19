@@ -11,16 +11,23 @@ import { ServiceEntity } from './entity/service.entity';
 import { ServiceSpecialistEntity } from './entity/specialist-service.entity';
 import { ServiceRepository } from './service.repository';
 import { ServiceSerializer } from './service.serializer';
-import { difference } from 'lodash';
+import { omit } from 'lodash';
 import { SpecialistRepository } from 'src/specialist/specialist.repository';
 import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 import { AssignSpecialistDto } from './dto/assign-specialist.dto';
 import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
+import { CategoryProviderServiceDto } from './dto/category-provider-service.dto';
 
 interface ICheckIds {
   userId: number;
   categoryId: string;
   subCategoryId?: string;
+}
+
+export interface IProviderWithService {
+  provider_id: number;
+  company_name: string;
+  [index: string]: string | number;
 }
 
 export class ServiceService {
@@ -342,5 +349,114 @@ export class ServiceService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async getProviderService(
+    categoryProviderServiceDto: CategoryProviderServiceDto
+  ) {
+    const {
+      categoryId,
+      subCategoryId,
+      keywords,
+      page = 1,
+      limit = 4
+    } = categoryProviderServiceDto;
+    const query = this.connection.createQueryBuilder(ServiceEntity, 'service');
+    query.where(`service.categoryId=:categoryId`, {
+      categoryId
+    });
+    if (subCategoryId) {
+      query.andWhere('service.subCategoryId = :subCategoryId', {
+        subCategoryId
+      });
+    }
+    const offset = (page - 1) * limit;
+    const totalCategoryAssociatedProvidersCount = await query
+      .clone()
+      .select('COUNT (DISTINCT service.userId)')
+      .getRawOne();
+    let categoryAssociatedProviders = await query
+      .clone()
+      .select('distinct service.userId')
+      .offset(offset)
+      .limit(limit)
+      .getRawMany();
+    categoryAssociatedProviders = categoryAssociatedProviders.map(
+      (provider) => provider.userId
+    );
+
+    const subQuery = query
+      .clone()
+      .select([
+        'service.title as title',
+        'service.price as price',
+        'service.userId as provider_id',
+        'provider.companyName as company_name',
+        'ROW_NUMBER() OVER (PARTITION BY service.userId)'
+      ])
+      .leftJoin(
+        'provider_informations',
+        'provider',
+        'provider.userId = service.userId'
+      )
+      .andWhere('service.userId In (:...users)', {
+        users: [...categoryAssociatedProviders]
+      });
+
+    const providerWithService = await this.connection
+      .createQueryBuilder()
+      .from('(' + subQuery.getQuery() + ')', 'ss')
+      .setParameters(subQuery.getParameters())
+      .select('*')
+      .andWhere('ss."row_number" < :number', {
+        number: 4
+      })
+      .getRawMany();
+
+    return {
+      results: this.groupProviderWithService(providerWithService),
+      totalItems: +totalCategoryAssociatedProvidersCount?.count ?? 0,
+      pageSize: limit,
+      currentPage: page,
+      previous: page > 1 ? page - 1 : 0,
+      next:
+        +totalCategoryAssociatedProvidersCount.count > offset + limit
+          ? page + 1
+          : 0
+    };
+  }
+
+  groupProviderWithService(providerWithService: IProviderWithService[]) {
+    const getFormattedData = (data: IProviderWithService) => {
+      return omit(data, ['row_number', 'provider_id', 'company_name']);
+    };
+    return providerWithService.reduce(
+      (
+        prevValue: {
+          company_name: string;
+          provider_id: number;
+          services: { [index: string]: string }[];
+        }[],
+        currentValue: IProviderWithService
+      ) => {
+        let currentProvider =
+          prevValue.length > 0
+            ? prevValue.find(
+                (value) => value.provider_id === currentValue.provider_id
+              )
+            : null;
+        if (!currentProvider) {
+          prevValue.push({
+            company_name: currentValue.company_name,
+            provider_id: currentValue.provider_id,
+            services: [getFormattedData(currentValue)]
+          });
+        } else {
+          currentProvider.services.push(getFormattedData(currentValue));
+        }
+        return prevValue;
+      },
+      []
+    );
   }
 }

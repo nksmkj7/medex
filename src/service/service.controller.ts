@@ -11,12 +11,14 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 import { AssignSpecialistDto } from './dto/assign-specialist.dto';
+import { CategoryProviderServiceDto } from './dto/category-provider-service.dto';
 import { ServiceFilterDto } from './dto/service-filter.dto';
 import { ServiceDto } from './dto/service.dto';
 import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
@@ -50,6 +52,15 @@ export class ServiceController {
     @Body() updateServiceDto: UpdateServiceDto
   ): Promise<ServiceSerializer> {
     return this.service.update(id, updateServiceDto);
+  }
+
+  @ApiTags('Public')
+  @Public()
+  @Get('category-provider')
+  getProviderServiceByCategoryId(
+    @Query() categoryProviderServiceDto: CategoryProviderServiceDto
+  ) {
+    return this.service.getProviderService(categoryProviderServiceDto);
   }
 
   @Get(':id')
