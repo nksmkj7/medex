@@ -125,4 +125,7 @@ export class ProviderController {
   ) {
     return this.providerService.dayStartEndTime(id, day);
   }
+
+  // @Post(':id/banners')
+  // storeProviderBanners(@Param(id)) {}
 }
