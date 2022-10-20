@@ -17,7 +17,7 @@ import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { RoleEntity } from 'src/role/entities/role.entity';
 import { ProviderInformationEntity } from 'src/provider/entity/provider-information.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
-import { ProviderBannerEntity } from 'src/provider-banner/entity/provider-banner.entity';
+import { ProviderBannerEntity } from 'src/provider/entity/provider-banner.entity';
 
 /**
  * User Entity
@@ -144,6 +144,9 @@ export class UserEntity extends CustomBaseEntity {
   @OneToMany(() => ServiceEntity, (service) => service.user)
   services: ServiceEntity[];
 
-  @OneToMany(() => ProviderBannerEntity, (banner) => banner.provider)
-  banners: ProviderBannerEntity[];
+  @OneToMany(
+    () => ProviderBannerEntity,
+    (providerBanner) => providerBanner.user
+  )
+  providerBanners: ProviderBannerEntity[];
 }

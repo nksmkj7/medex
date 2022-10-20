@@ -7,6 +7,8 @@ import { BaseRepository } from 'src/common/repository/base.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from 'src/auth/user.repository';
 import { NotFoundException } from '@nestjs/common';
+import { ProviderBannerEntity } from './entity/provider-banner.entity';
+import { ProviderBannerSerializer } from './serializer/provider-banner.serializer';
 
 @EntityRepository(ProviderInformationEntity)
 export class ProviderRepository extends BaseRepository<
@@ -77,5 +79,25 @@ export class ProviderRepository extends BaseRepository<
     });
     if (!user) throw new NotFoundException();
     return this.userRepository.transform(user, { groups: ['admin'] });
+  }
+
+  transformProviderBanner(
+    model: ProviderBannerEntity,
+    transformOption = {}
+  ): ProviderBannerSerializer {
+    return plainToClass(
+      ProviderBannerSerializer,
+      classToPlain(model, transformOption),
+      transformOption
+    );
+  }
+
+  transformManyProviderBanner(
+    models: ProviderBannerEntity[],
+    transformOption = {}
+  ): ProviderBannerSerializer[] {
+    return models.map((model) =>
+      this.transformProviderBanner(model, transformOption)
+    );
   }
 }

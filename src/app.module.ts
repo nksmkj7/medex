@@ -41,7 +41,6 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { CustomerController } from './customer/customer.controller';
 import { CustomerService } from './customer/customer.service';
 import { CustomerModule } from './customer/customer.module';
-import { ProviderBannerModule } from './provider-banner/provider-banner.module';
 
 const appConfig = config.get('app');
 
@@ -92,8 +91,7 @@ const appConfig = config.get('app');
     SpecialistModule,
     ServiceModule,
     ScheduleModule,
-    CustomerModule,
-    ProviderBannerModule
+    CustomerModule
   ],
   providers: [
     {

@@ -26,6 +26,11 @@ export class ProviderBannerTable1666257550023 implements MigrationInterface {
             isNullable: false
           },
           {
+            name: 'link',
+            type: 'varchar',
+            isNullable: true
+          },
+          {
             name: 'status',
             type: 'boolean',
             default: true

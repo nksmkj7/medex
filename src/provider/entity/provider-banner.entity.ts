@@ -1,7 +1,10 @@
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
-import { Column, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
+@Entity({
+  name: 'provider_banners'
+})
 export class ProviderBannerEntity extends CustomBaseEntity {
   @Column('int', {
     nullable: false,
@@ -14,12 +17,16 @@ export class ProviderBannerEntity extends CustomBaseEntity {
   })
   image: string;
 
+  @Column('varchar', {
+    nullable: true
+  })
+  link: string;
+
   @Column('boolean', {
     default: true
   })
   status: boolean;
 
-  @ManyToOne(() => UserEntity, (user) => user.banners)
-  //   @JoinColumn({ name: 'userId' })
-  provider: UserEntity;
+  @ManyToOne(() => UserEntity, (user) => user.providerBanners)
+  user: UserEntity[];
 }

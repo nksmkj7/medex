@@ -25,6 +25,10 @@ import { ServiceRepository } from 'src/service/service.repository';
 import { weekDays } from 'src/common/constants/weekdays.constants';
 import { NotFoundException } from 'src/exception/not-found.exception';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
+import { ProviderBannerDto } from './dto/provider-banner.dto';
+import { ProviderBannerEntity } from './entity/provider-banner.entity';
+import { Multer } from 'multer';
+import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 
 @Injectable()
 export class ProviderService {
@@ -270,5 +274,70 @@ export class ProviderService {
         ...defaultUserGroupsForSerializing
       ]
     });
+  }
+
+  async saveBanner(
+    id: number,
+    providerBannerDto: ProviderBannerDto,
+    file: Express.Multer.File
+  ) {
+    const provider = await this.userRepository.get(id, ['role'], {
+      groups: [...ownerUserGroupsForSerializing]
+    });
+    if (!provider || provider.role.name !== 'provider') {
+      throw new BadRequestException('Provider not found');
+    }
+
+    const banner = this.connection.manager.create(ProviderBannerEntity, {
+      userId: id,
+      image: file.filename,
+      status: providerBannerDto.status ?? true,
+      link: providerBannerDto.link
+    });
+    await banner.save();
+    return this.providerRepository.transformProviderBanner(banner);
+  }
+
+  async providerBanners(id: number, findOptions = {}) {
+    const banners = await this.connection.manager.find(ProviderBannerEntity, {
+      where: {
+        userId: id,
+        ...findOptions
+      }
+    });
+    return this.providerRepository.transformManyProviderBanner(banners);
+  }
+
+  async removeProviderBanner(id: number, bannerId: string) {
+    const banner = await this.connection.manager.findOneOrFail(
+      ProviderBannerEntity,
+      {
+        where: {
+          userId: id,
+          id: bannerId
+        }
+      }
+    );
+    return banner.remove();
+  }
+
+  async updateProviderBanner(
+    id: number,
+    bannerId: string,
+    updateProviderBannerDto: UpdateProviderBannerDto
+  ) {
+    const { link, status } = updateProviderBannerDto;
+    const banner = await this.connection.manager.findOneOrFail(
+      ProviderBannerEntity,
+      {
+        where: {
+          userId: id,
+          id: bannerId
+        }
+      }
+    );
+    banner.link = link;
+    banner.status = status;
+    return banner.save();
   }
 }

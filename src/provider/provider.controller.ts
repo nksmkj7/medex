@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -14,14 +16,17 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { ObjectLiteral } from 'typeorm';
+import { ProviderBannerDto } from './dto/provider-banner.dto';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import { RegisterProviderDto } from './dto/register-provider.dto';
+import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
 import { ProviderService } from './provider.service';
 
@@ -126,6 +131,54 @@ export class ProviderController {
     return this.providerService.dayStartEndTime(id, day);
   }
 
-  // @Post(':id/banners')
-  // storeProviderBanners(@Param(id)) {}
+  @Post(':id/banners')
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      multerOptionsHelper('public/images/provider-banners', 1000000, true)
+    )
+  )
+  @ApiConsumes('multipart/form-data')
+  storeProviderBanner(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile()
+    file: Express.Multer.File,
+    @Body()
+    providerBannerDto: ProviderBannerDto
+  ) {
+    return this.providerService.saveBanner(id, providerBannerDto, file);
+  }
+
+  @Get(':id/banners')
+  getProviderBanners(@Param('id', ParseIntPipe) id: number) {
+    return this.providerService.providerBanners(id);
+  }
+
+  @Delete(':id/banners/:bannerId')
+  deleteProviderBanner(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('bannerId', ParseUUIDPipe) bannerId: string
+  ) {
+    return this.providerService.removeProviderBanner(id, bannerId);
+  }
+
+  @Put(':id/banners/:bannerId')
+  editProviderBanner(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('bannerId', ParseUUIDPipe) bannerId: string,
+    @Body() updateProviderBannerDto: UpdateProviderBannerDto
+  ) {
+    return this.providerService.updateProviderBanner(
+      id,
+      bannerId,
+      updateProviderBannerDto
+    );
+  }
+
+  @Public()
+  @ApiTags('Public')
+  @Get(':providerId/banners-list')
+  activeProviderBanners(@Param('providerId', ParseIntPipe) providerId: number) {
+    return this.providerService.providerBanners(providerId, { status: true });
+  }
 }
