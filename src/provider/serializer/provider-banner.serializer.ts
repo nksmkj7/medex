@@ -25,6 +25,9 @@ export class ProviderBannerSerializer extends ModelSerializer {
   status: boolean;
 
   @ApiProperty()
+  isFeatured: boolean;
+
+  @ApiProperty()
   @Exclude({
     toClassOnly: true
   })

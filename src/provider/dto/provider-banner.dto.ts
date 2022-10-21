@@ -25,5 +25,14 @@ export class ProviderBannerDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true')
   @IsBoolean()
+  isFeatured: boolean;
+
+  @ApiPropertyOptional({
+    type: 'boolean',
+    default: true
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
   status: boolean;
 }

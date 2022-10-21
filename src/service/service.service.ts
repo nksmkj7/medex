@@ -17,6 +17,9 @@ import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 import { AssignSpecialistDto } from './dto/assign-specialist.dto';
 import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
 import { CategoryProviderServiceDto } from './dto/category-provider-service.dto';
+import { ProviderBannerEntity } from 'src/provider/entity/provider-banner.entity';
+import * as config from 'config';
+const appConfig = config.get('app');
 
 interface ICheckIds {
   userId: number;
@@ -27,6 +30,12 @@ interface ICheckIds {
 export interface IProviderWithService {
   provider_id: number;
   company_name: string;
+  logo?: string;
+  city?: string;
+  state?: string;
+  landmark?: string;
+  banner?: string;
+  banner_link?: string;
   [index: string]: string | number;
 }
 
@@ -400,7 +409,14 @@ export class ServiceService {
         'service.discount as discount',
         'service.serviceCharge as service_charge',
         'provider.companyName as company_name',
-        'ROW_NUMBER() OVER (PARTITION BY service.userId)'
+        'provider.businessLogo as logo',
+        'provider.businessLocation as location',
+        'provider.city as city',
+        'provider.state as state',
+        'provider.landmark as landmark',
+        'ROW_NUMBER() OVER (PARTITION BY service.userId)',
+        'provider_banner.image as banner',
+        'provider_banner.link as banner_link'
       ])
       .leftJoin(
         'provider_informations',
@@ -409,8 +425,29 @@ export class ServiceService {
       )
       .andWhere('service.userId In (:...users)', {
         users: [...categoryAssociatedProviders]
-      });
+      })
+      .leftJoin(
+        (qb) =>
+          qb
+            .select([
+              'banner.image as image',
+              'banner.link as link',
+              'banner.userId as userId'
+            ])
+            .from(ProviderBannerEntity, 'banner')
+            .distinctOn(['banner."userId"'])
+            .where('banner.userId In (:...users)', {
+              users: [...categoryAssociatedProviders]
+            })
+            .andWhere('banner.status =:status', { status: true })
+            .andWhere('banner.isFeatured =:status', { status: true })
+            .orderBy('banner.createdAt', 'DESC')
+            .orderBy('banner."userId"', 'ASC'),
+        'provider_banner',
+        'provider_banner.userId=service.userId'
+      );
 
+    // .getRawMany()
     const providerWithService = await this.connection
       .createQueryBuilder()
       .from('(' + subQuery.getQuery() + ')', 'ss')
@@ -436,13 +473,31 @@ export class ServiceService {
 
   groupProviderWithService(providerWithService: IProviderWithService[]) {
     const getFormattedData = (data: IProviderWithService) => {
-      return omit(data, ['row_number', 'provider_id', 'company_name']);
+      return omit(data, [
+        'row_number',
+        'provider_id',
+        'company_name',
+        'logo',
+        'location',
+        'city',
+        'state',
+        'landmark',
+        'banner',
+        'banner_link'
+      ]);
     };
     return providerWithService.reduce(
       (
         prevValue: {
           company_name: string;
           provider_id: number;
+          logo?: string;
+          location?: string;
+          city?: string;
+          state?: string;
+          landmark?: string;
+          banner?: string;
+          banner_link?: string;
           services: { [index: string]: string }[];
         }[],
         currentValue: IProviderWithService
@@ -457,6 +512,16 @@ export class ServiceService {
           prevValue.push({
             company_name: currentValue.company_name,
             provider_id: currentValue.provider_id,
+            logo: currentValue.logo
+              ? `${appConfig.appUrl}/images/logos/${currentValue.logo}`
+              : null,
+            city: currentValue.city,
+            state: currentValue.state,
+            landmark: currentValue.landmark,
+            banner: currentValue.banner
+              ? `${appConfig.appUrl}/images/provider-banners/${currentValue.banner}`
+              : null,
+            banner_link: currentValue.banner_link,
             services: [getFormattedData(currentValue)]
           });
         } else {

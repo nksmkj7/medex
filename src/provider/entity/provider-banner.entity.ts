@@ -27,6 +27,11 @@ export class ProviderBannerEntity extends CustomBaseEntity {
   })
   status: boolean;
 
+  @Column('boolean', {
+    default: true
+  })
+  isFeatured: boolean;
+
   @ManyToOne(() => UserEntity, (user) => user.providerBanners)
   user: UserEntity[];
 }
