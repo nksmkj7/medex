@@ -163,16 +163,34 @@ export class ProviderController {
   }
 
   @Put(':id/banners/:bannerId')
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      multerOptionsHelper('public/images/provider-banners', 1000000, true)
+    )
+  )
+  @ApiConsumes('multipart/form-data')
   editProviderBanner(
     @Param('id', ParseIntPipe) id: number,
     @Param('bannerId', ParseUUIDPipe) bannerId: string,
+    @UploadedFile()
+    file: Express.Multer.File,
     @Body() updateProviderBannerDto: UpdateProviderBannerDto
   ) {
     return this.providerService.updateProviderBanner(
       id,
       bannerId,
-      updateProviderBannerDto
+      updateProviderBannerDto,
+      file
     );
+  }
+
+  @Get(':id/banners/:bannerId')
+  getBannerDetail(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('bannerId', ParseUUIDPipe) bannerId: string
+  ) {
+    return this.providerService.getProviderBanner(id, bannerId);
   }
 
   @Public()

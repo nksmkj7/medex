@@ -17,7 +17,7 @@ export const defaultUserGroupsForSerializing: string[] = ['timestamps'];
 export class ProviderBannerSerializer extends ModelSerializer {
   @ApiProperty()
   @Transform(({ value }) =>
-    value ? `${appConfig.appUrl}/images/provider-banner/${value}` : null
+    value ? `${appConfig.appUrl}/images/provider-banners/${value}` : null
   )
   image: string;
 

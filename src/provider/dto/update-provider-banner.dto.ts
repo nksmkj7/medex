@@ -1,6 +1,4 @@
 import { OmitType } from '@nestjs/swagger';
 import { ProviderBannerDto } from './provider-banner.dto';
 
-export class UpdateProviderBannerDto extends OmitType(ProviderBannerDto, [
-  'image'
-]) {}
+export class UpdateProviderBannerDto extends ProviderBannerDto {}

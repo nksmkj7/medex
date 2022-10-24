@@ -6,7 +6,7 @@ import { UserSerializer } from 'src/auth/serializer/user.serializer';
 import { UserRepository } from 'src/auth/user.repository';
 import { Pagination } from 'src/paginate';
 import { RoleRepository } from 'src/role/role.repository';
-import { Connection, DeepPartial, EntityManager } from 'typeorm';
+import { Connection, DeepPartial, EntityManager, FindOperator } from 'typeorm';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import {
   ProviderInformationEntity,
@@ -287,12 +287,18 @@ export class ProviderService {
     if (!provider || provider.role.name !== 'provider') {
       throw new BadRequestException('Provider not found');
     }
-
     const banner = this.connection.manager.create(ProviderBannerEntity, {
       userId: id,
       image: file.filename,
-      status: providerBannerDto.status ?? true,
-      link: providerBannerDto.link
+      status:
+        (providerBannerDto.status as unknown as string) === 'false'
+          ? false
+          : true,
+      link: providerBannerDto.link,
+      isFeatured:
+        (providerBannerDto.isFeatured as unknown as string) === 'false'
+          ? false
+          : true
     });
     await banner.save();
     return this.providerRepository.transformProviderBanner(banner);
@@ -324,9 +330,10 @@ export class ProviderService {
   async updateProviderBanner(
     id: number,
     bannerId: string,
-    updateProviderBannerDto: UpdateProviderBannerDto
+    updateProviderBannerDto: UpdateProviderBannerDto,
+    file: Express.Multer.File
   ) {
-    const { link, status } = updateProviderBannerDto;
+    const { link, status, isFeatured } = updateProviderBannerDto;
     const banner = await this.connection.manager.findOneOrFail(
       ProviderBannerEntity,
       {
@@ -338,6 +345,31 @@ export class ProviderService {
     );
     banner.link = link;
     banner.status = status;
-    return banner.save();
+    banner.isFeatured = isFeatured;
+    if (file) {
+      if (banner.image) {
+        const path = `public/images/provider-banners/${banner.image}`;
+        if (existsSync(path)) {
+          unlinkSync(`public/images/provider-banners/${banner.image}`);
+        }
+      }
+      banner.image = file.filename;
+    }
+    console.log(link, status, isFeatured, 'asdfasdfasdfsdaf');
+    await banner.save();
+    return this.providerRepository.transformProviderBanner(banner);
+  }
+
+  async getProviderBanner(id: number, bannerId: string) {
+    const banner = await this.connection.manager.findOneOrFail(
+      ProviderBannerEntity,
+      {
+        where: {
+          userId: id,
+          id: bannerId
+        }
+      }
+    );
+    return this.providerRepository.transformProviderBanner(banner);
   }
 }

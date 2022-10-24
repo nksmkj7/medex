@@ -396,6 +396,42 @@ export const PermissionConfiguration: PermissionConfigInterface = {
               method: MethodList.GET
             }
           ]
+        },
+        {
+          name: 'Get provider banners',
+          route: [
+            {
+              path: '/providers/:id/banners',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store provider banner',
+          route: [
+            {
+              path: '/providers/:id/banners',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update provider banners',
+          route: [
+            {
+              path: '/providers/:id/banners/:bannerId',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete provider banners',
+          route: [
+            {
+              path: '/providers/:id/banners/:bannerId',
+              method: MethodList.DELETE
+            }
+          ]
         }
       ]
     },
@@ -479,6 +515,58 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           route: [
             {
               path: '/banner/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Provider Banner management',
+      resource: 'provider-banner',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all provider banners',
+          route: [
+            {
+              path: '/provider-banner',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View provider banner by id',
+          route: [
+            {
+              path: '/provider-banner/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new provider banner',
+          route: [
+            {
+              path: '/provider-banner',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update provider banner by id',
+          route: [
+            {
+              path: '/provider-banner/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete provider banner by id',
+          route: [
+            {
+              path: '/provider-banner/:id',
               method: MethodList.DELETE
             }
           ]
@@ -703,7 +791,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           route: [
             {
               path: '/schedule/:serviceId/:specialistId',
-              method: MethodList.GET 
+              method: MethodList.GET
             }
           ]
         },

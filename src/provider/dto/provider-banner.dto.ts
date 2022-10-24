@@ -13,7 +13,8 @@ export class ProviderBannerDto {
   @ApiPropertyOptional()
   @IsOptional()
   @ValidateIf(({ link }) => {
-    return !!link;
+    if (!link) return false;
+    return true;
   })
   @IsUrl()
   link: string;
@@ -23,7 +24,12 @@ export class ProviderBannerDto {
     default: true
   })
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => {
+    if (value === 'true' || !value) {
+      return true;
+    }
+    return false;
+  })
   @IsBoolean()
   isFeatured: boolean;
 
@@ -32,7 +38,12 @@ export class ProviderBannerDto {
     default: true
   })
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => {
+    if (value === 'true' || !value) {
+      return true;
+    }
+    return false;
+  })
   @IsBoolean()
   status: boolean;
 }
