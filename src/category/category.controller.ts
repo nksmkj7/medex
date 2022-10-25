@@ -13,7 +13,8 @@ import {
   Query,
   UploadedFile,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
+  Headers
 } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
@@ -63,9 +64,10 @@ export class CategoryController {
   @Get()
   findAll(
     @Query()
-    categoryFilterDto: CategoryFilterDto
+    categoryFilterDto: CategoryFilterDto,
+    @Headers('referer') referer: string
   ): Promise<Pagination<CategorySerializer>> {
-    return this.categoryService.findAll(categoryFilterDto);
+    return this.categoryService.findAll(categoryFilterDto, referer);
   }
 
   @Get('active')

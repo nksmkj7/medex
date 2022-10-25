@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -55,12 +56,14 @@ export class BannerController {
   }
 
   @Public()
+  @ApiTags('Public')
   @Get()
   findAll(
     @Query()
-    BannerFilterDto: BannerFilterDto
+    BannerFilterDto: BannerFilterDto,
+    @Headers('referer') referer: string
   ): Promise<Pagination<BannerSerializer>> {
-    return this.bannerService.findAll(BannerFilterDto);
+    return this.bannerService.findAll(BannerFilterDto, referer);
   }
 
   @Get(':id')

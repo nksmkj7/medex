@@ -12,6 +12,10 @@ import { BannerRepository } from './banner.repository';
 import { BannerFilterDto } from './dto/banner-filter.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 
+import * as config from 'config';
+
+const appConfig = config.get('app');
+
 @Injectable()
 export class BannerService implements CommonServiceInterface<BannerSerializer> {
   constructor(
@@ -24,12 +28,19 @@ export class BannerService implements CommonServiceInterface<BannerSerializer> {
   }
 
   async findAll(
-    bannerFilterDto: BannerFilterDto
+    bannerFilterDto: BannerFilterDto,
+    referer?: string
   ): Promise<Pagination<BannerSerializer>> {
+    let searchCriteria = {};
+    if (referer == appConfig.frontendUrl) {
+      searchCriteria['status'] = true;
+    }
     return this.repository.paginate(
       bannerFilterDto,
       [],
-      ['title', 'seoDescription', 'link']
+      ['title', 'seoDescription', 'link'],
+      {},
+      searchCriteria
     );
   }
 

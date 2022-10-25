@@ -10,6 +10,9 @@ import { CategoryFilterDto } from './dto/category-filter.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entity/category.entity';
 import { existsSync, unlinkSync } from 'fs';
+import * as config from 'config';
+
+const appConfig = config.get('app');
 
 @Injectable()
 export class CategoryService {
@@ -36,7 +39,8 @@ export class CategoryService {
   }
 
   async findAll(
-    categoryFilterDto: CategoryFilterDto
+    categoryFilterDto: CategoryFilterDto,
+    referer?: string
   ): Promise<Pagination<CategorySerializer>> {
     const { mode } = categoryFilterDto;
     const searchCriteria = {};
@@ -46,6 +50,10 @@ export class CategoryService {
       } else {
         searchCriteria['parentId'] = Not(IsNull());
       }
+    }
+    console.log(referer, appConfig.frontendUrl);
+    if (referer === appConfig.frontendUrl) {
+      searchCriteria['status'] = true;
     }
     return this.repository.paginate(
       categoryFilterDto,

@@ -12,7 +12,8 @@ import {
   Query,
   UploadedFile,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
+  Headers
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
@@ -55,12 +56,14 @@ export class PackageController {
   }
 
   @Public()
+  @ApiTags('Public')
   @Get()
   findAll(
     @Query()
-    PackageFilterDto: PackageFilterDto
+    PackageFilterDto: PackageFilterDto,
+    @Headers('referer') referer: string
   ): Promise<Pagination<PackageSerializer>> {
-    return this.packageService.findAll(PackageFilterDto);
+    return this.packageService.findAll(PackageFilterDto, referer);
   }
 
   @Get(':id')

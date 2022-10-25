@@ -79,8 +79,13 @@ export class ServiceService {
   }
 
   async findAll(
-    serviceFilterDto: ServiceFilterDto
+    serviceFilterDto: ServiceFilterDto,
+    referer?: string
   ): Promise<Pagination<ServiceSerializer>> {
+    let searchCriteria = {};
+    if (referer == appConfig.frontendUrl) {
+      searchCriteria['status'] = true;
+    }
     const { keywords } = serviceFilterDto;
     let relationalSearchCriteria = {};
     if (keywords) {
@@ -102,9 +107,7 @@ export class ServiceService {
       ['user', 'category', 'subCategory'],
       ['title'],
       {},
-      {
-        status: true
-      },
+      searchCriteria,
       relationalSearchCriteria
     );
   }

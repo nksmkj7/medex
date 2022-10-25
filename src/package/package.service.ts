@@ -12,6 +12,10 @@ import { PackageRepository } from './package.repository';
 import { PackageFilterDto } from './dto/package-filter.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 
+import * as config from 'config';
+
+const appConfig = config.get('app');
+
 @Injectable()
 export class PackageService
   implements CommonServiceInterface<PackageSerializer>
@@ -26,12 +30,19 @@ export class PackageService
   }
 
   async findAll(
-    packageFilterDto: PackageFilterDto
+    packageFilterDto: PackageFilterDto,
+    referer?: string
   ): Promise<Pagination<PackageSerializer>> {
+    let searchCriteria = {};
+    if (referer == appConfig.frontendUrl) {
+      searchCriteria['status'] = true;
+    }
     return this.repository.paginate(
       packageFilterDto,
       [],
-      ['title', 'seoDescription', 'link']
+      ['title', 'seoDescription', 'link'],
+      {},
+      searchCriteria
     );
   }
 

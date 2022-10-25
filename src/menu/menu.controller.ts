@@ -12,7 +12,8 @@ import {
   Put,
   Query,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
+  Headers
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -41,12 +42,14 @@ export class MenuController {
   }
 
   @Public()
+  @ApiTags('Public')
   @Get()
   findAll(
     @Query()
-    menuFilterDto: MenuFilterDto
+    menuFilterDto: MenuFilterDto,
+    @Headers('referer') referer: string
   ): Promise<Pagination<MenuSerializer>> {
-    return this.menuService.findAll(menuFilterDto);
+    return this.menuService.findAll(menuFilterDto, referer);
   }
 
   @Get(':id')

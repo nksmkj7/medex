@@ -1,12 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  UnprocessableEntityException,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { HomeJsonDto } from './dto/home-json.dto';
@@ -23,7 +17,9 @@ export class HomeJsonController {
     return this.service.storeHomeJson(homeJsonDto);
   }
 
+  @Public()
   @Get()
+  @ApiTags('Public')
   getHomeJson() {
     return this.service.getHomeJson();
   }

@@ -15,6 +15,9 @@ import { MenuSerializer } from './serializer/menu.serializer';
 import { MenuFilterDto, SubMenuFilterDto } from './dto/menu-filter.dto';
 import { IsNull, Not } from 'typeorm';
 import { MenuEntity } from './entity/menu.entity';
+import * as config from 'config';
+
+const appConfig = config.get('app');
 
 @Injectable()
 export class MenuService {
@@ -48,7 +51,8 @@ export class MenuService {
   }
 
   async findAll(
-    menuFilterDto: MenuFilterDto
+    menuFilterDto: MenuFilterDto,
+    referer?: string
   ): Promise<Pagination<MenuSerializer>> {
     const { mode, menuType } = menuFilterDto;
     const searchCriteria = menuType
@@ -62,6 +66,9 @@ export class MenuService {
       } else {
         searchCriteria['parentId'] = Not(IsNull());
       }
+    }
+    if (referer == appConfig.frontendUrl) {
+      searchCriteria['status'] = true;
     }
     return this.repository.paginate(
       menuFilterDto,

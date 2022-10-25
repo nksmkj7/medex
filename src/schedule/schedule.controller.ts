@@ -9,6 +9,7 @@ import {
   Put
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 import { AutoGenerateScheduleDto } from './dto/auto-generate-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleService } from './schedule.service';
@@ -23,6 +24,8 @@ export class ScheduleController {
     return this.service.generateSchedules(createScheduleDto);
   }
 
+  @Public()
+  @ApiTags('Public')
   @Get(':serviceId/:specialistId')
   getServiceSpecialistSchedules(
     @Param('serviceId', ParseUUIDPipe) serviceId: string,
@@ -31,6 +34,8 @@ export class ScheduleController {
     return this.service.serviceSpecialistSchedules(serviceId, specialistId);
   }
 
+  @Public()
+  @ApiTags('Public')
   //get schedule of specific date
   @Get(':serviceId/:specialistId/:date')
   getServiceSpecialistDateSchedules(
@@ -62,6 +67,8 @@ export class ScheduleController {
     );
   }
 
+  @Public()
+  @ApiTags('Public')
   //get schedule of specific month
   @Get(':serviceId/:specialistId/year/:year/month/:month')
   getServiceSpecialistMonthSchedules(

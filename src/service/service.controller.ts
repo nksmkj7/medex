@@ -8,7 +8,8 @@ import {
   Put,
   Query,
   UseGuards,
-  UseInterceptors
+  UseInterceptors,
+  Headers
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -37,12 +38,15 @@ export class ServiceController {
     return this.service.create(serviceDto);
   }
 
+  @Public()
+  @ApiTags('Public')
   @Get()
   findAll(
     @Query()
-    serviceFilterDto: ServiceFilterDto
+    serviceFilterDto: ServiceFilterDto,
+    @Headers('referer') referer: string
   ): Promise<Pagination<ServiceSerializer>> {
-    return this.service.findAll(serviceFilterDto);
+    return this.service.findAll(serviceFilterDto, referer);
   }
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))
