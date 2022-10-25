@@ -823,6 +823,58 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Package management',
+      resource: 'package',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all packages',
+          route: [
+            {
+              path: '/package',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View package by id',
+          route: [
+            {
+              path: '/package/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new package',
+          route: [
+            {
+              path: '/package',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update package by id',
+          route: [
+            {
+              path: '/package/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete package by id',
+          route: [
+            {
+              path: '/package/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
     }
   ]
 };

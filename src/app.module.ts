@@ -41,6 +41,7 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { CustomerController } from './customer/customer.controller';
 import { CustomerService } from './customer/customer.service';
 import { CustomerModule } from './customer/customer.module';
+import { PackageModule } from './package/package.module';
 
 const appConfig = config.get('app');
 
@@ -86,6 +87,7 @@ const appConfig = config.get('app');
     CountryModule,
     ProviderModule,
     BannerModule,
+    PackageModule,
     MenuModule,
     CategoryModule,
     SpecialistModule,
