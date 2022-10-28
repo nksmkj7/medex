@@ -875,6 +875,31 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Home Json management',
+      resource: 'home-json',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View home json',
+          route: [
+            {
+              path: '/home-json',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store home json',
+          route: [
+            {
+              path: '/home-json',
+              method: MethodList.POST
+            }
+          ]
+        }
+      ]
     }
   ]
 };
