@@ -12,7 +12,8 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
-  ValidationPipe
+  ValidationPipe,
+  Headers
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
@@ -63,6 +64,8 @@ export class ProviderController {
   }
 
   @Get(':id')
+  @Public()
+  @ApiTags('Public')
   async getProviderDetail(@Param('id', ParseIntPipe) id: number) {
     return await this.providerService.getProviderDetail(id);
   }
@@ -114,8 +117,13 @@ export class ProviderController {
   }
 
   @Get(':id/services')
-  getProviderCategories(@Param('id', ParseIntPipe) id: number) {
-    return this.providerService.providerCategories(id);
+  @Public()
+  @ApiTags('Public')
+  getProviderCategories(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers() headers: object
+  ) {
+    return this.providerService.providerCategories(id, headers['referer']);
   }
 
   @Get(':id/week-holidays')

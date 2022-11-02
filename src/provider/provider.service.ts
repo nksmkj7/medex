@@ -30,6 +30,10 @@ import { ProviderBannerEntity } from './entity/provider-banner.entity';
 import { Multer } from 'multer';
 import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 
+import * as config from 'config';
+
+const appConfig = config.get('app');
+
 @Injectable()
 export class ProviderService {
   constructor(
@@ -229,9 +233,14 @@ export class ProviderService {
     return user.providerInformation.daySchedules;
   }
 
-  async providerCategories(id: number) {
+  async providerCategories(id: number, referer?: string) {
+    let searchCriteria = {};
+    if (referer == appConfig.frontendUrl) {
+      searchCriteria['status'] = true;
+    }
     const user = await this.userRepository.findOneOrFail(id, {
-      relations: ['role', 'services']
+      relations: ['role', 'services'],
+      where: searchCriteria
     });
     if (!user || user.role.name !== 'provider') {
       throw new BadRequestException('Invalid user or user is not a provider');
