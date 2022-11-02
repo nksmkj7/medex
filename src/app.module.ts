@@ -43,6 +43,8 @@ import { CustomerService } from './customer/customer.service';
 import { CustomerModule } from './customer/customer.module';
 import { PackageModule } from './package/package.module';
 import { HomeJsonModule } from './home-json/home-json.module';
+import { BookingModule } from './booking/booking.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 const appConfig = config.get('app');
 
@@ -95,7 +97,9 @@ const appConfig = config.get('app');
     ServiceModule,
     ScheduleModule,
     CustomerModule,
-    HomeJsonModule
+    HomeJsonModule,
+    BookingModule,
+    TransactionModule
   ],
   providers: [
     {

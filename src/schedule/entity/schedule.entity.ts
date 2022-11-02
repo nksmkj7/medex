@@ -1,5 +1,6 @@
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
-import { Column, Entity } from 'typeorm';
+import { ServiceEntity } from 'src/service/entity/service.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 export interface ISchedule {
   id: string;
@@ -29,4 +30,11 @@ export class ScheduleEntity extends CustomUuidBaseEntity {
     nullable: false
   })
   schedules: ISchedule[];
+
+  @OneToOne(() => ServiceEntity)
+  @JoinColumn({
+    name: 'serviceId',
+    referencedColumnName: 'id'
+  })
+  service: ServiceEntity;
 }
