@@ -119,15 +119,24 @@ export class BookingService {
     return transactionCode;
   }
 
-  getCustomerBooking(customer: CustomerEntity) {
-    return this.repository.paginate(
-      {},
-      [],
-      [],
-      {},
-      {
-        customerId: customer.id
-      }
-    );
+  async getCustomerBooking(customer: CustomerEntity) {
+    const bookings = await this.repository.find({
+      customerId: customer.id
+    });
+    return this.repository.transformMany(bookings, {
+      groups: ['blabla']
+    });
+    // const bookings = await this.repository.paginate(
+    //   {},
+    //   [],
+    //   [],
+    //   {
+    //     groups: [...basicFieldGroupsForSerializing]
+    //   },
+    //   {
+    //     customerId: customer.id
+    //   }
+    // );
+    // return bookings;
   }
 }
