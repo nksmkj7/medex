@@ -61,9 +61,9 @@ export class BannerController {
   findAll(
     @Query()
     BannerFilterDto: BannerFilterDto,
-    @Headers('referer') referer: string
+    @Headers() headers: object
   ): Promise<Pagination<BannerSerializer>> {
-    return this.bannerService.findAll(BannerFilterDto, referer);
+    return this.bannerService.findAll(BannerFilterDto, headers['referer']);
   }
 
   @Get(':id')

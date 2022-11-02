@@ -47,9 +47,9 @@ export class MenuController {
   findAll(
     @Query()
     menuFilterDto: MenuFilterDto,
-    @Headers('referer') referer: string
+    @Headers() headers: object
   ): Promise<Pagination<MenuSerializer>> {
-    return this.menuService.findAll(menuFilterDto, referer);
+    return this.menuService.findAll(menuFilterDto, headers['referer']);
   }
 
   @Get(':id')

@@ -355,7 +355,6 @@ export class ProviderService {
       }
       banner.image = file.filename;
     }
-    console.log(link, status, isFeatured, 'asdfasdfasdfsdaf');
     await banner.save();
     return this.providerRepository.transformProviderBanner(banner);
   }

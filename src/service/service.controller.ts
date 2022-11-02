@@ -44,9 +44,9 @@ export class ServiceController {
   findAll(
     @Query()
     serviceFilterDto: ServiceFilterDto,
-    @Headers('referer') referer: string
+    @Headers() headers: object
   ): Promise<Pagination<ServiceSerializer>> {
-    return this.service.findAll(serviceFilterDto, referer);
+    return this.service.findAll(serviceFilterDto, headers['referer']);
   }
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))

@@ -65,9 +65,9 @@ export class CategoryController {
   findAll(
     @Query()
     categoryFilterDto: CategoryFilterDto,
-    @Headers('referer') referer: string
+    @Headers() headers: object
   ): Promise<Pagination<CategorySerializer>> {
-    return this.categoryService.findAll(categoryFilterDto, referer);
+    return this.categoryService.findAll(categoryFilterDto, headers['referer']);
   }
 
   @Get('active')

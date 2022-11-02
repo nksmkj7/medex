@@ -381,6 +381,7 @@ export class ServiceService {
       .andWhere('service.status = :status', {
         status: true
       });
+
     if (subCategoryId) {
       query.andWhere('service.subCategoryId = :subCategoryId', {
         subCategoryId
@@ -391,6 +392,7 @@ export class ServiceService {
       .clone()
       .select('COUNT (DISTINCT service.userId)')
       .getRawOne();
+
     let categoryAssociatedProviders = await query
       .clone()
       .select('distinct service.userId')
@@ -404,6 +406,7 @@ export class ServiceService {
     const subQuery = query
       .clone()
       .select([
+        'service.id as id',
         'service.title as title',
         'service.price as price',
         'service.userId as provider_id',
@@ -450,19 +453,22 @@ export class ServiceService {
         'provider_banner.userId=service.userId'
       );
 
-    // .getRawMany()
-    const providerWithService = await this.connection
-      .createQueryBuilder()
-      .from('(' + subQuery.getQuery() + ')', 'ss')
-      .setParameters(subQuery.getParameters())
-      .select('*')
-      .andWhere('ss."row_number" < :number', {
-        number: 4
-      })
-      .getRawMany();
-
+    let providerWithService = {};
+    if (totalCategoryAssociatedProvidersCount.count > 0) {
+      providerWithService = this.groupProviderWithService(
+        await this.connection
+          .createQueryBuilder()
+          .from('(' + subQuery.getQuery() + ')', 'ss')
+          .setParameters(subQuery.getParameters())
+          .select('*')
+          .andWhere('ss."row_number" < :number', {
+            number: 4
+          })
+          .getRawMany()
+      );
+    }
     return {
-      results: this.groupProviderWithService(providerWithService),
+      results: providerWithService,
       totalItems: +totalCategoryAssociatedProvidersCount?.count ?? 0,
       pageSize: limit,
       currentPage: page,

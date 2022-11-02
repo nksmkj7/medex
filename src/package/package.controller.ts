@@ -61,9 +61,9 @@ export class PackageController {
   findAll(
     @Query()
     PackageFilterDto: PackageFilterDto,
-    @Headers('referer') referer: string
+    @Headers() headers: object
   ): Promise<Pagination<PackageSerializer>> {
-    return this.packageService.findAll(PackageFilterDto, referer);
+    return this.packageService.findAll(PackageFilterDto, headers['referer']);
   }
 
   @Get(':id')
