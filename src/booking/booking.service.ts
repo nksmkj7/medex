@@ -10,6 +10,7 @@ import { Connection } from 'typeorm';
 import { BookingRepository } from './booking.repository';
 import { BookingDto } from './dto/booking.dto';
 import { BookingEntity } from './entity/booking.entity';
+import { basicFieldGroupsForSerializing } from './serializer/booking.serializer';
 
 @Injectable()
 export class BookingService {
@@ -120,23 +121,17 @@ export class BookingService {
   }
 
   async getCustomerBooking(customer: CustomerEntity) {
-    const bookings = await this.repository.find({
-      customerId: customer.id
-    });
-    return this.repository.transformMany(bookings, {
-      groups: ['blabla']
-    });
-    // const bookings = await this.repository.paginate(
-    //   {},
-    //   [],
-    //   [],
-    //   {
-    //     groups: [...basicFieldGroupsForSerializing]
-    //   },
-    //   {
-    //     customerId: customer.id
-    //   }
-    // );
-    // return bookings;
+    const bookings = await this.repository.paginate(
+      {},
+      [],
+      [],
+      {
+        groups: [...basicFieldGroupsForSerializing]
+      },
+      {
+        customerId: customer.id
+      }
+    );
+    return bookings;
   }
 }
