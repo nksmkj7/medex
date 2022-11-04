@@ -900,6 +900,31 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Booking management',
+      resource: 'booking',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View booking',
+          route: [
+            {
+              path: '/bookings',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Edit booking',
+          route: [
+            {
+              path: '/bookings/:id',
+              method: MethodList.PUT
+            }
+          ]
+        }
+      ]
     }
   ]
 };

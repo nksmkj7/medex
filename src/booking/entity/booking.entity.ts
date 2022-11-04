@@ -73,7 +73,9 @@ export class BookingEntity extends CustomBaseEntity {
   })
   customer: CustomerEntity;
 
-  @OneToOne(() => ScheduleEntity)
+  @OneToOne((type) => {
+    return ScheduleEntity;
+  })
   @JoinColumn({
     name: 'scheduleId',
     referencedColumnName: 'id'

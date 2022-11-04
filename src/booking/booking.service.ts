@@ -6,8 +6,10 @@ import { ScheduleRepository } from 'src/schedule/schedule.repository';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { TransactionEntity } from 'src/transaction/entity/transaction.entity';
 import { TransactionRepository } from 'src/transaction/transaction.repository';
-import { Connection } from 'typeorm';
+import { Connection, ILike } from 'typeorm';
 import { BookingRepository } from './booking.repository';
+import { BookingFilterDto } from './dto/booking-filter.dto';
+import { BookingUpdateStatusDto } from './dto/booking-update-status.dto';
 import { BookingDto } from './dto/booking.dto';
 import { BookingEntity } from './entity/booking.entity';
 import { basicFieldGroupsForSerializing } from './serializer/booking.serializer';
@@ -133,5 +135,51 @@ export class BookingService {
       }
     );
     return bookings;
+  }
+
+  findAll(bookingFilterDto: BookingFilterDto) {
+    const { keywords } = bookingFilterDto;
+    let relationalSearchCriteria = {};
+    if (keywords) {
+      relationalSearchCriteria = {
+        ...relationalSearchCriteria,
+        customer: [
+          {
+            firstName: ILike(`%${keywords}%`)
+          },
+          {
+            lastName: ILike(`%${keywords}%`)
+          }
+        ]
+      };
+    }
+    return this.repository.paginate(
+      bookingFilterDto,
+      ['customer', 'transactions', 'schedule', 'schedule.service'],
+      ['firstName', 'lastName', 'email', 'phone'],
+      {}
+    );
+  }
+
+  async bookingById(bookingId: string) {
+    const booking = await this.repository.findOneOrFail(bookingId, {
+      relations: [
+        'customer',
+        'schedule',
+        'schedule.service',
+        'schedule.specialist'
+      ]
+    });
+    return this.repository.transform(booking);
+  }
+
+  async updateBookingStatus(
+    bookingId: string,
+    bookingUpdateStatusDto: BookingUpdateStatusDto
+  ) {
+    const booking = await this.repository.findOneOrFail(bookingId);
+    booking.status = bookingUpdateStatusDto.status;
+    await booking.save();
+    return this.repository.transform(booking);
   }
 }

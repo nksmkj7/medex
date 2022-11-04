@@ -1,5 +1,6 @@
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
+import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 export interface ISchedule {
@@ -37,4 +38,11 @@ export class ScheduleEntity extends CustomUuidBaseEntity {
     referencedColumnName: 'id'
   })
   service: ServiceEntity;
+
+  @OneToOne(() => SpecialistEntity)
+  @JoinColumn({
+    name: 'specialistId',
+    referencedColumnName: 'id'
+  })
+  specialist: SpecialistEntity;
 }
