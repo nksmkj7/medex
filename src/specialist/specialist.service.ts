@@ -50,12 +50,16 @@ export class SpecialistService {
 
   async update(
     id: string,
-    updateSpecialistDto: UpdateSpecialistDto
+    updateSpecialistDto: UpdateSpecialistDto,
+    file: Express.Multer.File
   ): Promise<SpecialistSerializer> {
     const specialist = await this.repository.findOne(id);
     if (!specialist) {
       throw new NotFoundException();
     }
+    updateSpecialistDto = file
+      ? { ...updateSpecialistDto, image: file.filename }
+      : { ...updateSpecialistDto, image: specialist.image };
     if (specialist.image) {
       const path = `public/images/specialist/${specialist.image}`;
       if (existsSync(path)) {

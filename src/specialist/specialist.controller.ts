@@ -89,9 +89,6 @@ export class SpecialistController {
     @Body()
     updateSpecialistDto: UpdateSpecialistDto
   ): Promise<SpecialistSerializer> {
-    updateSpecialistDto = file
-      ? { ...updateSpecialistDto, image: file.filename }
-      : { ...updateSpecialistDto };
-    return this.specialistService.update(id, updateSpecialistDto);
+    return this.specialistService.update(id, updateSpecialistDto, file);
   }
 }
