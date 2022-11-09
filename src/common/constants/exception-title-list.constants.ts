@@ -9,5 +9,6 @@ export const ExceptionTitleList = {
   InvalidRefreshToken: 'invalidRefreshToken',
   DeleteDefaultError: 'deleteDefaultError',
   RefreshTokenExpired: 'refreshTokenExpired',
-  TooManyTries: 'tooManyTries'
+  TooManyTries: 'tooManyTries',
+  PaymentGatewayException: 'payment gateway exception'
 } as const;

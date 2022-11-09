@@ -1,4 +1,5 @@
 import { BookingEntity } from 'src/booking/entity/booking.entity';
+import { PaymentGatewayEnum } from 'src/booking/enums/payment-gateway.enum';
 import { TransactionStatusEnum } from 'src/booking/enums/transaction-status.enum';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { CustomerEntity } from 'src/customer/entity/customer.entity';
@@ -49,6 +50,18 @@ export class TransactionEntity extends CustomBaseEntity {
     default: TransactionStatusEnum.UNPAID
   })
   status: TransactionStatusEnum;
+
+  @Column('jsonb')
+  response_json: { [index: string]: any };
+
+  @Column('varchar')
+  currency: string;
+
+  @Column('enum', {
+    nullable: true,
+    enum: [PaymentGatewayEnum['2C2P'], PaymentGatewayEnum.OMISE]
+  })
+  paymentGateway: PaymentGatewayEnum;
 
   @OneToOne(() => CustomerEntity)
   @JoinColumn({

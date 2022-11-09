@@ -3,7 +3,9 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsPhoneNumber,
+  IsString,
   IsUUID,
   Validate
 } from 'class-validator';
@@ -12,6 +14,7 @@ import { ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { BookingStatusEnum } from '../enums/booking-status.enum';
+import { PaymentGatewayEnum } from '../enums/payment-gateway.enum';
 
 export class BookingDto {
   @IsNotEmpty()
@@ -50,6 +53,22 @@ export class BookingDto {
   @IsNotEmpty()
   @IsUUID('4')
   scheduleTimeId: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  totalAmount: number;
+
+  @IsNotEmpty()
+  @IsEnum(PaymentGatewayEnum)
+  paymentGateway: PaymentGatewayEnum;
+
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+
+  @IsNotEmpty()
+  @IsString()
+  currency: string;
 
   //   @IsNotEmpty()
   //   @IsEnum(BookingStatusEnum)

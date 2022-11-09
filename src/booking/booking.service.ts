@@ -13,6 +13,10 @@ import { BookingUpdateStatusDto } from './dto/booking-update-status.dto';
 import { BookingDto } from './dto/booking.dto';
 import { BookingEntity } from './entity/booking.entity';
 import { basicFieldGroupsForSerializing } from './serializer/booking.serializer';
+import * as Omise from 'omise';
+import { Public } from 'src/common/decorators/public.decorator';
+import { PaymentGatewayException } from 'src/exception/payment-gateway.exception';
+import { TransactionStatusEnum } from './enums/transaction-status.enum';
 
 @Injectable()
 export class BookingService {
@@ -29,6 +33,7 @@ export class BookingService {
     this.transactionCodeLength = 16;
   }
 
+  @Public()
   async storeBooking(bookingDto: BookingDto, customer: CustomerEntity) {
     const schedule = await this.scheduleRepository.findOne(
       bookingDto.scheduleId,
@@ -50,6 +55,7 @@ export class BookingService {
     if (!scheduleTime || scheduleTime.isBooked) {
       throw new UnprocessableEntityException('Schedule not available');
     }
+
     scheduleTime['isBooked'] = true;
     const service = schedule.service;
     const queryRunner = this.connection.createQueryRunner();
@@ -71,15 +77,53 @@ export class BookingService {
       await manager.save(booking);
       const transaction = await this.getBookingTransaction(customer, service);
       transaction.booking = booking;
+      let paymentResponse = {};
+      try {
+        paymentResponse = await this.verifyPayment(
+          bookingDto,
+          customer,
+          service
+        );
+      } catch (error) {
+        paymentResponse = error.message;
+        throw new PaymentGatewayException(error.message);
+      }
+      transaction.response_json = paymentResponse;
+      transaction.currency = bookingDto.currency;
+      transaction.paymentGateway = bookingDto.paymentGateway;
+      transaction.status = TransactionStatusEnum.PAID;
       await manager.save(transaction);
       await queryRunner.commitTransaction();
       //   booking.transactions = [transaction];
       return booking;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async verifyPayment(
+    bookingDto: BookingDto,
+    customer: CustomerEntity,
+    service: ServiceEntity
+  ) {
+    const omise = Omise({
+      publicKey: process.env.OMISE_PUBLIC_KEY,
+      secretKey: process.env.OMISE_SECRET_KEY
+    });
+    const { token, currency } = bookingDto;
+    const omiseCustomer = await omise.customers.create({
+      email: customer.email,
+      card: token
+    });
+
+    return omise.charges.create({
+      amount: this.calculateServiceTotalAmount(service) * 1000,
+      currency,
+      customer: omiseCustomer.id
+    });
   }
 
   calculateServiceTotalAmount(service: ServiceEntity) {
