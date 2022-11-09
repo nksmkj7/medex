@@ -120,7 +120,7 @@ export class BookingService {
     });
 
     return omise.charges.create({
-      amount: this.calculateServiceTotalAmount(service) * 1000,
+      amount: this.calculateServiceTotalAmount(service) * 100,
       currency,
       customer: omiseCustomer.id
     });
