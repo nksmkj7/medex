@@ -72,6 +72,8 @@ export class ServiceController {
     return this.service.findOne(id);
   }
 
+  @Public()
+  @ApiTags('Public')
   @Get(':id/specialists')
   findServiceSpecialists(
     @Param('id', ParseUUIDPipe) id: string,
