@@ -54,21 +54,21 @@ export class BookingDto {
   @IsUUID('4')
   scheduleTimeId: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  totalAmount: number;
+  // @IsNotEmpty()
+  // @IsNumber()
+  // totalAmount: number;
 
-  @IsNotEmpty()
-  @IsEnum(PaymentGatewayEnum)
-  paymentGateway: PaymentGatewayEnum;
+  // @IsNotEmpty()
+  // @IsEnum(PaymentGatewayEnum)
+  // paymentGateway: PaymentGatewayEnum;
 
-  @IsNotEmpty()
-  @IsString()
-  token: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // token: string;
 
-  @IsNotEmpty()
-  @IsString()
-  currency: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // currency: string;
 
   //   @IsNotEmpty()
   //   @IsEnum(BookingStatusEnum)
