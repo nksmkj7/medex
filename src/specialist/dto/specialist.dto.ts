@@ -10,7 +10,8 @@ import {
   IsString,
   MaxLength,
   Min,
-  Validate
+  Validate,
+  ValidateIf
 } from 'class-validator';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
@@ -26,6 +27,9 @@ export class SpecialistDto {
   fullName: string;
 
   @ApiPropertyOptional()
+  @ValidateIf((object, value) => {
+    return !!value;
+  })
   @IsOptional()
   @IsPhoneNumber()
   contactNo: string;
