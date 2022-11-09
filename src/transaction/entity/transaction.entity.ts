@@ -51,17 +51,17 @@ export class TransactionEntity extends CustomBaseEntity {
   })
   status: TransactionStatusEnum;
 
-  @Column('jsonb')
-  response_json: { [index: string]: any };
+  // @Column('jsonb')
+  // response_json: { [index: string]: any };
 
-  @Column('varchar')
-  currency: string;
+  // @Column('varchar')
+  // currency: string;
 
-  @Column('enum', {
-    nullable: true,
-    enum: [PaymentGatewayEnum['2C2P'], PaymentGatewayEnum.OMISE]
-  })
-  paymentGateway: PaymentGatewayEnum;
+  // @Column('enum', {
+  //   nullable: true,
+  //   enum: [PaymentGatewayEnum['2C2P'], PaymentGatewayEnum.OMISE]
+  // })
+  // paymentGateway: PaymentGatewayEnum;
 
   @OneToOne(() => CustomerEntity)
   @JoinColumn({
