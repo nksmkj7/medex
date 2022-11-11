@@ -20,6 +20,7 @@ import { Pagination } from 'src/paginate';
 import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 import { AssignSpecialistDto } from './dto/assign-specialist.dto';
 import { CategoryProviderServiceDto } from './dto/category-provider-service.dto';
+import { SearchCategoryProvideServiceDto } from './dto/search-category-provider-service.dto';
 import { ServiceFilterDto } from './dto/service-filter.dto';
 import { ServiceDto } from './dto/service.dto';
 import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
@@ -65,6 +66,15 @@ export class ServiceController {
     @Query() categoryProviderServiceDto: CategoryProviderServiceDto
   ) {
     return this.service.getProviderService(categoryProviderServiceDto);
+  }
+
+  @ApiTags('Public')
+  @Public()
+  @Get('search-category')
+  searchProviderService(
+    @Query() searchCategoryProvideServiceDto: SearchCategoryProvideServiceDto
+  ) {
+    return this.service.searchProviderService(searchCategoryProvideServiceDto);
   }
 
   @Get(':id')

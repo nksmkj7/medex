@@ -19,6 +19,7 @@ import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
 import { CategoryProviderServiceDto } from './dto/category-provider-service.dto';
 import { ProviderBannerEntity } from 'src/provider/entity/provider-banner.entity';
 import * as config from 'config';
+import { SearchCategoryProvideServiceDto } from './dto/search-category-provider-service.dto';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -540,5 +541,122 @@ export class ServiceService {
       },
       []
     );
+  }
+
+  async searchProviderService(
+    searchCategoryProvideServiceDto: SearchCategoryProvideServiceDto
+  ) {
+    const {
+      categoryId,
+      keywords,
+      page = 1,
+      limit = 4
+    } = searchCategoryProvideServiceDto;
+    const query = this.connection.createQueryBuilder(ServiceEntity, 'service');
+    query.where('service.status = :status', {
+      status: true
+    });
+    if (categoryId) {
+      query.andWhere(`service.categoryId=:categoryId`, {
+        categoryId
+      });
+    }
+    if (keywords) {
+      query.andWhere(`service.title Ilike :keywords`, {
+        keywords: `%${keywords}%`
+      });
+    }
+
+    const offset = (page - 1) * limit;
+    const totalCategoryAssociatedProvidersCount = await query
+      .clone()
+      .select('COUNT (DISTINCT service.userId)')
+      .getRawOne();
+
+    let categoryAssociatedProviders = await query
+      .clone()
+      .select('distinct service.userId')
+      .offset(offset)
+      .limit(limit)
+      .getRawMany();
+    categoryAssociatedProviders = categoryAssociatedProviders.map(
+      (provider) => provider.userId
+    );
+
+    const subQuery = query
+      .clone()
+      .select([
+        'service.id as id',
+        'service.title as title',
+        'service.price as price',
+        'service.userId as provider_id',
+        'service.durationInMinutes as duration_in_minutes',
+        'service.description as description',
+        'service.discount as discount',
+        'service.serviceCharge as service_charge',
+        'provider.companyName as company_name',
+        'provider.businessLogo as logo',
+        'provider.businessLocation as location',
+        'provider.city as city',
+        'provider.state as state',
+        'provider.landmark as landmark',
+        'ROW_NUMBER() OVER (PARTITION BY service.userId)',
+        'provider_banner.image as banner',
+        'provider_banner.link as banner_link'
+      ])
+      .leftJoin(
+        'provider_informations',
+        'provider',
+        'provider.userId = service.userId'
+      )
+      .andWhere('service.userId In (:...users)', {
+        users: [...categoryAssociatedProviders]
+      })
+      .leftJoin(
+        (qb) =>
+          qb
+            .select([
+              'banner.image as image',
+              'banner.link as link',
+              'banner.userId as userId'
+            ])
+            .from(ProviderBannerEntity, 'banner')
+            .distinctOn(['banner."userId"'])
+            .where('banner.userId In (:...users)', {
+              users: [...categoryAssociatedProviders]
+            })
+            .andWhere('banner.status =:status', { status: true })
+            .andWhere('banner.isFeatured =:status', { status: true })
+            .orderBy('banner.createdAt', 'DESC')
+            .orderBy('banner."userId"', 'ASC'),
+        'provider_banner',
+        'provider_banner.userId=service.userId'
+      );
+
+    let providerWithService = {};
+    if (totalCategoryAssociatedProvidersCount.count > 0) {
+      providerWithService = this.groupProviderWithService(
+        await this.connection
+          .createQueryBuilder()
+          .from('(' + subQuery.getQuery() + ')', 'ss')
+          .setParameters(subQuery.getParameters())
+          .select('*')
+          .andWhere('ss."row_number" < :number', {
+            number: 4
+          })
+          .getRawMany()
+      );
+    }
+    return {
+      results: providerWithService,
+      totalItems: +totalCategoryAssociatedProvidersCount?.count ?? 0,
+      pageSize: limit,
+      currentPage: page,
+      previous: page > 1 ? page - 1 : 0,
+      next:
+        +totalCategoryAssociatedProvidersCount.count > offset + limit
+          ? page + 1
+          : 0
+    };
   }
 }
