@@ -17,7 +17,7 @@ import { UpdateStaticPageDto } from './dto/update-static-page.dto';
 import { StaticPageService } from './static-page.service';
 
 @Controller('static-page')
-@ApiTags('Public', 'Static Page')
+@ApiTags('Static Page')
 @UseGuards(JwtTwoFactorGuard, PermissionGuard)
 export class StaticPageController {
   constructor(protected readonly service: StaticPageService) {}
