@@ -45,6 +45,8 @@ import { PackageModule } from './package/package.module';
 import { HomeJsonModule } from './home-json/home-json.module';
 import { BookingModule } from './booking/booking.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { StaticPageModule } from './static-page/static-page.module';
+import { FaqModule } from './faq/faq.module';
 
 const appConfig = config.get('app');
 
@@ -99,7 +101,9 @@ const appConfig = config.get('app');
     CustomerModule,
     HomeJsonModule,
     BookingModule,
-    TransactionModule
+    TransactionModule,
+    StaticPageModule,
+    FaqModule
   ],
   providers: [
     {
