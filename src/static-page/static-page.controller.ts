@@ -23,6 +23,7 @@ export class StaticPageController {
   constructor(protected readonly service: StaticPageService) {}
 
   @Public()
+  @ApiTags('Public')
   @Get(':slug')
   staticPage(@Param('slug') slug: string) {
     return this.service.getStaticPageBySlug(slug);
