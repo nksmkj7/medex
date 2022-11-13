@@ -22,6 +22,7 @@ import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
+import { ServiceFilterDto } from 'src/service/dto/service-filter.dto';
 import { ObjectLiteral } from 'typeorm';
 import { ProviderBannerDto } from './dto/provider-banner.dto';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
@@ -119,11 +120,16 @@ export class ProviderController {
   @Get(':id/services')
   @Public()
   @ApiTags('Public')
-  getProviderCategories(
+  getProviderServices(
     @Param('id', ParseIntPipe) id: number,
-    @Headers() headers: object
+    @Headers() headers: object,
+    @Query() serviceFilterDto: ServiceFilterDto
   ) {
-    return this.providerService.providerCategories(id, headers['referer']);
+    return this.providerService.providerServices(
+      id,
+      serviceFilterDto,
+      headers['referer']
+    );
   }
 
   @Get(':id/week-holidays')

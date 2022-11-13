@@ -31,6 +31,7 @@ import { Multer } from 'multer';
 import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 
 import * as config from 'config';
+import { ServiceFilterDto } from 'src/service/dto/service-filter.dto';
 
 const appConfig = config.get('app');
 
@@ -233,19 +234,28 @@ export class ProviderService {
     return user.providerInformation.daySchedules;
   }
 
-  async providerCategories(id: number, referer?: string) {
-    let searchCriteria = {};
+  async providerServices(
+    id: number,
+    serviceFilterDto: ServiceFilterDto,
+    referer?: string
+  ) {
+    let searchCondition = {};
     if (referer == appConfig.frontendUrl) {
-      searchCriteria['status'] = true;
+      searchCondition['status'] = true;
     }
     const user = await this.userRepository.findOneOrFail(id, {
-      relations: ['role', 'services'],
-      where: searchCriteria
+      relations: ['role']
     });
     if (!user || user.role.name !== 'provider') {
       throw new BadRequestException('Invalid user or user is not a provider');
     }
-    return this.serviceRepository.transformMany(user.services);
+    return this.serviceRepository.paginate(
+      serviceFilterDto,
+      [],
+      ['title'],
+      {},
+      searchCondition
+    );
   }
 
   async providerWeekHolidays(id: number) {
