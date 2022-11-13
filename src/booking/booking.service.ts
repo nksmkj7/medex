@@ -76,21 +76,21 @@ export class BookingService {
       await manager.save(booking);
       const transaction = await this.getBookingTransaction(customer, service);
       transaction.booking = booking;
-      // let paymentResponse = {};
-      // try {
-      //   paymentResponse = await this.verifyPayment(
-      //     bookingDto,
-      //     customer,
-      //     service
-      //   );
-      // } catch (error) {
-      //   paymentResponse = error.message;
-      //   throw new PaymentGatewayException(error.message);
-      // }
-      // transaction.response_json = paymentResponse;
-      // transaction.currency = bookingDto.currency;
-      // transaction.paymentGateway = bookingDto.paymentGateway;
-      // transaction.status = TransactionStatusEnum.PAID;
+      let paymentResponse = {};
+      try {
+        paymentResponse = await this.verifyPayment(
+          bookingDto,
+          customer,
+          service
+        );
+      } catch (error) {
+        paymentResponse = error.message;
+        throw new PaymentGatewayException(error.message);
+      }
+      transaction.response_json = paymentResponse;
+      transaction.currency = bookingDto.currency;
+      transaction.paymentGateway = bookingDto.paymentGateway;
+      transaction.status = TransactionStatusEnum.PAID;
       await manager.save(transaction);
       await queryRunner.commitTransaction();
       //   booking.transactions = [transaction];
@@ -103,27 +103,27 @@ export class BookingService {
     }
   }
 
-  // async verifyPayment(
-  //   bookingDto: BookingDto,
-  //   customer: CustomerEntity,
-  //   service: ServiceEntity
-  // ) {
-  //   const omise = Omise({
-  //     publicKey: process.env.OMISE_PUBLIC_KEY,
-  //     secretKey: process.env.OMISE_SECRET_KEY
-  //   });
-  //   const { token, currency } = bookingDto;
-  //   const omiseCustomer = await omise.customers.create({
-  //     email: customer.email,
-  //     card: token
-  //   });
+  async verifyPayment(
+    bookingDto: BookingDto,
+    customer: CustomerEntity,
+    service: ServiceEntity
+  ) {
+    const omise = Omise({
+      publicKey: process.env.OMISE_PUBLIC_KEY,
+      secretKey: process.env.OMISE_SECRET_KEY
+    });
+    const { token, currency } = bookingDto;
+    const omiseCustomer = await omise.customers.create({
+      email: customer.email,
+      card: token
+    });
 
-  //   return omise.charges.create({
-  //     amount: this.calculateServiceTotalAmount(service) * 100,
-  //     currency,
-  //     customer: omiseCustomer.id
-  //   });
-  // }
+    return omise.charges.create({
+      amount: this.calculateServiceTotalAmount(service) * 100,
+      currency,
+      customer: omiseCustomer.id
+    });
+  }
 
   calculateServiceTotalAmount(service: ServiceEntity) {
     const price = +service.price;
