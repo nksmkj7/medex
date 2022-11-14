@@ -38,4 +38,8 @@ export class StaticPageService {
       id
     });
   }
+
+  getStaticPageList() {
+    return this.connection.createEntityManager().find(StaticPageEntity);
+  }
 }

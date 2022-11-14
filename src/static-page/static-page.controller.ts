@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
-import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { UpdateStaticPageDto } from './dto/update-static-page.dto';
@@ -21,6 +20,11 @@ import { StaticPageService } from './static-page.service';
 @UseGuards(JwtTwoFactorGuard, PermissionGuard)
 export class StaticPageController {
   constructor(protected readonly service: StaticPageService) {}
+
+  @Get()
+  staticPages() {
+    return this.service.getStaticPageList();
+  }
 
   @Public()
   @ApiTags('Public')

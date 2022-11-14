@@ -925,6 +925,49 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Static page management',
+      resource: 'static-page',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View static page list',
+          route: [
+            {
+              path: '/static-page',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View static page content',
+          route: [
+            {
+              path: '/static-page/:slug',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Edit static page content',
+          route: [
+            {
+              path: '/static-page/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete static page',
+          route: [
+            {
+              path: '/static-page/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
     }
   ]
 };
