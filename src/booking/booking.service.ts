@@ -90,7 +90,7 @@ export class BookingService {
       }
       transaction.response_json = paymentResponse;
       transaction.currency = bookingDto.currency;
-      transaction.paymentGateway = bookingDto.paymentGateway;
+      transaction.paymentGateway = ${bookingDto.paymentGateway};
       transaction.status = TransactionStatusEnum.PAID;
       await manager.save(transaction);
       await queryRunner.commitTransaction();
@@ -118,7 +118,11 @@ export class BookingService {
       email: customer.email,
       card: token
     });
-
+    console.log(
+      'amount is ---->',
+      this.calculateServiceTotalAmount(service) * 100,
+      currency
+    );
     return omise.charges.create({
       amount: this.calculateServiceTotalAmount(service) * 100,
       currency,

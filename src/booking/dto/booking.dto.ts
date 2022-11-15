@@ -5,10 +5,12 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
+  IsOptional,
   IsPhoneNumber,
   IsString,
   IsUUID,
-  Validate
+  Validate,
+  ValidateIf
 } from 'class-validator';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
 import { ScheduleEntity } from 'src/schedule/entity/schedule.entity';
@@ -59,9 +61,11 @@ export class BookingDto {
   @IsNumberString()
   totalAmount: number;
 
-  @IsNotEmpty()
-  @IsEnum(PaymentGatewayEnum)
-  paymentGateway: PaymentGatewayEnum;
+  // @IsNotEmpty()
+  // @IsEnum(PaymentGatewayEnum)
+  @IsOptional()
+  @ValidateIf((object, value) => !!value)
+  paymentGateway: string | null;
 
   @IsNotEmpty()
   @IsString()
