@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsNumberString,
   IsPhoneNumber,
   IsString,
   IsUUID,
@@ -55,7 +56,7 @@ export class BookingDto {
   scheduleTimeId: string;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsNumberString()
   totalAmount: number;
 
   @IsNotEmpty()

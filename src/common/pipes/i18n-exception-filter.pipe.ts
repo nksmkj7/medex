@@ -113,7 +113,8 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
         'min',
         'max',
         'isPhoneNumber',
-        'isValidForeign'
+        'isValidForeign',
+        'isNumberString'
       ];
       const item = errors[i];
       let message = [];
