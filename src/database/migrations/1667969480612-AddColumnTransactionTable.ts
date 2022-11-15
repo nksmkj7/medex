@@ -15,7 +15,7 @@ export class AddColumnTransactionTable1667969480612
       new TableColumn({
         name: 'paymentGateway',
         type: 'enum',
-        enum: [PaymentGatewayEnum['2C2P'], PaymentGatewayEnum.OMISE],
+        enum: ['2C2P', 'omise'],
         isNullable: true
       }),
       new TableColumn({

@@ -84,7 +84,6 @@ export class BookingService {
           service
         );
       } catch (error) {
-        console.log(error);
         paymentResponse = error.message;
         throw new PaymentGatewayException(error.message);
       }
@@ -118,11 +117,6 @@ export class BookingService {
       email: customer.email,
       card: token
     });
-    console.log(
-      'amount is ---->',
-      this.calculateServiceTotalAmount(service) * 100,
-      currency
-    );
     return omise.charges.create({
       amount: this.calculateServiceTotalAmount(service) * 100,
       currency,
