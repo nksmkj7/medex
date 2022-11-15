@@ -968,6 +968,49 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'Faq management',
+      resource: 'faq',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View faq list',
+          route: [
+            {
+              path: '/faq',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View faq detail',
+          route: [
+            {
+              path: '/faq/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Edit faq',
+          route: [
+            {
+              path: '/faq/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete faq',
+          route: [
+            {
+              path: '/faq/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
     }
   ]
 };

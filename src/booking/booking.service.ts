@@ -84,6 +84,7 @@ export class BookingService {
           service
         );
       } catch (error) {
+        console.log(error);
         paymentResponse = error.message;
         throw new PaymentGatewayException(error.message);
       }

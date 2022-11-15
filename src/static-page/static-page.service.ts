@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
+import { slugify } from 'src/common/helper/general.helper';
 import { Connection } from 'typeorm';
+import { StaticPageDto } from './dto/static-page.dto';
 import { UpdateStaticPageDto } from './dto/update-static-page.dto';
 import { StaticPageEntity } from './entity/static-page.entity';
 
@@ -41,5 +43,12 @@ export class StaticPageService {
 
   getStaticPageList() {
     return this.connection.createEntityManager().find(StaticPageEntity);
+  }
+
+  store(staticPageDto: StaticPageDto) {
+    return this.connection.createEntityManager().save(StaticPageEntity, {
+      ...staticPageDto,
+      slug: slugify(staticPageDto.title)
+    });
   }
 }

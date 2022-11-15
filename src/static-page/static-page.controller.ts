@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Post,
   Put,
   UseGuards
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { StaticPageDto } from './dto/static-page.dto';
 import { UpdateStaticPageDto } from './dto/update-static-page.dto';
 import { StaticPageService } from './static-page.service';
 
@@ -44,5 +46,10 @@ export class StaticPageController {
   @Delete(':id')
   deleteStaticPage(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.deleteStaticPage(id);
+  }
+
+  @Post()
+  createStaticPage(@Body() staticPageDto: StaticPageDto) {
+    return this.service.store(staticPageDto);
   }
 }
