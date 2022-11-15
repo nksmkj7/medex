@@ -90,7 +90,7 @@ export class BookingService {
       }
       transaction.response_json = paymentResponse;
       transaction.currency = bookingDto.currency;
-      transaction.paymentGateway = ${bookingDto.paymentGateway};
+      transaction.paymentGateway = null;
       transaction.status = TransactionStatusEnum.PAID;
       await manager.save(transaction);
       await queryRunner.commitTransaction();
