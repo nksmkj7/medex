@@ -12,7 +12,10 @@ import { BookingFilterDto } from './dto/booking-filter.dto';
 import { BookingUpdateStatusDto } from './dto/booking-update-status.dto';
 import { BookingDto } from './dto/booking.dto';
 import { BookingEntity } from './entity/booking.entity';
-import { basicFieldGroupsForSerializing } from './serializer/booking.serializer';
+import {
+  adminUserGroupsForSerializing,
+  basicFieldGroupsForSerializing
+} from './serializer/booking.serializer';
 import * as Omise from 'omise';
 import { Public } from 'src/common/decorators/public.decorator';
 import { PaymentGatewayException } from 'src/exception/payment-gateway.exception';
@@ -199,7 +202,7 @@ export class BookingService {
       bookingFilterDto,
       ['customer', 'transactions', 'schedule', 'schedule.service'],
       ['firstName', 'lastName', 'email', 'phone'],
-      {}
+      { groups: adminUserGroupsForSerializing }
     );
   }
 
