@@ -37,6 +37,7 @@ export interface IProviderWithService {
   landmark?: string;
   banner?: string;
   banner_link?: string;
+  category_title: string;
   [index: string]: string | number;
 }
 
@@ -423,13 +424,15 @@ export class ServiceService {
         'provider.landmark as landmark',
         'ROW_NUMBER() OVER (PARTITION BY service.userId)',
         'provider_banner.image as banner',
-        'provider_banner.link as banner_link'
+        'provider_banner.link as banner_link',
+        'category.title as category_title'
       ])
       .leftJoin(
         'provider_informations',
         'provider',
         'provider.userId = service.userId'
       )
+      .leftJoin('categories', 'category', 'category.id = service.categoryId')
       .andWhere('service.userId In (:...users)', {
         users: [...categoryAssociatedProviders]
       })
@@ -508,6 +511,7 @@ export class ServiceService {
           landmark?: string;
           banner?: string;
           banner_link?: string;
+          category_title: string;
           services: { [index: string]: string }[];
         }[],
         currentValue: IProviderWithService
@@ -532,6 +536,7 @@ export class ServiceService {
               ? `${appConfig.appUrl}/images/provider-banners/${currentValue.banner}`
               : null,
             banner_link: currentValue.banner_link,
+            category_title: currentValue.category_title,
             services: [getFormattedData(currentValue)]
           });
         } else {

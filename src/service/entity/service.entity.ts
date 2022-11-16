@@ -3,6 +3,7 @@ import { UserEntity } from 'src/auth/entity/user.entity';
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
 import { slugify } from 'src/common/helper/general.helper';
 import {
+  AfterLoad,
   BeforeInsert,
   BeforeUpdate,
   Column,
@@ -94,5 +95,23 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     if (this.title) {
       this.slug = slugify(this.title);
     }
+  }
+
+  discounted_amount: number;
+
+  amount_after_discount: number;
+
+  service_charge_amount: number;
+
+  amount_after_service_charge: number;
+
+  @AfterLoad()
+  afterLoad() {
+    this.discounted_amount = (this.discount / 100) * this.price;
+    this.amount_after_discount = this.price - this.discounted_amount;
+    this.service_charge_amount =
+      (this.serviceCharge / 100) * this.amount_after_discount;
+    this.amount_after_service_charge =
+      this.amount_after_discount - this.service_charge_amount;
   }
 }

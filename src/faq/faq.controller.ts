@@ -57,4 +57,9 @@ export class FaqController {
   ) {
     return this.service.update(id, updateFaqDto);
   }
+
+  @Get(':id')
+  getFaqDetail(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.getFaqDetail(id);
+  }
 }

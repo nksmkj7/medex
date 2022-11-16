@@ -44,4 +44,12 @@ export class FaqService {
     }
     return this.repository.updateItem(faq, updateFaqDto);
   }
+
+  async getFaqDetail(id: string) {
+    const faq = await this.repository.findOne(id);
+    if (!faq) {
+      throw new UnprocessableEntityException('Faq not found');
+    }
+    return this.repository.transform(faq);
+  }
 }
