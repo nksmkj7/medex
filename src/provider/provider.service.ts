@@ -231,7 +231,13 @@ export class ProviderService {
     let user = await this.userRepository.findOne(id, {
       relations: ['providerInformation']
     });
-    return user.providerInformation.daySchedules;
+    const daySchedules = user.providerInformation.daySchedules;
+    return weekDays.reduce((accumulator, currentValue) => {
+      if (daySchedules[currentValue]) {
+        accumulator[currentValue] = daySchedules[currentValue];
+      }
+      return accumulator;
+    }, {});
   }
 
   async providerServices(
