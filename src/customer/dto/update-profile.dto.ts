@@ -5,7 +5,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
-  IsString
+  IsString,
+  ValidateIf
 } from 'class-validator';
 import { CustomerSignupDto } from './customer-signup.dto';
 
@@ -27,7 +28,7 @@ export class UpdateProfileDto extends OmitType(CustomerSignupDto, [
   @IsString()
   lastName: string;
 
-  @IsNotEmpty()
+  @ValidateIf((object, value) => !!value)
   @IsPhoneNumber()
   phoneNumber: string;
 
