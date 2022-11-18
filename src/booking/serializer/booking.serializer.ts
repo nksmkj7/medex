@@ -6,6 +6,7 @@ import * as config from 'config';
 import { BookingStatusEnum } from '../enums/booking-status.enum';
 import { CustomerSerializer } from 'src/customer/serializer/customer.serializer';
 import { ScheduleSerializer } from 'src/schedule/schedule.serializer';
+import { TransactionSerializer } from 'src/transaction/transaction.serializer';
 
 export const adminUserGroupsForSerializing: string[] = ['admin'];
 export const basicFieldGroupsForSerializing: string[] = ['basic', 'customer'];
@@ -79,4 +80,17 @@ export class BookingSerializer extends ModelSerializer {
     toPlainOnly: true
   })
   schedule: ScheduleSerializer;
+
+  @ApiProperty()
+  @Type(() => TransactionSerializer)
+  @Expose({
+    groups: [...adminUserGroupsForSerializing]
+  })
+  transactions: TransactionSerializer[];
+
+  @ApiProperty()
+  @Expose({
+    groups: [...basicFieldGroupsForSerializing]
+  })
+  paymentStatus: string;
 }

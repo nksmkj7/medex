@@ -3,6 +3,7 @@ import { CustomerEntity } from 'src/customer/entity/customer.entity';
 import { ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import { TransactionEntity } from 'src/transaction/entity/transaction.entity';
 import {
+  AfterLoad,
   Column,
   Entity,
   JoinColumn,
@@ -84,4 +85,14 @@ export class BookingEntity extends CustomBaseEntity {
 
   @OneToMany(() => TransactionEntity, (transaction) => transaction.booking)
   transactions: TransactionEntity[];
+
+  paymentStatus: string;
+
+  @AfterLoad()
+  afterLoad() {
+    this.paymentStatus =
+      this.transactions && Array.isArray(this.transactions)
+        ? this.transactions[this.transactions.length - 1].status
+        : 'unpaid';
+  }
 }

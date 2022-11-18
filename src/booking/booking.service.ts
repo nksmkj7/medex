@@ -170,7 +170,7 @@ export class BookingService {
   async getCustomerBooking(customer: CustomerEntity) {
     const bookings = await this.repository.paginate(
       {},
-      [],
+      ['transactions'],
       [],
       {
         groups: [...basicFieldGroupsForSerializing]
