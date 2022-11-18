@@ -1,6 +1,8 @@
 import { OmitType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsDateString,
+  IsEmpty,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -67,4 +69,7 @@ export class UpdateProfileDto extends OmitType(CustomerSignupDto, [
   @IsOptional()
   @IsString()
   instagram: string;
+
+  @IsEmpty()
+  profilePicture: string;
 }
