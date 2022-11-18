@@ -112,6 +112,6 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     this.service_charge_amount =
       (this.serviceCharge / 100) * this.amount_after_discount;
     this.amount_after_service_charge =
-      this.amount_after_discount - this.service_charge_amount;
+      this.amount_after_discount + this.service_charge_amount;
   }
 }
