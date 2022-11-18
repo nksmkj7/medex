@@ -91,7 +91,7 @@ export class ProviderService {
         manager
       );
       if (!user) throw new BadRequestException();
-
+      console.log(providerInformation, 'provider information is --->');
       const provider = await this.providerRepository.store(
         {
           ...providerInformation,

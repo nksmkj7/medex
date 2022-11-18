@@ -65,7 +65,7 @@ export class ProviderEntity extends UserEntity {
   })
   businessLogo: string;
 
-  @Column({
+  @Column('text', {
     nullable: true
   })
   businessDescription: string;
@@ -75,6 +75,6 @@ export class ProviderEntity extends UserEntity {
   })
   vatNo: string;
 
-  @Column({})
+  @Column('text', {})
   termsCondition: string;
 }
