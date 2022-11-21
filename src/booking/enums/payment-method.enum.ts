@@ -2,7 +2,8 @@
  * Transaction method enum
  */
 export enum PaymentMethodEnum {
-  CARD = 'card',
+  CARD = 'credit_card',
   INTERNET_BANKING = 'internet_banking',
-  ALI_PAY = 'ali_pay'
+  ALI_PAY = 'alipay',
+  GOOGLE_PLAY = 'googleplay'
 }
