@@ -1,5 +1,6 @@
 import { BookingEntity } from 'src/booking/entity/booking.entity';
 import { PaymentGatewayEnum } from 'src/booking/enums/payment-gateway.enum';
+import { PaymentMethodEnum } from 'src/booking/enums/payment-method.enum';
 import { TransactionStatusEnum } from 'src/booking/enums/transaction-status.enum';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { CustomerEntity } from 'src/customer/entity/customer.entity';
@@ -57,11 +58,11 @@ export class TransactionEntity extends CustomBaseEntity {
   @Column('varchar')
   currency: string;
 
-  @Column('enum', {
-    nullable: true,
-    enum: [PaymentGatewayEnum['2C2P'], PaymentGatewayEnum.OMISE]
-  })
-  paymentGateway: PaymentGatewayEnum;
+  @Column('varchar')
+  paymentGateway: string;
+
+  @Column('varchar')
+  paymentMethod: string;
 
   @OneToOne(() => CustomerEntity)
   @JoinColumn({

@@ -16,6 +16,7 @@ import { ServiceEntity } from 'src/service/entity/service.entity';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { BookingStatusEnum } from '../enums/booking-status.enum';
 import { PaymentGatewayEnum } from '../enums/payment-gateway.enum';
+import { PaymentMethodEnum } from '../enums/payment-method.enum';
 
 export class BookingDto {
   @IsNotEmpty()
@@ -74,4 +75,8 @@ export class BookingDto {
   //   @IsNotEmpty()
   //   @IsEnum(BookingStatusEnum)
   //   status: BookingStatusEnum;
+
+  @IsNotEmpty()
+  @IsEnum(PaymentMethodEnum)
+  paymentMethod: PaymentMethodEnum;
 }

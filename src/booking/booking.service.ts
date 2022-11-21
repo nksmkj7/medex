@@ -1,4 +1,8 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException
+} from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { generateUniqueToken } from 'src/common/helper/general.helper';
 import { CustomerEntity } from 'src/customer/entity/customer.entity';
@@ -20,6 +24,10 @@ import * as Omise from 'omise';
 import { Public } from 'src/common/decorators/public.decorator';
 import { PaymentGatewayException } from 'src/exception/payment-gateway.exception';
 import { TransactionStatusEnum } from './enums/transaction-status.enum';
+import { PaymentMethodEnum } from './enums/payment-method.enum';
+import * as config from 'config';
+
+const appConfig = config.get('app');
 
 @Injectable()
 export class BookingService {
@@ -80,6 +88,14 @@ export class BookingService {
       const transaction = await this.getBookingTransaction(customer, service);
       transaction.booking = booking;
       let paymentResponse = {};
+      if (
+        Number(bookingDto.totalAmount) !==
+        Number(this.calculateServiceTotalAmount(service))
+      ) {
+        throw new BadRequestException(
+          'Sent amount is not matched with the system calculated amount '
+        );
+      }
       try {
         paymentResponse = await this.verifyPayment(
           bookingDto,
@@ -92,7 +108,7 @@ export class BookingService {
       }
       transaction.response_json = paymentResponse;
       transaction.currency = bookingDto.currency;
-      transaction.paymentGateway = null;
+      transaction.paymentGateway = bookingDto.paymentGateway;
       transaction.status = TransactionStatusEnum.PAID;
       await manager.save(transaction);
       await queryRunner.commitTransaction();
@@ -115,15 +131,43 @@ export class BookingService {
       publicKey: process.env.OMISE_PUBLIC_KEY,
       secretKey: process.env.OMISE_SECRET_KEY
     });
-    const { token, currency } = bookingDto;
+
+    if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
+      return this.verifyOmiseCardPayment(omise, customer, bookingDto, service);
+    }
+    return this.verifyOtherPayment(omise, customer, bookingDto, service);
+  }
+
+  async verifyOmiseCardPayment(
+    omise: Omise.IOmise,
+    customer: CustomerEntity,
+    bookingDto: BookingDto,
+    service: ServiceEntity
+  ) {
     const omiseCustomer = await omise.customers.create({
       email: customer.email,
-      card: token
+      card: bookingDto.token
     });
     return omise.charges.create({
       amount: this.calculateServiceTotalAmount(service) * 100,
-      currency,
+      currency: bookingDto.currency,
       customer: omiseCustomer.id
+    });
+  }
+
+  async verifyOtherPayment(
+    omise: Omise.IOmise,
+    customer: CustomerEntity,
+    bookingDto: BookingDto,
+    service: ServiceEntity
+  ) {
+    const { currency, token } = bookingDto;
+
+    return omise.charges.create({
+      amount: this.calculateServiceTotalAmount(service) * 100,
+      source: token,
+      currency,
+      return_uri: `${appConfig.frontendUrl}/booking`
     });
   }
 
