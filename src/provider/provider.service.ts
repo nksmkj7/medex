@@ -232,8 +232,15 @@ export class ProviderService {
       relations: ['providerInformation']
     });
     const daySchedules = user.providerInformation.daySchedules;
+    if (!daySchedules) {
+      throw new NotFoundException('Provider weekly day schedule not found.');
+    }
     return weekDays.reduce((accumulator, currentValue) => {
-      if (daySchedules[currentValue]) {
+      if (
+        daySchedules[currentValue] &&
+        daySchedules[currentValue].startTime &&
+        daySchedules[currentValue].endTime
+      ) {
         accumulator[currentValue] = daySchedules[currentValue];
       }
       return accumulator;

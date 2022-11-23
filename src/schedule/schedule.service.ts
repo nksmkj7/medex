@@ -44,7 +44,7 @@ export class ScheduleService {
     }
 
     //month is always one less than expected. 0 for jan and 11 for dec
-    const month = dayjs(startDate).month();
+    const month = dayjs(startDate).month() + 1;
 
     const year = dayjs(startDate).year();
 
@@ -89,6 +89,7 @@ export class ScheduleService {
           return manager.save(schedule);
         })
       );
+
       await queryRunner.commitTransaction();
       await queryRunner.release();
       return schedules;
