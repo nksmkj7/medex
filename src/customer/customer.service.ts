@@ -66,21 +66,20 @@ export class CustomerService {
   };
 
   async store(customerDto: CustomerSignupDto) {
-    console.log(`${appConfig.customerEndUrl}`);
-    // const token = await generateUniqueToken(6, this.checkUniqueFn);
-    // const tokenValidityDate = dayjs().add(this.tokenExpirationTime, 'm');
-    // const customer = await this.repository.store({
-    //   ...customerDto,
-    //   token,
-    //   tokenValidityDate,
-    //   salt: await bcrypt.genSalt()
-    // });
-    // const subject = 'Account created';
-    // const link = `?verify-token=${token}`;
-    // const slug = 'activate-account';
-    // const linkLabel = 'Activate Account';
-    // await this.sendMailToUser(customer, subject, link, slug, linkLabel);
-    // return customer;
+    const token = await generateUniqueToken(6, this.checkUniqueFn);
+    const tokenValidityDate = dayjs().add(this.tokenExpirationTime, 'm');
+    const customer = await this.repository.store({
+      ...customerDto,
+      token,
+      tokenValidityDate,
+      salt: await bcrypt.genSalt()
+    });
+    const subject = 'Account created';
+    const link = `?verify-token=${token}`;
+    const slug = 'activate-account';
+    const linkLabel = 'Activate Account';
+    await this.sendMailToUser(customer, subject, link, slug, linkLabel);
+    return customer;
   }
 
   async sendMailToUser(
