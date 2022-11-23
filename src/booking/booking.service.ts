@@ -26,6 +26,7 @@ import { PaymentGatewayException } from 'src/exception/payment-gateway.exception
 import { TransactionStatusEnum } from './enums/transaction-status.enum';
 import { PaymentMethodEnum } from './enums/payment-method.enum';
 import * as config from 'config';
+import { paginate } from 'src/common/helper/pagination.helper';
 
 const appConfig = config.get('app');
 
@@ -213,18 +214,52 @@ export class BookingService {
   }
 
   async getCustomerBooking(customer: CustomerEntity) {
-    const bookings = await this.repository.paginate(
-      {},
-      ['transactions'],
-      [],
-      {
-        groups: [...basicFieldGroupsForSerializing]
-      },
-      {
-        customerId: customer.id
-      }
-    );
-    return bookings;
+    // const bookings = await this.repository.paginate(
+    //   {},
+    //   [
+    //     'transactions'
+    //     // 'schedule',
+    //     // 'schedule.service',
+    //     // 'schedule.service.user',
+    //     // 'schedule.service.user.providerInformation'
+    //   ],
+    //   [],
+    //   {
+    //     groups: [...basicFieldGroupsForSerializing]
+    //   },
+    //   {
+    //     customerId: customer.id
+    //   }
+    // );
+    // return bookings;
+    const transactions = await this.connection.manager
+      .createQueryBuilder(TransactionEntity, 'transaction')
+      .leftJoin('bookings ', 'booking', 'booking.id = transaction.bookingId')
+      // .select('ROW_NUMBER() OVER (PARTITION BY booking.id)')
+      // .where(`booking.booking.customerId = :customerId`, {
+      //   customerId: customer.id
+      // })
+      .getSql();
+
+    console.log(transactions);
+    return;
+
+    const bookingsQuery = this.connection.manager
+      .createQueryBuilder(BookingEntity, 'booking')
+      .where(`booking.customerId = :customerId`, { customerId: customer.id })
+      .leftJoin('schedules', 'schedule', 'schedule.id = booking.scheduleId')
+      .leftJoin('services', 'service', 'service.id = schedule.serviceId')
+      .leftJoin('user', 'user', 'user.id = service.userId')
+      .leftJoin('provider_informations', 'pi', 'pi.userId = user.id')
+      .select([
+        'booking.*',
+        'service.title as serviceTitle',
+        'pi.companyName as providerCompanyName',
+        'pi.businessLogo as providerBusinessLogo'
+      ]);
+
+    return await paginate(bookingsQuery, { limit: 1000, page: 1 });
+    // return bookingsQuery;
   }
 
   findAll(bookingFilterDto: BookingFilterDto) {
