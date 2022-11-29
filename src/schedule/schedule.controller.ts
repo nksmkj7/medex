@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -9,8 +10,11 @@ import {
   Put
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { scheduled } from 'rxjs';
 import { Public } from 'src/common/decorators/public.decorator';
 import { AutoGenerateScheduleDto } from './dto/auto-generate-schedule.dto';
+import { DailyDeleteScheduleDto } from './dto/daily-delete-schedule.dto';
+import { MonthlyDeleteScheduleDto } from './dto/monthly-delete-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ScheduleService } from './schedule.service';
 
@@ -83,5 +87,23 @@ export class ScheduleController {
       month,
       year
     );
+  }
+
+  @Delete('reset-month')
+  clearMonthSchedule(@Body() deleteScheduleDto: MonthlyDeleteScheduleDto) {
+    return this.service.deleteSchedule(deleteScheduleDto, 'monthly');
+  }
+
+  @Delete('reset-day')
+  clearDaySchedule(@Body() deleteScheduleDto: DailyDeleteScheduleDto) {
+    return this.service.deleteSchedule(deleteScheduleDto, 'daily');
+  }
+
+  @Delete(':scheduleId/delete/:scheduleTimeId')
+  clearSpecificDaySchedule(
+    @Param('scheduleTimeId', ParseUUIDPipe) scheduleTimeId: string,
+    @Param('scheduleId', ParseUUIDPipe) scheduleId: string
+  ) {
+    return this.service.deleteSpecificDaySchedule(scheduleId, scheduleTimeId);
   }
 }

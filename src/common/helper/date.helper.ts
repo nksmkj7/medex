@@ -78,3 +78,7 @@ export const daySchedules = (
   }
   return times;
 };
+
+export const checkValidDate = (date: string, format = 'YYYY-MM-DD') => {
+  return dayjs(date, format).isValid();
+};

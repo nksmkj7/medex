@@ -1,7 +1,8 @@
+import { BookingEntity } from 'src/booking/entity/booking.entity';
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 
 export interface ISchedule {
   id: string;
@@ -45,4 +46,7 @@ export class ScheduleEntity extends CustomUuidBaseEntity {
     referencedColumnName: 'id'
   })
   specialist: SpecialistEntity;
+
+  @OneToMany(() => BookingEntity, (booking) => booking.schedule)
+  booking: BookingEntity;
 }
