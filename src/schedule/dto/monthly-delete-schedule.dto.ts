@@ -1,13 +1,13 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import * as dayjs from 'dayjs';
 import { DeleteScheduleDto } from './delete-schedule.dto';
 
 export class MonthlyDeleteScheduleDto extends DeleteScheduleDto {
   @IsNotEmpty()
-  @IsNumber()
-  year: number;
+  @IsString()
+  year: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  month: number;
+  @IsString()
+  month: string;
 }
