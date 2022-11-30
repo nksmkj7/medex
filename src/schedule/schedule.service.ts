@@ -283,10 +283,21 @@ export class ScheduleService {
     });
   }
 
-  async deleteSpecificDaySchedule(scheduleId: string, scheduleTimeId: string) {
-    const schedule = await this.repository.findOneOrFail(scheduleId);
+  async deleteSpecificDaySchedule(
+    serviceId: string,
+    specialistId: string,
+    date: string,
+    scheduleId: string
+  ) {
+    const schedule = await this.repository.findOneOrFail({
+      where: {
+        serviceId,
+        date,
+        specialistId
+      }
+    });
     const scheduleTime = schedule.schedules.find(
-      (scheduleTime) => scheduleTime.id === scheduleTimeId
+      (scheduleTime) => scheduleTime.id === scheduleId
     );
     if (scheduleTime.isBooked) {
       throw new UnprocessableEntityException(
@@ -294,7 +305,7 @@ export class ScheduleService {
       );
     }
     schedule.schedules = schedule.schedules.filter(
-      (scheduleTime) => scheduleTime.id !== scheduleTimeId
+      (scheduleTime) => scheduleTime.id !== scheduleId
     );
 
     return schedule.save();

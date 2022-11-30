@@ -99,11 +99,18 @@ export class ScheduleController {
     return this.service.deleteSchedule(deleteScheduleDto, 'daily');
   }
 
-  @Delete(':scheduleId/delete/:scheduleTimeId')
+  @Delete(':serviceId/:specialistId/:date/:scheduleId')
   clearSpecificDaySchedule(
-    @Param('scheduleTimeId', ParseUUIDPipe) scheduleTimeId: string,
+    @Param('serviceId', ParseUUIDPipe) serviceId: string,
+    @Param('specialistId', ParseUUIDPipe) specialistId: string,
+    @Param('date') date: string,
     @Param('scheduleId', ParseUUIDPipe) scheduleId: string
   ) {
-    return this.service.deleteSpecificDaySchedule(scheduleId, scheduleTimeId);
+    return this.service.deleteSpecificDaySchedule(
+      serviceId,
+      specialistId,
+      date,
+      scheduleId
+    );
   }
 }
