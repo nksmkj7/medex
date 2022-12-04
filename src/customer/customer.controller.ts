@@ -36,6 +36,7 @@ import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { CustomerFilterDto } from './dto/customer-filter.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @ApiTags('customer')
 @Controller('customer')
@@ -170,5 +171,24 @@ export class CustomerController {
     updateCustomerDto: UpdateCustomerDto
   ): Promise<CustomerSerializer> {
     return this.service.update(id, updateCustomerDto);
+  }
+
+  @Post('/refresh')
+  refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @Req()
+    req: Request
+  ) {
+    const ua = UAParser(req.headers['user-agent']);
+    const refreshTokenPayload: Partial<CustomerRefreshToken> = {
+      ip: req.ip,
+      userAgent: JSON.stringify(ua),
+      browser: ua.browser.name,
+      os: ua.os.name
+    };
+    return this.service.createAccessTokenFromRefreshToken(
+      refreshTokenDto.refreshToken,
+      refreshTokenPayload
+    );
   }
 }

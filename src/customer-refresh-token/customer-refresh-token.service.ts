@@ -36,7 +36,7 @@ export class CustomerRefreshTokenService {
     @InjectRepository(CustomerRefreshTokenRepository)
     private readonly repository: CustomerRefreshTokenRepository,
     @Inject(forwardRef(() => CustomerService))
-    private readonly authService: CustomerService,
+    private readonly customerService: CustomerService,
     private readonly jwt: JwtService
   ) {}
 
@@ -109,12 +109,16 @@ export class CustomerRefreshTokenService {
   public async createAccessTokenFromRefreshToken(refresh: string): Promise<{
     token: string;
     user: CustomerSerializer;
+    oldRefreshToken?: CustomerRefreshToken;
   }> {
-    const { user } = await this.resolveRefreshToken(refresh);
-    const token = await this.authService.generateAccessToken(user);
+    const { user, token: oldRefreshToken } = await this.resolveRefreshToken(
+      refresh
+    );
+    const token = await this.customerService.generateAccessToken(user);
     return {
       user,
-      token
+      token,
+      oldRefreshToken
     };
   }
 
@@ -161,7 +165,7 @@ export class CustomerRefreshTokenService {
       );
     }
 
-    return this.authService.findById(subId);
+    return this.customerService.findById(subId);
   }
 
   /**

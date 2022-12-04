@@ -287,4 +287,29 @@ export class CustomerService {
     }
     return this.repository.updateItem(customer, updateCustomerDto);
   }
+
+  async createAccessTokenFromRefreshToken(
+    refreshToken: string,
+    refreshTokenPayload: Partial<CustomerRefreshToken>
+  ) {
+    const { token, user, oldRefreshToken } =
+      await this.refreshTokenService.createAccessTokenFromRefreshToken(
+        refreshToken
+      );
+
+    if (oldRefreshToken) {
+      oldRefreshToken.isRevoked = true;
+      oldRefreshToken.save();
+    }
+    let newRefreshToken = await this.refreshTokenService.generateRefreshToken(
+      user,
+      refreshTokenPayload
+    );
+
+    return {
+      accessToken: token,
+      refreshToken: newRefreshToken,
+      expiresIn: tokenConfig.expiresIn
+    };
+  }
 }
