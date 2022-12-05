@@ -191,4 +191,9 @@ export class CustomerController {
       refreshTokenPayload
     );
   }
+
+  @Post('/revoke-refresh-token')
+  revokeRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.service.revokeCustomerRefreshToken(refreshTokenDto);
+  }
 }

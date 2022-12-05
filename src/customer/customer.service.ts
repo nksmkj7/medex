@@ -35,6 +35,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CustomerFilterDto } from './dto/customer-filter.dto';
 import { Pagination } from 'src/paginate';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 // const jwtConfig = config.get('jwt');
 const appConfig = config.get('app');
@@ -311,5 +312,16 @@ export class CustomerService {
       refreshToken: newRefreshToken,
       expiresIn: tokenConfig.expiresIn
     };
+  }
+
+  async revokeCustomerRefreshToken(refreshTokenDto: RefreshTokenDto) {
+    const { refreshToken } = refreshTokenDto;
+    const { token: oldRefreshToken } =
+      await this.refreshTokenService.resolveRefreshToken(refreshToken);
+    if (oldRefreshToken) {
+      oldRefreshToken.isRevoked = true;
+      await oldRefreshToken.save();
+    }
+    return oldRefreshToken;
   }
 }
