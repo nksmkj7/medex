@@ -35,8 +35,8 @@ const jwtConfig = config.get('jwt');
     // JwtTwoFactorStrategy,
     // CustomerJwtStrategy,
     // PassportModule,
-    TypeOrmModule.forFeature([CustomerRepository]),
-    JwtModule
+    TypeOrmModule.forFeature([CustomerRepository])
+    // JwtModule
   ]
 })
 export class CustomerModule {}

@@ -299,6 +299,9 @@ export class ScheduleService {
     const scheduleTime = schedule.schedules.find(
       (scheduleTime) => scheduleTime.id === scheduleId
     );
+    if (!scheduleTime) {
+      throw new UnprocessableEntityException("Schedule doesn't exist");
+    }
     if (scheduleTime.isBooked) {
       throw new UnprocessableEntityException(
         'Booking exits. Cannot delete  schedules.'
