@@ -185,15 +185,17 @@ export class BaseRepository<
         }
       }
     } else {
+      if (Object.keys(relationalSearchCriteria).length) {
+        for (const [key, value] of Object.entries(relationalSearchCriteria)) {
+          // whereCondition.push({
+          //   [key]: value
+          //   // ...searchCondition
+          // });
+
+          searchCondition = { ...searchCondition, [key]: value };
+        }
+      }
       whereCondition.push({ ...searchCondition });
-      // if (Object.keys(relationalSearchCriteria).length) {
-      //   for (const [key, value] of Object.entries(relationalSearchCriteria)) {
-      //     whereCondition.push({
-      //       [key]: value,
-      //       ...searchCondition
-      //     });
-      //   }
-      // }
     }
     const paginationInfo: PaginationInfoInterface =
       this.getPaginationInfo(searchFilter);

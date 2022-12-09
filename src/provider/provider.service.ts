@@ -32,6 +32,7 @@ import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 
 import * as config from 'config';
 import { ServiceFilterDto } from 'src/service/dto/service-filter.dto';
+import { ServiceFilterDtoWithoutProvider } from './provider.controller';
 
 const appConfig = config.get('app');
 
@@ -91,7 +92,6 @@ export class ProviderService {
         manager
       );
       if (!user) throw new BadRequestException();
-      console.log(providerInformation, 'provider information is --->');
       const provider = await this.providerRepository.store(
         {
           ...providerInformation,
@@ -249,19 +249,20 @@ export class ProviderService {
 
   async providerServices(
     id: number,
-    serviceFilterDto: ServiceFilterDto,
+    serviceFilterDto: ServiceFilterDtoWithoutProvider,
     referer?: string
   ) {
     let searchCondition = {};
     if (referer == appConfig.frontendUrl) {
       searchCondition['status'] = true;
     }
-    const user = await this.userRepository.findOneOrFail(id, {
+    const user = await this.userRepository.findOne(id, {
       relations: ['role']
     });
     if (!user || user.role.name !== 'provider') {
       throw new BadRequestException('Invalid user or user is not a provider');
     }
+    searchCondition['userId'] = id;
     return this.serviceRepository.paginate(
       serviceFilterDto,
       [],

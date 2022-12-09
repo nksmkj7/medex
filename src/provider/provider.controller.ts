@@ -16,13 +16,14 @@ import {
   Headers
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags, OmitType } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { ServiceFilterDto } from 'src/service/dto/service-filter.dto';
+import { ServiceDto } from 'src/service/dto/service.dto';
 import { ObjectLiteral } from 'typeorm';
 import { ProviderBannerDto } from './dto/provider-banner.dto';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
@@ -31,6 +32,11 @@ import { RegisterProviderDto } from './dto/register-provider.dto';
 import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 import { UpdateProviderDto } from './dto/update-provider.dto';
 import { ProviderService } from './provider.service';
+
+export class ServiceFilterDtoWithoutProvider extends OmitType(
+  ServiceFilterDto,
+  ['provider']
+) {}
 
 @ApiTags('provider')
 @UseGuards(JwtTwoFactorGuard, PermissionGuard)
@@ -59,6 +65,7 @@ export class ProviderController {
     return user;
   }
 
+  @Public()
   @Get('active')
   getActiveProviders() {
     return this.providerService.activeProviders();
@@ -123,7 +130,7 @@ export class ProviderController {
   getProviderServices(
     @Param('id', ParseIntPipe) id: number,
     @Headers() headers: object,
-    @Query() serviceFilterDto: ServiceFilterDto
+    @Query() serviceFilterDto: ServiceFilterDtoWithoutProvider
   ) {
     return this.providerService.providerServices(
       id,

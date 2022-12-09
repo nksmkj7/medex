@@ -765,17 +765,26 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Get service specialist by service id',
           route: [
             {
-              path: '/service/:id/specialists',
+              path: '/service/:serviceId/specialists',
               method: MethodList.GET
             }
           ]
         },
         {
-          name: 'Get service specialist by service id',
+          name: 'Get service specialist schedule by ids',
           route: [
             {
-              path: '/service/:id/specialists',
+              path: '/service/:serviceId/specialist-service/:specialistId',
               method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Update specialist service time',
+          route: [
+            {
+              path: '/service/:serviceId/assign-specialist/:specialistId',
+              method: MethodList.PUT
             }
           ]
         }
@@ -910,7 +919,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'View booking',
           route: [
             {
-              path: '/bookings',
+              path: '/booking',
               method: MethodList.GET
             }
           ]
@@ -919,7 +928,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Edit booking',
           route: [
             {
-              path: '/bookings/:id',
+              path: '/booking/:id',
               method: MethodList.PUT
             }
           ]

@@ -20,6 +20,7 @@ import { CategoryProviderServiceDto } from './dto/category-provider-service.dto'
 import { ProviderBannerEntity } from 'src/provider/entity/provider-banner.entity';
 import * as config from 'config';
 import { SearchCategoryProvideServiceDto } from './dto/search-category-provider-service.dto';
+import { BookingEntity } from 'src/booking/entity/booking.entity';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -88,7 +89,7 @@ export class ServiceService {
     if (referer == appConfig.frontendUrl) {
       searchCriteria['status'] = true;
     }
-    const { keywords } = serviceFilterDto;
+    const { keywords, provider = null } = serviceFilterDto;
     let relationalSearchCriteria = {};
     if (keywords) {
       relationalSearchCriteria = {
@@ -103,6 +104,9 @@ export class ServiceService {
           title: ILike(`%${keywords}%`)
         }
       };
+    }
+    if (provider) {
+      searchCriteria['userId'] = provider;
     }
     return this.repository.paginate(
       serviceFilterDto,
@@ -127,7 +131,7 @@ export class ServiceService {
     await queryRunner.connect();
     try {
       const { categoryId, subCategoryId, userId } = updateServiceDto;
-      if (!(await this.canBeUpdate())) {
+      if (!(await this.canBeUpdate(service))) {
         throw new BadRequestException(
           "Service can't be updated. It has reservations"
         );
@@ -219,8 +223,9 @@ export class ServiceService {
   }
 
   //TODO: not allow to update service if it already has reservations
-  async canBeUpdate() {
-    return true;
+  async canBeUpdate(service: ServiceEntity) {
+    const bookings = await this.serviceBookings(service.id);
+    return bookings.length <= 0;
   }
 
   assignSpecialistToService(
@@ -671,5 +676,13 @@ export class ServiceService {
           ? page + 1
           : 0
     };
+  }
+
+  serviceBookings(serviceId: string) {
+    return this.connection.manager
+      .createQueryBuilder(BookingEntity, 'booking')
+      .leftJoin('schedules', 'schedule', 'schedule.id = booking.scheduleId')
+      .where(`schedule.serviceId = :serviceId`, { serviceId })
+      .getMany();
   }
 }

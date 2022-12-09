@@ -264,7 +264,7 @@ export class BookingService {
   }
 
   findAll(bookingFilterDto: BookingFilterDto) {
-    const { keywords } = bookingFilterDto;
+    const { keywords, provider } = bookingFilterDto;
     let relationalSearchCriteria = {};
     if (keywords) {
       relationalSearchCriteria = {
@@ -279,11 +279,23 @@ export class BookingService {
         ]
       };
     }
+    if (provider) {
+      relationalSearchCriteria = {
+        ...relationalSearchCriteria,
+        schedule: {
+          service: {
+            userId: provider
+          }
+        }
+      };
+    }
     return this.repository.paginate(
       bookingFilterDto,
       ['customer', 'transactions', 'schedule', 'schedule.service'],
       ['firstName', 'lastName', 'email', 'phone'],
-      { groups: adminUserGroupsForSerializing }
+      { groups: adminUserGroupsForSerializing },
+      {},
+      relationalSearchCriteria
     );
   }
 
