@@ -281,7 +281,13 @@ export class BookingService {
     }
     return this.repository.paginate(
       bookingFilterDto,
-      ['customer', 'transactions', 'schedule', 'schedule.service'],
+      [
+        'customer',
+        'transactions',
+        'schedule',
+        'schedule.service',
+        'schedule.service.user'
+      ],
       ['firstName', 'lastName', 'email', 'phone'],
       { groups: adminUserGroupsForSerializing }
     );
