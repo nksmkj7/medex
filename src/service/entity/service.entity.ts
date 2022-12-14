@@ -55,6 +55,15 @@ export class ServiceEntity extends CustomUuidBaseEntity {
   @Column('decimal', { default: 0, precision: 12, scale: 4 })
   price: number;
 
+  @Column('integer', { default: 0 })
+  additionalTime: number;
+
+  @Column('time', { nullable: true })
+  startTime: string;
+
+  @Column('time', { nullable: true })
+  endTime: string;
+
   @OneToOne(() => CategoryEntity)
   @JoinColumn()
   category: CategoryEntity;

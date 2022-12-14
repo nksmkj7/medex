@@ -84,4 +84,57 @@ export class ScheduleController {
       year
     );
   }
+
+  // -----------------------
+
+  @Public()
+  @ApiTags('Public')
+  @Get(':serviceId')
+  getServiceSchedules(@Param('serviceId', ParseUUIDPipe) serviceId: string) {
+    return this.service.serviceSpecialistSchedules(serviceId);
+  }
+
+  @Public()
+  @ApiTags('Public')
+  //get schedule of specific date
+  @Get(':serviceId/:date')
+  getServiceDateSchedules(
+    @Param('serviceId', ParseUUIDPipe) serviceId: string,
+    @Param('date') date: string
+  ) {
+    return this.service.serviceSpecialistDateSchedules(serviceId, null, date);
+  }
+
+  @Put(':serviceId/:date/:scheduleId')
+  updateServiceSchedule(
+    @Param('serviceId', ParseUUIDPipe) serviceId: string,
+    @Param('date') date: string,
+    @Param('scheduleId', ParseUUIDPipe) scheduleId: string,
+    @Body() updateScheduleDto: UpdateScheduleDto
+  ) {
+    return this.service.updateSchedule(
+      serviceId,
+      null,
+      date,
+      scheduleId,
+      updateScheduleDto
+    );
+  }
+
+  @Public()
+  @ApiTags('Public')
+  //get schedule of specific month
+  @Get(':serviceId/year/:year/month/:month')
+  getServiceMonthSchedules(
+    @Param('serviceId', ParseUUIDPipe) serviceId: string,
+    @Param('month', ParseIntPipe) month: number,
+    @Param('year', ParseIntPipe) year: number
+  ) {
+    return this.service.serviceSpecialistMonthSchedules(
+      serviceId,
+      null,
+      month,
+      year
+    );
+  }
 }

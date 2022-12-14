@@ -64,12 +64,14 @@ export class ServiceService {
       const manager = queryRunner.manager;
       const service = manager.create(ServiceEntity, createServiceDto);
       await manager.save(service);
-      await this.assignSpecialistToService(manager, service, {
-        specialistIds: createServiceDto.specialistIds ?? [],
-        additionalTime: createServiceDto.additionalTime ?? 0,
-        startTime: createServiceDto.startTime ?? null,
-        endTime: createServiceDto.endTime ?? null
-      });
+      if (createServiceDto?.specialistIds?.length > 0) {
+        await this.assignSpecialistToService(manager, service, {
+          specialistIds: createServiceDto.specialistIds ?? [],
+          additionalTime: createServiceDto.additionalTime ?? 0,
+          startTime: createServiceDto.startTime ?? null,
+          endTime: createServiceDto.endTime ?? null
+        });
+      }
       await queryRunner.commitTransaction();
       return this.repository.transform(service);
     } catch (error) {
@@ -280,25 +282,36 @@ export class ServiceService {
     return { ...specialists, service: transformedService };
   }
 
-  async getSpecialistService(serviceId: string, specialistId: string) {
-    const specialistServiceDetail = await this.connection.manager
-      .createQueryBuilder()
-      .from(ServiceSpecialistEntity, 's')
-      .where('s.serviceId = :serviceId', {
-        serviceId
-      })
-      .andWhere('s.specialistId = :specialistId', {
-        specialistId
-      })
-      .innerJoin('s.service', 'service')
+  async getSpecialistService(serviceId: string, specialistId: string | null) {
+    const query = this.connection.manager.createQueryBuilder();
+    if (specialistId) {
+      query
+        .from(ServiceSpecialistEntity, 's')
+        .select(
+          's."additionalTime", s."startTime",s."endTime",service."durationInMinutes"'
+        )
+        .where('s.serviceId = :serviceId', {
+          serviceId
+        })
+        .andWhere('s.specialistId = :specialistId', {
+          specialistId
+        })
+        .innerJoin('s.service', 'service');
+    }
+    query
+      .from(ServiceEntity, 'service')
+      .where('service.id = :serviceId', { serviceId });
+    const specialistServiceDetail = await query
       .select(
-        's."additionalTime", s."startTime",s."endTime",service."durationInMinutes"'
+        'service."additionalTime", service."startTime",service."endTime",service."durationInMinutes"'
       )
       .getRawOne();
     if (!specialistServiceDetail) {
-      throw new NotFoundException(
-        'Such service for  specialist does not exists.'
-      );
+      let exceptionMessage = '';
+      if (specialistId)
+        exceptionMessage = 'Such service for  specialist does not exist.';
+      else exceptionMessage = 'Service does not exist.';
+      throw new NotFoundException(exceptionMessage);
     }
     return specialistServiceDetail;
   }
