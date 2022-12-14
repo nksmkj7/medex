@@ -97,7 +97,7 @@ export class ScheduleController {
   @Public()
   @ApiTags('Public')
   //get schedule of specific date
-  @Get(':serviceId/:date')
+  @Get('service/:serviceId/date/:date')
   getServiceDateSchedules(
     @Param('serviceId', ParseUUIDPipe) serviceId: string,
     @Param('date') date: string
