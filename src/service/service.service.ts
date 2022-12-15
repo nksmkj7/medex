@@ -297,15 +297,15 @@ export class ServiceService {
           specialistId
         })
         .innerJoin('s.service', 'service');
+    } else {
+      query
+        .from(ServiceEntity, 'service')
+        .where('service.id = :serviceId', { serviceId })
+        .select(
+          'service."additionalTime", service."startTime",service."endTime",service."durationInMinutes"'
+        );
     }
-    query
-      .from(ServiceEntity, 'service')
-      .where('service.id = :serviceId', { serviceId });
-    const specialistServiceDetail = await query
-      .select(
-        'service."additionalTime", service."startTime",service."endTime",service."durationInMinutes"'
-      )
-      .getRawOne();
+    const specialistServiceDetail = query.getRawOne();
     if (!specialistServiceDetail) {
       let exceptionMessage = '';
       if (specialistId)
