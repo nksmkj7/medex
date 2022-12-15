@@ -830,6 +830,33 @@ export const PermissionConfiguration: PermissionConfigInterface = {
               method: MethodList.POST
             }
           ]
+        },
+        {
+          name: 'View all service schedules',
+          route: [
+            {
+              path: '/schedule/:serviceId',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View specific date schedules of service',
+          route: [
+            {
+              path: 'schedule/service/:serviceId/date/:date',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Edit schedule of service for the specific date',
+          route: [
+            {
+              path: 'schedule/:serviceId/:date/:scheduleId',
+              method: MethodList.PUT
+            }
+          ]
         }
       ]
     },

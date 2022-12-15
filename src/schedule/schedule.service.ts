@@ -43,7 +43,12 @@ export class ScheduleService {
   ) {}
 
   async generateSchedules(generateScheduleDto: AutoGenerateScheduleDto) {
-    const { serviceId, specialistId, startDate, endDate } = generateScheduleDto;
+    const {
+      serviceId,
+      specialistId = null,
+      startDate,
+      endDate
+    } = generateScheduleDto;
     const validServiceSpecialist = await this.checkIfValidServiceSpecialist(
       serviceId,
       specialistId
@@ -62,6 +67,7 @@ export class ScheduleService {
       specialistId,
       month
     );
+
     if (schedulesOfTheMonth.length) {
       throw new UnprocessableEntityException(
         'Cannot auto generate schedules cause there are already schedules for this service'
@@ -69,6 +75,12 @@ export class ScheduleService {
     }
     const { additionalTime, startTime, endTime, durationInMinutes } =
       await this.serviceService.getSpecialistService(serviceId, specialistId);
+    if (!startTime || !endTime) {
+      throw new UnprocessableEntityException(
+        'Either start time or end time has not been set.'
+      );
+    }
+
     const serviceHolidays = await this.getServiceHolidays(serviceId);
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
@@ -109,18 +121,29 @@ export class ScheduleService {
     }
   }
 
-  async checkIfValidServiceSpecialist(serviceId: string, specialistId: string) {
-    if (!serviceId || !specialistId) {
+  async checkIfValidServiceSpecialist(
+    serviceId: string,
+    specialistId: string | null
+  ) {
+    if (!serviceId) {
       return false;
     }
-    return this.serviceRepository
+
+    const query = this.serviceRepository
       .createQueryBuilder('service')
-      .leftJoin('service.specialists', 'specialist')
-      .where('specialist.id = :specialistId', { specialistId })
-      .getCount();
+      .where(`service.id = :serviceId`, { serviceId });
+    if (specialistId) {
+      query
+        .leftJoin('service.specialists', 'specialist')
+        .where('specialist.id = :specialistId', { specialistId });
+    }
+    return query.getCount();
   }
 
-  serviceSpecialistSchedules(serviceId: string, specialistId: string) {
+  serviceSpecialistSchedules(
+    serviceId: string,
+    specialistId: string | null = null
+  ) {
     return this.repository.allServiceSpecialistSchedule(
       serviceId,
       specialistId

@@ -27,7 +27,7 @@ export class ScheduleRepository extends BaseRepository<
 
   async getSchedulesForMonth(
     serviceId: string,
-    specialistId: string,
+    specialistId: string | null,
     month: number,
     year = dayjs().year()
   ) {
@@ -50,7 +50,10 @@ export class ScheduleRepository extends BaseRepository<
     });
   }
 
-  async allServiceSpecialistSchedule(serviceId: string, specialistId: string) {
+  async allServiceSpecialistSchedule(
+    serviceId: string,
+    specialistId: string | null
+  ) {
     const schedules = await this.find({
       where: {
         serviceId,
@@ -62,7 +65,7 @@ export class ScheduleRepository extends BaseRepository<
 
   async dayServiceSpecialistSchedules(
     serviceId: string,
-    specialistId: string,
+    specialistId: string | null,
     date: string
   ) {
     return this.find({
