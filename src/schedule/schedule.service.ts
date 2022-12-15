@@ -66,6 +66,11 @@ export class ScheduleService {
     }
     const { additionalTime, startTime, endTime, durationInMinutes } =
       await this.serviceService.getSpecialistService(serviceId, specialistId);
+    if (!startTime || !endTime) {
+      throw new UnprocessableEntityException(
+        'Either start time or end time has not been set.'
+      );
+    }
 
     const serviceHolidays = await this.getServiceHolidays(serviceId);
     const queryRunner = this.connection.createQueryRunner();
