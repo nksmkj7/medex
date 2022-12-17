@@ -21,6 +21,7 @@ import * as dayjs from 'dayjs';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ProviderService } from 'src/provider/provider.service';
 import { weekDays } from 'src/common/constants/weekdays.constants';
+import { ScheduleTypeEnum } from 'src/service/enums/schedule-type.enum';
 
 @Injectable()
 export class ScheduleService {
@@ -64,8 +65,18 @@ export class ScheduleService {
         'Cannot auto generate schedules cause there are already schedules for this service'
       );
     }
-    const { additionalTime, startTime, endTime, durationInMinutes } =
-      await this.serviceService.getSpecialistService(serviceId, specialistId);
+    const {
+      additionalTime,
+      startTime,
+      endTime,
+      durationInMinutes,
+      scheduleType
+    } = await this.serviceService.getSpecialistService(serviceId, specialistId);
+    if (scheduleType === ScheduleTypeEnum.SERVICE_ONLY && specialistId) {
+      throw new BadRequestException(
+        'Service subjected to have only service schedule are not allowed to assign specialist schedule.'
+      );
+    }
     if (!startTime || !endTime) {
       throw new UnprocessableEntityException(
         'Either start time or end time has not been set.'

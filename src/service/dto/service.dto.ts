@@ -3,6 +3,7 @@ import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -28,6 +29,7 @@ import { IsTime } from 'src/common/validators/time-only.decorator';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceEntity } from '../entity/service.entity';
 import * as dayjs from 'dayjs';
+import { ScheduleTypeEnum } from '../enums/schedule-type.enum';
 
 export class ServiceDto {
   @IsNotEmpty()
@@ -119,4 +121,11 @@ export class ServiceDto {
   @IsNotEmpty()
   @IsBoolean()
   status: boolean;
+
+  @ApiProperty({
+    default: ScheduleTypeEnum.SPEICIALIST_ONLY
+  })
+  @IsNotEmpty()
+  @IsEnum(ScheduleTypeEnum)
+  scheduleType: ScheduleTypeEnum;
 }

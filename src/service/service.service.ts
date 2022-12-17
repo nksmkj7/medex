@@ -288,7 +288,7 @@ export class ServiceService {
       query
         .from(ServiceSpecialistEntity, 's')
         .select(
-          's."additionalTime", s."startTime",s."endTime",service."durationInMinutes"'
+          's."additionalTime", s."startTime",s."endTime",service."durationInMinutes",service."scheduleType"'
         )
         .where('s.serviceId = :serviceId', {
           serviceId
@@ -302,7 +302,7 @@ export class ServiceService {
         .from(ServiceEntity, 'service')
         .where('service.id = :serviceId', { serviceId })
         .select(
-          'service."additionalTime", service."startTime",service."endTime",service."durationInMinutes"'
+          'service."additionalTime", service."startTime",service."endTime",service."durationInMinutes",service."scheduleType"'
         );
     }
     const specialistServiceDetail = query.getRawOne();

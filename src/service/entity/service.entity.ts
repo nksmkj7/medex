@@ -18,6 +18,7 @@ import {
 } from 'typeorm';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceSpecialistEntity } from './specialist-service.entity';
+import { ScheduleTypeEnum } from '../enums/schedule-type.enum';
 
 @Entity('services')
 @Unique(['slug', 'userId'])
@@ -123,4 +124,14 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     this.amount_after_service_charge =
       this.amount_after_discount + this.service_charge_amount;
   }
+
+  @Column('enum', {
+    enum: [
+      ScheduleTypeEnum.BOTH,
+      ScheduleTypeEnum.SERVICE_ONLY,
+      ScheduleTypeEnum.SPEICIALIST_ONLY
+    ],
+    default: ScheduleTypeEnum.SPEICIALIST_ONLY
+  })
+  scheduleType: string;
 }
