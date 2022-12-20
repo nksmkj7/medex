@@ -530,7 +530,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'View all provider banners',
           route: [
             {
-              path: '/provider-banner',
+              path: '/providers/:id/banners',
               method: MethodList.GET
             }
           ]
@@ -539,7 +539,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'View provider banner by id',
           route: [
             {
-              path: '/provider-banner/:id',
+              path: '/providers/:id/banners/:bannerId',
               method: MethodList.GET
             }
           ]
@@ -548,7 +548,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Store new provider banner',
           route: [
             {
-              path: '/provider-banner',
+              path: '/providers/:id',
               method: MethodList.POST
             }
           ]
@@ -557,7 +557,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Update provider banner by id',
           route: [
             {
-              path: '/provider-banner/:id',
+              path: '/providers/:id/banners/:bannerId',
               method: MethodList.PUT
             }
           ]
@@ -566,7 +566,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Delete provider banner by id',
           route: [
             {
-              path: '/provider-banner/:id',
+              path: '/providers/:id/banners/:bannerId',
               method: MethodList.DELETE
             }
           ]
