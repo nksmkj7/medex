@@ -44,9 +44,9 @@ export class BookingSerializer extends ModelSerializer {
   status: BookingStatusEnum;
 
   @ApiPropertyOptional()
-  @Expose({
-    groups: adminUserGroupsForSerializing
-  })
+  // @Expose({
+  //   groups: adminUserGroupsForSerializing
+  // })
   createdAt: Date;
 
   @ApiPropertyOptional()

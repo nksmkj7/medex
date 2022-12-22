@@ -19,6 +19,7 @@ import { BookingService } from './booking.service';
 import { BookingFilterDto } from './dto/booking-filter.dto';
 import { BookingUpdateStatusDto } from './dto/booking-update-status.dto';
 import { BookingDto } from './dto/booking.dto';
+import { CustomerBookingFilterDto } from './dto/customer-booking-filter.dto';
 
 @ApiTags('Booking')
 @Controller('booking')
@@ -38,8 +39,11 @@ export class BookingController {
   @UseGuards(CustomerJwtAuthGuard)
   @ApiBearerAuth()
   @Get('/my-bookings')
-  customerBooking(@GetCustomer() customer: CustomerEntity) {
-    return this.service.getCustomerBooking(customer);
+  customerBooking(
+    @GetCustomer() customer: CustomerEntity,
+    @Query() customerBookingFilterDto: CustomerBookingFilterDto
+  ) {
+    return this.service.getCustomerBooking(customer, customerBookingFilterDto);
   }
 
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)

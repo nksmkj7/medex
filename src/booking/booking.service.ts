@@ -26,6 +26,8 @@ import { PaymentGatewayException } from 'src/exception/payment-gateway.exception
 import { TransactionStatusEnum } from './enums/transaction-status.enum';
 import { PaymentMethodEnum } from './enums/payment-method.enum';
 import * as config from 'config';
+import { paginate } from 'src/common/helper/pagination.helper';
+import { CustomerBookingFilterDto } from './dto/customer-booking-filter.dto';
 
 const appConfig = config.get('app');
 
@@ -212,19 +214,53 @@ export class BookingService {
     return transactionCode;
   }
 
-  async getCustomerBooking(customer: CustomerEntity) {
-    const bookings = await this.repository.paginate(
-      {},
-      ['transactions'],
-      [],
-      {
-        groups: [...basicFieldGroupsForSerializing]
-      },
-      {
-        customerId: customer.id
-      }
+  async getCustomerBooking(
+    customer: CustomerEntity,
+    customerBookingFilterDto: CustomerBookingFilterDto
+  ) {
+    const { limit = 10, page = 1 } = customerBookingFilterDto;
+    const offset = (page - 1) * limit;
+
+    const bookings = await this.connection.manager.query(
+      `SELECT booking.*,
+      "service"."title" as serviceTitle, 
+      "pi"."companyName" as "providerCompanyName", 
+      "pi"."businessLogo" as "providerBusinessLogo",
+      transaction."status" as "paymentStatus"
+      FROM "bookings" "booking" 
+      LEFT JOIN "schedules" "schedule" ON "schedule"."id" = "booking"."scheduleId"
+      LEFT JOIN "services" "service" ON "service"."id" = "schedule"."serviceId" 
+      LEFT JOIN "user" "user" ON "user"."id" = "service"."userId" 
+      LEFT JOIN "provider_informations" "pi" ON "pi"."userId" = "user"."id"
+      left join (select * from 
+        (select t."status",t."bookingId" ,ROW_NUMBER() OVER (PARTITION BY t."bookingId")
+        from transactions t
+        inner join bookings b
+        on b.id = t."bookingId"
+        where b."customerId" = $1
+        order by t."createdAt" desc ) as a
+      where a."row_number" = 1) "transaction"
+      on transaction."bookingId" = "booking"."id"
+      WHERE "booking"."customerId" =$2 limit $3 offset $4`,
+      [customer.id, customer.id, limit, offset]
     );
-    return bookings;
+
+    const totalCustomerBooking = await this.connection
+      .createEntityManager()
+      .count(BookingEntity, {
+        where: {
+          customerId: customer.id
+        }
+      });
+
+    return {
+      results: bookings,
+      totalItems: totalCustomerBooking,
+      pageSize: limit,
+      currentPage: page,
+      previous: page > 1 ? page - 1 : 0,
+      next: totalCustomerBooking > offset + limit ? page + 1 : 0
+    };
   }
 
   findAll(bookingFilterDto: BookingFilterDto) {
@@ -245,7 +281,13 @@ export class BookingService {
     }
     return this.repository.paginate(
       bookingFilterDto,
-      ['customer', 'transactions', 'schedule', 'schedule.service'],
+      [
+        'customer',
+        'transactions',
+        'schedule',
+        'schedule.service',
+        'schedule.service.user'
+      ],
       ['firstName', 'lastName', 'email', 'phone'],
       { groups: adminUserGroupsForSerializing }
     );
