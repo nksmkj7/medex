@@ -43,7 +43,7 @@ export class ServiceEntity extends CustomUuidBaseEntity {
   @Column('text')
   description: string;
 
-  @Column('decimal', { default: 0, precision: 4, scale: 4 })
+  @Column('decimal', { default: 0, precision: 4, scale: 4, })
   discount: number;
 
   @Column('decimal', { default: 0, precision: 12, scale: 4 })
@@ -114,4 +114,9 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     this.amount_after_service_charge =
       this.amount_after_discount + this.service_charge_amount;
   }
+
+  @Column('varchar', {
+    nullable: true
+  })
+  image:string
 }

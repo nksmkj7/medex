@@ -51,13 +51,13 @@ async function bootstrap() {
   useContainer(app.select(AppModule), {
     fallbackOnErrors: true
   });
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     transform: true,
-  //     whitelist: true,
-  //     forbidNonWhitelisted: true
-  //   })
-  // );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      // whitelist: true,
+      // forbidNonWhitelisted: true
+    })
+  );
 
   app.use(cookieParser());
   await app.listen(port);

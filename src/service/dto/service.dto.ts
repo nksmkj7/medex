@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsArray,
@@ -49,7 +49,8 @@ export class ServiceDto {
   @Validate(IsValidForeignKey, [CategoryEntity])
   categoryId: string;
 
-  @IsOptional()
+  @ApiPropertyOptional()
+  @Transform(({value}) => !!value ? value:null)
   @ValidateIf((object, value) => {
     return value;
   })
@@ -58,6 +59,7 @@ export class ServiceDto {
   subCategoryId: string;
 
   @IsNotEmpty()
+  @Transform(({ value }) => Number(value))
   @IsInt()
   @Validate(IsValidForeignKey, [UserEntity])
   userId: number;
@@ -66,47 +68,66 @@ export class ServiceDto {
   @IsString()
   description: string;
 
-  @IsOptional()
+  @ApiPropertyOptional()
+  @ValidateIf((object, value) => { 
+    return !!value
+  })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   durationInMinutes: number;
 
-  @IsOptional()
+  @ApiPropertyOptional()
+  @Transform(({value}) => value ? Number(value) : 0)
+  @ValidateIf((object, value) => { 
+    return !!value
+  })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
   discount: number;
 
-  @IsOptional()
+  @ApiPropertyOptional()
+  @Transform(({value}) => value ? Number(value) : 0)
+  @ValidateIf((object, value) => { 
+    return !!value
+  })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
   serviceCharge: number;
 
   @IsNotEmpty()
+  @Transform(({ value }) => Number(value))
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   price: number;
 
-  @IsOptional()
+  @ApiPropertyOptional()
+  @Transform(({value}) => !!value ? value: null)
+  @ValidateIf((object, value) => { 
+    return !!value
+  })
   @IsArray()
   @IsUUID('4', { each: true })
   @Validate(IsValidForeignKey, [SpecialistEntity], { each: true })
   specialistIds: string[];
 
-  @IsOptional()
+  @ApiPropertyOptional()
+  @ValidateIf((object, value) => { 
+    return !!value
+  })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   additionalTime: number;
 
-  @IsOptional()
+  @ApiProperty()
   @IsTime('24h')
   @Validate(RunValidation, [isGreaterThanTime, 'endTime'], {
     message: 'startTime must be greater than endTime'
   })
   startTime: string;
 
-  @IsOptional()
+  @ApiProperty()
   @IsTime('24h')
   @Validate(RunValidation, [isSmallerThanTime, 'startTime'], {
     message: 'endTime must be greater than startTime'
@@ -117,6 +138,20 @@ export class ServiceDto {
     default: true
   })
   @IsNotEmpty()
+  @Transform(({ value }) => value === 'true' ? true : false)
   @IsBoolean()
-  status: boolean;
+  status: boolean
+
+
+  @ApiPropertyOptional({
+    description: 'Service Image ',
+    type: 'string',
+    format: 'binary'
+  })
+  @ValidateIf((object, value) => { 
+    return !!value
+  })
+  image:string
 }
+
+

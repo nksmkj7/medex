@@ -17,7 +17,9 @@ export class CustomValidationPipe implements PipeTransform<any> {
     if (!value) {
       return value;
     }
-    const object = plainToClass(metatype, value);
+    const object = plainToClass(metatype, value, {
+      exposeDefaultValues:true
+    });
     const errors = await validate(object);
     if (errors.length > 0) {
       const translatedError = await this.transformError(errors);
