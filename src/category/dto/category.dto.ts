@@ -31,8 +31,8 @@ export class CategoryDto {
 
   @IsNotEmpty()
   @IsString()
-  @MaxLength(50, {
-    message: 'maxLength-{"ln":50,"count":50}'
+  @MaxLength(200, {
+    message: 'maxLength-{"ln":200,"count":200}'
   })
   @Validate(
     UniqueValidatorPipe,
