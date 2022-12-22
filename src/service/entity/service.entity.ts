@@ -44,7 +44,7 @@ export class ServiceEntity extends CustomUuidBaseEntity {
   @Column('text')
   description: string;
 
-  @Column('decimal', { default: 0, precision: 4, scale: 4 })
+  @Column('decimal', { default: 0, precision: 4, scale: 4, })
   discount: number;
 
   @Column('decimal', { default: 0, precision: 12, scale: 4 })
@@ -134,4 +134,9 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     default: ScheduleTypeEnum.SPEICIALIST_ONLY
   })
   scheduleType: string;
+  
+  @Column('varchar', {
+    nullable: true
+  })
+  image:string
 }

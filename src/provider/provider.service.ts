@@ -357,6 +357,12 @@ export class ProviderService {
         }
       }
     );
+      if (banner.image) {
+        const path = `public/images/provider-banners/${banner.image}`;
+        if (existsSync(path)) {
+          unlinkSync(`public/images/provider-banners/${banner.image}`);
+        }
+    }
     return banner.remove();
   }
 

@@ -21,6 +21,7 @@ import { ProviderBannerEntity } from 'src/provider/entity/provider-banner.entity
 import * as config from 'config';
 import { SearchCategoryProvideServiceDto } from './dto/search-category-provider-service.dto';
 import { BookingEntity } from 'src/booking/entity/booking.entity';
+import { existsSync, unlinkSync } from 'fs';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -120,7 +121,11 @@ export class ServiceService {
     );
   }
 
-  async update(id: string, updateServiceDto: UpdateServiceDto) {
+  async update(
+    id: string,
+    updateServiceDto: UpdateServiceDto,
+    file?: Express.Multer.File
+  ) {
     const queryRunner = this.connection.createQueryRunner();
     const manager = queryRunner.manager;
     const service = await this.repository.findOne(id, {
@@ -140,6 +145,15 @@ export class ServiceService {
       }
       await this.validIds({ userId, categoryId, subCategoryId });
       const { specialists, ...serviceOnlyData } = service;
+       updateServiceDto = file
+      ? { ...updateServiceDto, image: file.filename }
+      : { ...updateServiceDto, image: service.image };
+    if (service.image && file) {
+      const path = `public/images/service/${service.image}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/service/${service.image}`);
+      }
+    }
       const updatedService = manager.merge(
         ServiceEntity,
         service,

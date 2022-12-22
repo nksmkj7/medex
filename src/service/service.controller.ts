@@ -9,12 +9,15 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
-  Headers
+  Headers,
+  UploadedFile
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express/multer';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
@@ -35,8 +38,18 @@ export class ServiceController {
   constructor(private readonly service: ServiceService) {}
 
   @Post()
-  create(@Body() serviceDto: ServiceDto) {
-    return this.service.create(serviceDto);
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      multerOptionsHelper('public/images/service', 1000000)
+    )
+  )
+  @ApiConsumes('multipart/form-data')
+  create(@Body() serviceDto: ServiceDto,
+    @UploadedFile()
+    file: Express.Multer.File
+  ) {
+    return this.service.create({...serviceDto,image: file.filename});
   }
 
   @Public()
@@ -51,12 +64,21 @@ export class ServiceController {
   }
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      multerOptionsHelper('public/images/service', 1000000)
+    )
+  )
+  @ApiConsumes('multipart/form-data')
   @Put(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateServiceDto: UpdateServiceDto
+    @Body() updateServiceDto: UpdateServiceDto,
+    @UploadedFile()
+    file: Express.Multer.File,
   ): Promise<ServiceSerializer> {
-    return this.service.update(id, updateServiceDto);
+    return this.service.update(id, updateServiceDto,file);
   }
 
   @ApiTags('Public')
