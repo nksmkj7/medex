@@ -42,7 +42,6 @@ export abstract class AbstractUniqueValidator
    */
   public async validate<E>(value: string, args: UniqueValidationArguments<E>) {
     const _requestContext = args.object?._requestContext;
-
     const [EntityClass, findCondition = args.property] = args.constraints;
     const compareWith = args.constraints[2] || 'id';
     const { relations = [], whereCondition: extraWhereCondition = {} } =

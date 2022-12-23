@@ -2,31 +2,76 @@ import {
   ArgumentMetadata,
   Injectable,
   PipeTransform,
-  UnprocessableEntityException
+  UnprocessableEntityException,
+  ValidationPipe,
+  ValidationPipeOptions
 } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { classToPlain, plainToClass } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 import { omit } from 'lodash';
 
 @Injectable()
-export class CustomValidationPipe implements PipeTransform<any> {
-  async transform(value: any, { metatype }: ArgumentMetadata) {
-    if (!metatype || !this.toValidate(metatype)) {
-      return value;
+export class CustomValidationPipe extends ValidationPipe {
+  constructor(options: ValidationPipeOptions) {
+    super(options)
+  }
+
+  async transform(value: any, metadata: ArgumentMetadata) {
+    if (this.expectedType) {
+        metadata = Object.assign(Object.assign({}, metadata), { metatype: this.expectedType });
     }
-    if (!value) {
-      return value;
+    const metatype = metadata.metatype;
+    if (!metatype || !this.toValidate(metadata)) {
+        return this.isTransformEnabled
+            ? this.transformPrimitive(value, metadata)
+            : value;
     }
-    const object = plainToClass(metatype, value, {
-      exposeDefaultValues:true
-    });
-    const errors = await validate(object);
-    if (errors.length > 0) {
-      const translatedError = await this.transformError(errors);
-      throw new UnprocessableEntityException(translatedError);
-    }
-    if (value?._requestContext) return omit(value, ['_requestContext']);
-    return value;
+    const originalValue = value;
+    value = this.toEmptyIfNil(value);
+    const isNil = value !== originalValue;
+    const isPrimitive = this.isPrimitive(value);
+    this.stripProtoKeys(value);
+    let entity:object = plainToClass(metatype, value, this.transformOptions);
+     const originalEntity = entity;
+        const isCtorNotEqual = entity.constructor !== metatype;
+        if (isCtorNotEqual && !isPrimitive) {
+            entity.constructor = metatype;
+        }
+        else if (isCtorNotEqual) {
+            // when "entity" is a primitive value, we have to temporarily
+            // replace the entity to perform the validation against the original
+            // metatype defined inside the handler
+            entity = { constructor: metatype };
+        }
+    const errors = await this.validate(entity, this.validatorOptions);
+    if (value?._requestContext) {
+      value = omit(value, ['_requestContext'])
+      entity= omit(entity, ['_requestContext'])
+    };
+      if (errors.length > 0) {
+        const translatedError = await this.transformError(errors);
+        throw new UnprocessableEntityException(translatedError);
+      }
+      if (isPrimitive) {
+          // if the value is a primitive value and the validation process has been successfully completed
+          // we have to revert the original value passed through the pipe
+          entity = originalEntity;
+      }
+      if (this.isTransformEnabled) {
+          return entity;
+      }
+      if (isNil) {
+          // if the value was originally undefined or null, revert it back
+          return originalValue;
+      }
+
+  
+  
+      return Object.keys(this.validatorOptions).length > 0
+          ? classToPlain(entity, this.transformOptions)
+          : value;
+
+  
   }
 
   async transformError(errors: ValidationError[]) {
@@ -83,7 +128,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
     return errorAccumulator;
   }
 
-  private toValidate(metatype: unknown): boolean {
+  toValidate(metatype: unknown): boolean {
     const types: unknown[] = [String, Boolean, Number, Array, Object];
     return !types.includes(metatype);
   }

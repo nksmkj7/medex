@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipeOptions } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
@@ -108,7 +108,10 @@ const appConfig = config.get('app');
   providers: [
     {
       provide: APP_PIPE,
-      useClass: CustomValidationPipe
+      useFactory: (options: ValidationPipeOptions) => { 
+        return new CustomValidationPipe(options)
+      },
+      inject:['options']
     },
     {
       provide: APP_GUARD,
@@ -117,6 +120,10 @@ const appConfig = config.get('app');
     {
       provide: APP_FILTER,
       useClass: I18nExceptionFilterPipe
+    }, {
+      provide: 'options', useValue: {
+        transform:true
+      }
     }
   ],
   controllers: [AppController]
