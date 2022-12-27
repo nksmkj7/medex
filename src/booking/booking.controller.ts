@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetCustomer } from 'src/common/decorators/get-customer.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 import { CustomerJwtAuthGuard } from 'src/common/guard/customer-jwt-auth.guard';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
@@ -66,4 +67,6 @@ export class BookingController {
   ) {
     return this.service.updateBookingStatus(bookingId, bookingUpdateStatusDto);
   }
+
+  
 }

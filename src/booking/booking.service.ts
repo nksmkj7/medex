@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Get,
   Injectable,
   UnprocessableEntityException
 } from '@nestjs/common';
@@ -28,6 +29,8 @@ import { PaymentMethodEnum } from './enums/payment-method.enum';
 import * as config from 'config';
 import { paginate } from 'src/common/helper/pagination.helper';
 import { CustomerBookingFilterDto } from './dto/customer-booking-filter.dto';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 
 const appConfig = config.get('app');
 
@@ -41,7 +44,8 @@ export class BookingService {
     @InjectRepository(TransactionRepository)
     private readonly transactionRepository: TransactionRepository,
     @InjectConnection()
-    private readonly connection: Connection
+    private readonly connection: Connection,
+    @InjectQueue(config.get('backOffice.queueName')) private backOfficeQueue: Queue
   ) {
     this.transactionCodeLength = 16;
   }
@@ -90,24 +94,24 @@ export class BookingService {
       const transaction = await this.getBookingTransaction(customer, service);
       transaction.booking = booking;
       let paymentResponse = {};
-      if (
-        Number(bookingDto.totalAmount) !==
-        Number(this.calculateServiceTotalAmount(service))
-      ) {
-        throw new BadRequestException(
-          'Sent amount is not matched with the system calculated amount '
-        );
-      }
-      try {
-        paymentResponse = await this.verifyPayment(
-          bookingDto,
-          customer,
-          service
-        );
-      } catch (error) {
-        paymentResponse = error.message;
-        throw new PaymentGatewayException(error.message);
-      }
+      // if (
+      //   Number(bookingDto.totalAmount) !==
+      //   Number(this.calculateServiceTotalAmount(service))
+      // ) {
+      //   throw new BadRequestException(
+      //     'Sent amount is not matched with the system calculated amount '
+      //   );
+      // }
+      // try {
+      //   paymentResponse = await this.verifyPayment(
+      //     bookingDto,
+      //     customer,
+      //     service
+      //   );
+      // } catch (error) {
+      //   paymentResponse = error.message;
+      //   throw new PaymentGatewayException(error.message);
+      // }
       transaction.response_json = paymentResponse;
       transaction.currency = bookingDto.currency;
       transaction.paymentGateway = bookingDto.paymentGateway;
@@ -115,6 +119,11 @@ export class BookingService {
       transaction.status = TransactionStatusEnum.PAID;
       await manager.save(transaction);
       await queryRunner.commitTransaction();
+      await this.backOfficeQueue.add('booking', {
+        service,
+        booking,
+        transaction
+      })
       //   booking.transactions = [transaction];
       return booking;
     } catch (error) {
