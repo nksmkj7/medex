@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsDateString,
   IsEmail,
@@ -30,7 +31,15 @@ export class BookingDto {
   @IsEmail()
   email: string;
 
+  @ValidateIf((object) => !!object.phone)
   @IsNotEmpty()
+  @IsString()
+  dialCode: string;
+
+  @ValidateIf((object, value) => !!value)
+  @Transform(({ value, obj }) => {
+    return `${obj.dialCode}${value}`;
+  })
   @IsPhoneNumber()
   phone: string;
 

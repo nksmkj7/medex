@@ -30,7 +30,15 @@ export class UpdateProfileDto extends OmitType(CustomerSignupDto, [
   @IsString()
   lastName: string;
 
+  @ValidateIf((object) => !!object.phoneNumber)
+  @IsNotEmpty()
+  @IsString()
+  dialCode: string;
+
   @ValidateIf((object, value) => !!value)
+  @Transform(({ value, obj }) => {
+    return `${obj.dialCode}${value}`;
+  })
   @IsPhoneNumber()
   phoneNumber: string;
 

@@ -147,11 +147,11 @@ export class CustomerService {
     }
     const serializedCustomer = this.repository.transform(customer);
 
-    let refreshToken = await this.refreshTokenService.generateRefreshToken(
+    const refreshToken = await this.refreshTokenService.generateRefreshToken(
       serializedCustomer,
       refreshTokenPayload
     );
-    let accessToken = await this.generateAccessToken(serializedCustomer);
+    const accessToken = await this.generateAccessToken(serializedCustomer);
     return {
       accessToken,
       refreshToken,
@@ -302,7 +302,7 @@ export class CustomerService {
       oldRefreshToken.isRevoked = true;
       oldRefreshToken.save();
     }
-    let newRefreshToken = await this.refreshTokenService.generateRefreshToken(
+    const newRefreshToken = await this.refreshTokenService.generateRefreshToken(
       user,
       refreshTokenPayload
     );

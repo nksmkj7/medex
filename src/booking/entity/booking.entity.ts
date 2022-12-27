@@ -96,4 +96,9 @@ export class BookingEntity extends CustomBaseEntity {
         ? this.transactions[this.transactions.length - 1].status
         : 'unpaid';
   }
+
+  @Column('varchar', {
+    nullable: true
+  })
+  dialCode: string;
 }

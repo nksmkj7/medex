@@ -65,6 +65,9 @@ export class BookingSerializer extends ModelSerializer {
   email: string;
 
   @ApiProperty()
+  dialCode: string;
+
+  @ApiProperty()
   phone: string;
 
   @ApiProperty()
