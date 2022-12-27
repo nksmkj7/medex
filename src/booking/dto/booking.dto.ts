@@ -8,7 +8,8 @@ import {
   IsPhoneNumber,
   IsString,
   IsUUID,
-  Validate
+  Validate,
+  ValidateIf
 } from 'class-validator';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
 import { ScheduleEntity } from 'src/schedule/entity/schedule.entity';
@@ -43,7 +44,7 @@ export class BookingDto {
   @Validate(IsValidForeignKey, [ServiceEntity])
   serviceId: string;
 
-  @IsNotEmpty()
+  @ValidateIf((object, value) => !!value)
   @IsUUID(4)
   @Validate(IsValidForeignKey, [SpecialistEntity])
   specialistId: string;

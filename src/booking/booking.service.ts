@@ -28,6 +28,8 @@ import { PaymentMethodEnum } from './enums/payment-method.enum';
 import * as config from 'config';
 import { paginate } from 'src/common/helper/pagination.helper';
 import { CustomerBookingFilterDto } from './dto/customer-booking-filter.dto';
+import { ISchedule, ScheduleEntity } from 'src/schedule/entity/schedule.entity';
+import dayjs = require('dayjs');
 
 const appConfig = config.get('app');
 
@@ -47,14 +49,17 @@ export class BookingService {
   }
 
   async storeBooking(bookingDto: BookingDto, customer: CustomerEntity) {
+    const whereCondition = {
+      serviceId: bookingDto.serviceId,
+      date: bookingDto.scheduleDate
+    };
+    if (bookingDto.specialistId) {
+      whereCondition['specialistId'] = bookingDto.specialistId;
+    }
     const schedule = await this.scheduleRepository.findOne(
       bookingDto.scheduleId,
       {
-        where: {
-          serviceId: bookingDto.serviceId,
-          specialistId: bookingDto.specialistId,
-          date: bookingDto.scheduleDate
-        },
+        where: whereCondition,
         relations: ['service']
       }
     );
@@ -67,7 +72,18 @@ export class BookingService {
     if (!scheduleTime || scheduleTime.isBooked) {
       throw new UnprocessableEntityException('Schedule not available');
     }
-
+    if (schedule.specialistId && !bookingDto.specialistId) {
+      throw new UnprocessableEntityException(
+        'Specialist has been assigned to schedule. Specialist is missing in booking'
+      );
+    }
+    const scheduleDayTime = dayjs(
+      `${schedule.date} ${scheduleTime.startTime}`,
+      'YYYY-mm-dd HH:mm'
+    );
+    if (scheduleDayTime.isBefore(dayjs())) {
+      throw new UnprocessableEntityException('Cannot booked past date.');
+    }
     scheduleTime['isBooked'] = true;
     const service = schedule.service;
     const queryRunner = this.connection.createQueryRunner();
