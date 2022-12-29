@@ -13,7 +13,7 @@ import {
 import { ServiceRepository } from 'src/service/service.repository';
 import { ServiceService } from 'src/service/service.service';
 import { SpecialistRepository } from 'src/specialist/specialist.repository';
-import { Between, Connection, DeepPartial } from 'typeorm';
+import { Between, Connection, DeepPartial, In } from 'typeorm';
 import { AutoGenerateScheduleDto } from './dto/auto-generate-schedule.dto';
 import { ISchedule, ScheduleEntity } from './entity/schedule.entity';
 import { ScheduleRepository } from './schedule.repository';
@@ -298,11 +298,29 @@ export class ScheduleService {
       );
     }
 
+    const scheduleIds = await this.connection.manager
+    .createQueryBuilder(ScheduleEntity,'schedule')
+    .select('schedule.id')
+    .where(
+      {
+        specialistId: deleteScheduleDto?.['specialistId'] ?? null,
+        serviceId: deleteScheduleDto['serviceId'],
+        date: dateCondition['scheduleDate']
+      }
+    )
+    .getRawMany()
+    if(!scheduleIds.length){
+      throw new UnprocessableEntityException('Schedules don\'nt exist')
+    }
     const bookingOnDate = await this.connection
       .createEntityManager()
       .count(BookingEntity, {
-        where: dateCondition
+        where: {
+          ...dateCondition,
+          scheduleId:In(scheduleIds.map(schedule => schedule.scheduleId))
+        }
       });
+    
     if (bookingOnDate > 0) {
       throw new UnprocessableEntityException(
         'Booking exits. Cannot delete  schedules.'
