@@ -40,6 +40,7 @@ export interface IProviderWithService {
   banner?: string;
   banner_link?: string;
   category_title: string;
+  service_image?:string;
   [index: string]: string | number;
 }
 
@@ -148,12 +149,12 @@ export class ServiceService {
        updateServiceDto = file
       ? { ...updateServiceDto, image: file.filename }
       : { ...updateServiceDto, image: service.image };
-    if (service.image && file) {
-      const path = `public/images/service/${service.image}`;
-      if (existsSync(path)) {
-        unlinkSync(`public/images/service/${service.image}`);
+      if (service.image && file) {
+        const path = `public/images/service/${service.image}`;
+        if (existsSync(path)) {
+          unlinkSync(`public/images/service/${service.image}`);
+        }
       }
-    }
       const updatedService = manager.merge(
         ServiceEntity,
         service,
@@ -446,7 +447,7 @@ export class ServiceService {
         'service.userId as provider_id',
         'service.durationInMinutes as duration_in_minutes',
         'service.description as description',
-        'service.image as service_image',
+        `COALESCE(CONCAT(service.image),null) as service_image`,
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
         'CAST((discount/100)*price as DOUBLE PRECISION) as discounted_amount',
@@ -523,6 +524,7 @@ export class ServiceService {
 
   groupProviderWithService(providerWithService: IProviderWithService[]) {
     const getFormattedData = (data: IProviderWithService) => {
+      data.service_image = data?.service_image ? `${appConfig.appUrl}/images/service/${data.service_image}`: null 
       return omit(data, [
         'row_number',
         'provider_id',
