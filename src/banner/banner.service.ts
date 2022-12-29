@@ -32,7 +32,7 @@ export class BannerService implements CommonServiceInterface<BannerSerializer> {
     referer?: string
   ): Promise<Pagination<BannerSerializer>> {
     let searchCriteria = {};
-    if (referer == appConfig.frontendUrl) {
+    if (referer !== appConfig.frontendUrl+"/") {
       searchCriteria['status'] = true;
     }
     return this.repository.paginate(

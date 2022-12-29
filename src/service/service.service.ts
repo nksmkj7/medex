@@ -89,7 +89,7 @@ export class ServiceService {
     referer?: string
   ): Promise<Pagination<ServiceSerializer>> {
     let searchCriteria = {};
-    if (referer == appConfig.frontendUrl) {
+    if (referer !== appConfig.frontendUrl+"/") {
       searchCriteria['status'] = true;
     }
     const { keywords, provider = null } = serviceFilterDto;

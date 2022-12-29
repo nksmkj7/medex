@@ -253,7 +253,7 @@ export class ProviderService {
     referer?: string
   ) {
     let searchCondition = {};
-    if (referer == appConfig.frontendUrl) {
+    if (referer !== appConfig.frontendUrl+"/") {
       searchCondition['status'] = true;
     }
     const user = await this.userRepository.findOne(id, {

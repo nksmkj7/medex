@@ -84,15 +84,15 @@ export class CategoryDto {
   })
   shortDescription: string;
 
-  @Type(() => Boolean)
+  @Transform(({value}) => value === 'true' ? true: false)
   @IsBoolean()
   isNew: boolean;
 
-  @Type(() => Boolean)
+  @Transform(({value}) => value === 'true' ? true: false)
   @IsBoolean()
   isFeatured: boolean;
 
-  @Type(() => Boolean)
+  @Transform(({value}) => value === 'true' ? true: false)
   @IsBoolean()
   status: boolean;
 }

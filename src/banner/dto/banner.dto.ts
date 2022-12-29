@@ -60,7 +60,9 @@ export class BannerDto {
   })
   link: string;
 
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    return value === 'true' ? true : false
+  })
   @IsBoolean()
   status: boolean;
 }
