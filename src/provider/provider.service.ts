@@ -181,7 +181,7 @@ export class ProviderService {
         }
       });
       const previousFile = provider.businessLogo;
-      providerDto = !!file
+      providerDto = Object.keys(file).length
         ? { ...providerDto, businessLogo: file.filename }
         : {
             ...providerDto,
@@ -193,7 +193,7 @@ export class ProviderService {
         providerDto
       );
       await queryRunner.commitTransaction();
-      if (providerDto.businessLogo && previousFile) {
+      if (providerDto.businessLogo && !!Object.keys(file).length) {
         const path = `public/images/profile/${previousFile}`;
         if (existsSync(path)) {
           unlinkSync(`public/images/profile/${previousFile}`);

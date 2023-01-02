@@ -146,10 +146,10 @@ export class ServiceService {
       }
       await this.validIds({ userId, categoryId, subCategoryId });
       const { specialists, ...serviceOnlyData } = service;
-       updateServiceDto = file
+       updateServiceDto = Object.keys(file).length
       ? { ...updateServiceDto, image: file.filename }
       : { ...updateServiceDto, image: service.image };
-      if (service.image && file) {
+      if (service.image && Object.keys(file).length) {
         const path = `public/images/service/${service.image}`;
         if (existsSync(path)) {
           unlinkSync(`public/images/service/${service.image}`);
