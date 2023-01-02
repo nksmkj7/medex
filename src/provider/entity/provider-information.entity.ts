@@ -126,4 +126,16 @@ export class ProviderInformationEntity extends CustomBaseEntity {
     type: 'jsonb'
   })
   daySchedules: IDaySchedules;
+
+  @Column({
+    type:  'decimal',
+    nullable: true
+  })
+  latitude: number
+
+  @Column({
+    type: 'decimal',
+    nullable: true
+  })
+  longitude: number
 }
