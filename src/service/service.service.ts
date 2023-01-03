@@ -22,6 +22,8 @@ import * as config from 'config';
 import { SearchCategoryProvideServiceDto } from './dto/search-category-provider-service.dto';
 import { BookingEntity } from 'src/booking/entity/booking.entity';
 import { existsSync, unlinkSync } from 'fs';
+import { UserEntity } from 'src/auth/entity/user.entity';
+import { CategoryEntity } from 'src/category/entity/category.entity';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -408,7 +410,20 @@ export class ServiceService {
       page = 1,
       limit = 4
     } = categoryProviderServiceDto;
-    const query = this.connection.createQueryBuilder(ServiceEntity, 'service');
+    const query = this.connection
+      .createQueryBuilder(ServiceEntity, 'service')
+      .leftJoin(UserEntity,'usr','usr.id = service."userId"')
+      .leftJoin(CategoryEntity,'category','category.id = service."categoryId"')
+      .leftJoin(
+        'provider_informations',
+        'provider',
+        'provider.userId = service.userId'
+      )
+      .where(`usr.status = :userStatus`,{userStatus: 'active'})
+      .andWhere(`category.status = :categoryStatus`,{categoryStatus: true})
+      .andWhere('service.status = :status', {
+        status: true
+      });
     query
       .where(`service.categoryId=:categoryId`, {
         categoryId
@@ -466,12 +481,6 @@ export class ServiceService {
         'provider_banner.link as banner_link',
         'category.title as category_title'
       ])
-      .leftJoin(
-        'provider_informations',
-        'provider',
-        'provider.userId = service.userId'
-      )
-      .leftJoin('categories', 'category', 'category.id = service.categoryId')
       .andWhere('service.userId In (:...users)', {
         users: [...categoryAssociatedProviders]
       })
@@ -597,21 +606,31 @@ export class ServiceService {
       page = 1,
       limit = 4
     } = searchCategoryProvideServiceDto;
-    const query = this.connection.createQueryBuilder(ServiceEntity, 'service');
-    query.where('service.status = :status', {
-      status: true
-    });
+    const query = this.connection
+      .createQueryBuilder(ServiceEntity, 'service')
+      .leftJoin(UserEntity,'usr','usr.id = service."userId"')
+      .leftJoin(CategoryEntity,'category','category.id = service."categoryId"')
+      .leftJoin(
+        'provider_informations',
+        'provider',
+        'provider.userId = service.userId'
+      )
+      .where(`usr.status = :userStatus`,{userStatus: 'active'})
+      .andWhere(`category.status = :categoryStatus`,{categoryStatus: true})
+      .andWhere('service.status = :status', {
+        status: true
+      });
+  
     if (categoryId) {
       query.andWhere(`service.categoryId=:categoryId`, {
         categoryId
       });
     }
     if (keywords) {
-      query.andWhere(`service.title Ilike :keywords`, {
+      query.andWhere(`service.title Ilike :keywords OR provider."companyName" Ilike :keywords OR category.title Ilike :keywords`, {
         keywords: `%${keywords}%`
       });
     }
-
     const offset = (page - 1) * limit;
     const totalCategoryAssociatedProvidersCount = await query
       .clone()
@@ -655,11 +674,6 @@ export class ServiceService {
         'provider_banner.image as banner',
         'provider_banner.link as banner_link'
       ])
-      .leftJoin(
-        'provider_informations',
-        'provider',
-        'provider.userId = service.userId'
-      )
       .andWhere('service.userId In (:...users)', {
         users: [...categoryAssociatedProviders]
       })
