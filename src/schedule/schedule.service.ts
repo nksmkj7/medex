@@ -310,14 +310,14 @@ export class ScheduleService {
     )
     .getRawMany()
     if(!scheduleIds.length){
-      throw new UnprocessableEntityException('Schedules don\'nt exist')
+      throw new UnprocessableEntityException('Schedules don\'t exist')
     }
     const bookingOnDate = await this.connection
       .createEntityManager()
       .count(BookingEntity, {
         where: {
           ...dateCondition,
-          scheduleId:In(scheduleIds.map(schedule => schedule.scheduleId))
+          scheduleId:In(scheduleIds.map(schedule => schedule.schedule_id))
         }
       });
     
@@ -326,9 +326,8 @@ export class ScheduleService {
         'Booking exits. Cannot delete  schedules.'
       );
     }
-
     return this.repository.delete({
-      specialistId: deleteScheduleDto['specialistId'],
+      specialistId: deleteScheduleDto?.['specialistId'] ?? null,
       serviceId: deleteScheduleDto['serviceId'],
       date: dateCondition['scheduleDate']
     });
