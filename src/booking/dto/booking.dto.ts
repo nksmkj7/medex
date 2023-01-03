@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
+  isPhoneNumber,
   IsPhoneNumber,
   IsString,
   IsUUID,
@@ -13,6 +14,7 @@ import {
   ValidateIf
 } from 'class-validator';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
+import { RunValidation } from 'src/common/validators/run-validation.validators';
 import { ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
@@ -37,10 +39,9 @@ export class BookingDto {
   dialCode: string;
 
   @ValidateIf((object, value) => !!value)
-  @Transform(({ value, obj }) => {
-    return `${obj.dialCode}${value}`;
+  @Validate(RunValidation, [(dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`), 'dialCode'], {
+    message: 'invalid phone number'
   })
-  @IsPhoneNumber()
   phone: string;
 
   @IsNotEmpty()
