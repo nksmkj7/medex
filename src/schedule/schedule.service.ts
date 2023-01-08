@@ -13,7 +13,7 @@ import {
 import { ServiceRepository } from 'src/service/service.repository';
 import { ServiceService } from 'src/service/service.service';
 import { SpecialistRepository } from 'src/specialist/specialist.repository';
-import { Connection, DeepPartial } from 'typeorm';
+import { Between, Connection, DeepPartial, In } from 'typeorm';
 import { AutoGenerateScheduleDto } from './dto/auto-generate-schedule.dto';
 import { ISchedule, ScheduleEntity } from './entity/schedule.entity';
 import { ScheduleRepository } from './schedule.repository';
@@ -21,6 +21,15 @@ import * as dayjs from 'dayjs';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ProviderService } from 'src/provider/provider.service';
 import { weekDays } from 'src/common/constants/weekdays.constants';
+import { DailyDeleteScheduleDto } from './dto/daily-delete-schedule.dto';
+import { MonthlyDeleteScheduleDto } from './dto/monthly-delete-schedule.dto';
+import { BookingEntity } from 'src/booking/entity/booking.entity';
+
+type monthlyScheduleResetType = 'monthly';
+type dailyScheduleResetType = 'daily';
+
+type R = MonthlyDeleteScheduleDto | DailyDeleteScheduleDto;
+import { ScheduleTypeEnum } from 'src/service/enums/schedule-type.enum';
 
 @Injectable()
 export class ScheduleService {
@@ -34,7 +43,12 @@ export class ScheduleService {
   ) {}
 
   async generateSchedules(generateScheduleDto: AutoGenerateScheduleDto) {
-    const { serviceId, specialistId, startDate, endDate } = generateScheduleDto;
+    const {
+      serviceId,
+      specialistId = null,
+      startDate,
+      endDate
+    } = generateScheduleDto;
     const validServiceSpecialist = await this.checkIfValidServiceSpecialist(
       serviceId,
       specialistId
@@ -53,13 +67,30 @@ export class ScheduleService {
       specialistId,
       month
     );
+
     if (schedulesOfTheMonth.length) {
       throw new UnprocessableEntityException(
         'Cannot auto generate schedules cause there are already schedules for this service'
       );
     }
-    const { additionalTime, startTime, endTime, durationInMinutes } =
-      await this.serviceService.getSpecialistService(serviceId, specialistId);
+    const {
+      additionalTime,
+      startTime,
+      endTime,
+      durationInMinutes,
+      scheduleType
+    } = await this.serviceService.getSpecialistService(serviceId, specialistId);
+    if (scheduleType === ScheduleTypeEnum.SERVICE_ONLY && specialistId) {
+      throw new BadRequestException(
+        'Service subjected to have only service schedule are not allowed to assign specialist schedule.'
+      );
+    }
+    if (!startTime || !endTime) {
+      throw new UnprocessableEntityException(
+        'Either start time or end time has not been set.'
+      );
+    }
+
     const serviceHolidays = await this.getServiceHolidays(serviceId);
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
@@ -100,18 +131,29 @@ export class ScheduleService {
     }
   }
 
-  async checkIfValidServiceSpecialist(serviceId: string, specialistId: string) {
-    if (!serviceId || !specialistId) {
+  async checkIfValidServiceSpecialist(
+    serviceId: string,
+    specialistId: string | null
+  ) {
+    if (!serviceId) {
       return false;
     }
-    return this.serviceRepository
+
+    const query = this.serviceRepository
       .createQueryBuilder('service')
-      .leftJoin('service.specialists', 'specialist')
-      .where('specialist.id = :specialistId', { specialistId })
-      .getCount();
+      .where(`service.id = :serviceId`, { serviceId });
+    if (specialistId) {
+      query
+        .leftJoin('service.specialists', 'specialist')
+        .where('specialist.id = :specialistId', { specialistId });
+    }
+    return query.getCount();
   }
 
-  serviceSpecialistSchedules(serviceId: string, specialistId: string) {
+  serviceSpecialistSchedules(
+    serviceId: string,
+    specialistId: string | null = null
+  ) {
     return this.repository.allServiceSpecialistSchedule(
       serviceId,
       specialistId
@@ -232,5 +274,93 @@ export class ScheduleService {
   async getServiceHolidays(serviceId: string) {
     const service = await this.serviceRepository.findOneOrFail(serviceId);
     return this.providerService.providerWeekHolidays(service.userId);
+  }
+
+  async deleteSchedule<T>(
+    deleteScheduleDto: R,
+    type: dailyScheduleResetType | monthlyScheduleResetType
+  ): Promise<any> {
+    const dateCondition = {};
+
+    if (deleteScheduleDto?.['date'] && type === 'daily') {
+      dateCondition['scheduleDate'] = deleteScheduleDto['date'];
+    } else if (
+      deleteScheduleDto?.['year'] &&
+      deleteScheduleDto?.['month'] &&
+      type === 'monthly'
+    ) {
+      const convertedDate = `${deleteScheduleDto['year']}-${String(
+        deleteScheduleDto?.['month']
+      ).padStart(2, '0')}`;
+      dateCondition['scheduleDate'] = Between(
+        dayjs(convertedDate, 'YYYY-MM').startOf('month'),
+        dayjs(convertedDate, 'YYYY-MM').endOf('month')
+      );
+    }
+
+    const scheduleIds = await this.connection.manager
+    .createQueryBuilder(ScheduleEntity,'schedule')
+    .select('schedule.id')
+    .where(
+      {
+        specialistId: deleteScheduleDto?.['specialistId'] ?? null,
+        serviceId: deleteScheduleDto['serviceId'],
+        date: dateCondition['scheduleDate']
+      }
+    )
+    .getRawMany()
+    if(!scheduleIds.length){
+      throw new UnprocessableEntityException('Schedules don\'t exist')
+    }
+    const bookingOnDate = await this.connection
+      .createEntityManager()
+      .count(BookingEntity, {
+        where: {
+          ...dateCondition,
+          scheduleId:In(scheduleIds.map(schedule => schedule.schedule_id))
+        }
+      });
+    
+    if (bookingOnDate > 0) {
+      throw new UnprocessableEntityException(
+        'Booking exits. Cannot delete  schedules.'
+      );
+    }
+    return this.repository.delete({
+      specialistId: deleteScheduleDto?.['specialistId'] ?? null,
+      serviceId: deleteScheduleDto['serviceId'],
+      date: dateCondition['scheduleDate']
+    });
+  }
+
+  async deleteSpecificDaySchedule(
+    serviceId: string,
+    specialistId: string,
+    date: string,
+    scheduleId: string
+  ) {
+    const schedule = await this.repository.findOneOrFail({
+      where: {
+        serviceId,
+        date,
+        specialistId
+      }
+    });
+    const scheduleTime = schedule.schedules.find(
+      (scheduleTime) => scheduleTime.id === scheduleId
+    );
+    if (!scheduleTime) {
+      throw new UnprocessableEntityException("Schedule doesn't exist");
+    }
+    if (scheduleTime.isBooked) {
+      throw new UnprocessableEntityException(
+        'Booking exits. Cannot delete  schedules.'
+      );
+    }
+    schedule.schedules = schedule.schedules.filter(
+      (scheduleTime) => scheduleTime.id !== scheduleId
+    );
+
+    return schedule.save();
   }
 }

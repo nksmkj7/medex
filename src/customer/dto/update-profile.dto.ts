@@ -5,11 +5,16 @@ import {
   IsEmpty,
   IsEnum,
   IsNotEmpty,
+  IsNumberString,
   IsOptional,
+  isPhoneNumber,
   IsPhoneNumber,
   IsString,
+  Validate,
+  validate,
   ValidateIf
 } from 'class-validator';
+import { RunValidation } from 'src/common/validators/run-validation.validators';
 import { CustomerSignupDto } from './customer-signup.dto';
 
 enum GenderEnum {
@@ -30,8 +35,15 @@ export class UpdateProfileDto extends OmitType(CustomerSignupDto, [
   @IsString()
   lastName: string;
 
+  @ValidateIf((object) => !!object.phoneNumber)
+  @IsNotEmpty()
+  @IsString()
+  dialCode: string;
+
   @ValidateIf((object, value) => !!value)
-  @IsPhoneNumber()
+  @Validate(RunValidation, [(dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`), 'dialCode'], {
+    message: 'invalid phone number'
+  })
   phoneNumber: string;
 
   @IsOptional()

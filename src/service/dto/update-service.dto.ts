@@ -7,10 +7,7 @@ import { ServiceDto } from './service.dto';
 
 export class UpdateServiceDto extends OmitType(ServiceDto, [
   'title',
-  'specialistIds',
-  'additionalTime',
-  'startTime',
-  'endTime'
+  'specialistIds'
 ]) {
   // @IsNotEmpty()
   // @IsString()

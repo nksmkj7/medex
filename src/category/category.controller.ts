@@ -70,6 +70,7 @@ export class CategoryController {
     return this.categoryService.findAll(categoryFilterDto, headers['referer']);
   }
 
+  @Public()
   @Get('active')
   getActiveCategories() {
     return this.categoryService.activeCategories();

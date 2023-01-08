@@ -91,7 +91,7 @@ export class SpecialistDto {
   @ApiProperty({
     default: true
   })
-  @Type(() => Boolean)
+  @Transform(({value}) => value === 'true' ? true: false)
   @IsBoolean()
   status: boolean;
 }

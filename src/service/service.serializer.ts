@@ -67,4 +67,10 @@ export class ServiceSerializer extends ModelSerializer {
 
   @Exclude()
   specialists: SpecialistSerializer[];
+
+
+  @ApiProperty()
+  @Transform(({ value }) => value ? `${appConfig.appUrl}/images/service/${value}` : null) 
+  image: string;
+
 }

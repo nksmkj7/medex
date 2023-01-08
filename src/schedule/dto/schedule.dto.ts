@@ -3,8 +3,10 @@ import { Type } from 'class-transformer';
 import {
   IsDate,
   IsNotEmpty,
+  IsOptional,
   IsUUID,
   Validate,
+  ValidateIf,
   ValidateNested
 } from 'class-validator';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
@@ -36,7 +38,7 @@ export class ScheduleDto {
   @Validate(IsValidForeignKey, [ServiceEntity])
   serviceId: string;
 
-  @IsNotEmpty()
+  @ValidateIf((object, value) => !!value)
   @IsUUID(4)
   @Validate(IsValidForeignKey, [SpecialistEntity])
   specialistId: string;

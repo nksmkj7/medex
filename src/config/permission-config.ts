@@ -530,7 +530,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'View all provider banners',
           route: [
             {
-              path: '/provider-banner',
+              path: '/providers/:id/banners',
               method: MethodList.GET
             }
           ]
@@ -539,7 +539,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'View provider banner by id',
           route: [
             {
-              path: '/provider-banner/:id',
+              path: '/providers/:id/banners/:bannerId',
               method: MethodList.GET
             }
           ]
@@ -548,7 +548,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Store new provider banner',
           route: [
             {
-              path: '/provider-banner',
+              path: '/providers/:id',
               method: MethodList.POST
             }
           ]
@@ -557,7 +557,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Update provider banner by id',
           route: [
             {
-              path: '/provider-banner/:id',
+              path: '/providers/:id/banners/:bannerId',
               method: MethodList.PUT
             }
           ]
@@ -566,7 +566,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Delete provider banner by id',
           route: [
             {
-              path: '/provider-banner/:id',
+              path: '/providers/:id/banners/:bannerId',
               method: MethodList.DELETE
             }
           ]
@@ -765,17 +765,26 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Get service specialist by service id',
           route: [
             {
-              path: '/service/:id/specialists',
+              path: '/service/:serviceId/specialists',
               method: MethodList.GET
             }
           ]
         },
         {
-          name: 'Get service specialist by service id',
+          name: 'Get service specialist schedule by ids',
           route: [
             {
-              path: '/service/:id/specialists',
+              path: '/service/:serviceId/specialist-service/:specialistId',
               method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Update specialist service time',
+          route: [
+            {
+              path: '/service/:serviceId/assign-specialist/:specialistId',
+              method: MethodList.PUT
             }
           ]
         }
@@ -819,6 +828,33 @@ export const PermissionConfiguration: PermissionConfigInterface = {
             {
               path: '/schedule/generate-schedule',
               method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'View all service schedules',
+          route: [
+            {
+              path: '/schedule/:serviceId',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View specific date schedules of service',
+          route: [
+            {
+              path: 'schedule/service/:serviceId/date/:date',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Edit schedule of service for the specific date',
+          route: [
+            {
+              path: 'schedule/:serviceId/:date/:scheduleId',
+              method: MethodList.PUT
             }
           ]
         }
@@ -910,7 +946,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'View booking',
           route: [
             {
-              path: '/bookings',
+              path: '/booking',
               method: MethodList.GET
             }
           ]
@@ -919,7 +955,7 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           name: 'Edit booking',
           route: [
             {
-              path: '/bookings/:id',
+              path: '/booking/:id',
               method: MethodList.PUT
             }
           ]

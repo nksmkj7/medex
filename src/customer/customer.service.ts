@@ -35,6 +35,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CustomerFilterDto } from './dto/customer-filter.dto';
 import { Pagination } from 'src/paginate';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 // const jwtConfig = config.get('jwt');
 const appConfig = config.get('app');
@@ -146,11 +147,11 @@ export class CustomerService {
     }
     const serializedCustomer = this.repository.transform(customer);
 
-    let refreshToken = await this.refreshTokenService.generateRefreshToken(
+    const refreshToken = await this.refreshTokenService.generateRefreshToken(
       serializedCustomer,
       refreshTokenPayload
     );
-    let accessToken = await this.generateAccessToken(serializedCustomer);
+    const accessToken = await this.generateAccessToken(serializedCustomer);
     return {
       accessToken,
       refreshToken,
@@ -286,5 +287,41 @@ export class CustomerService {
       throw new NotFoundException();
     }
     return this.repository.updateItem(customer, updateCustomerDto);
+  }
+
+  async createAccessTokenFromRefreshToken(
+    refreshToken: string,
+    refreshTokenPayload: Partial<CustomerRefreshToken>
+  ) {
+    const { token, user, oldRefreshToken } =
+      await this.refreshTokenService.createAccessTokenFromRefreshToken(
+        refreshToken
+      );
+
+    if (oldRefreshToken) {
+      oldRefreshToken.isRevoked = true;
+      oldRefreshToken.save();
+    }
+    const newRefreshToken = await this.refreshTokenService.generateRefreshToken(
+      user,
+      refreshTokenPayload
+    );
+
+    return {
+      accessToken: token,
+      refreshToken: newRefreshToken,
+      expiresIn: tokenConfig.expiresIn
+    };
+  }
+
+  async revokeCustomerRefreshToken(refreshTokenDto: RefreshTokenDto) {
+    const { refreshToken } = refreshTokenDto;
+    const { token: oldRefreshToken } =
+      await this.refreshTokenService.resolveRefreshToken(refreshToken);
+    if (oldRefreshToken) {
+      oldRefreshToken.isRevoked = true;
+      await oldRefreshToken.save();
+    }
+    return oldRefreshToken;
   }
 }

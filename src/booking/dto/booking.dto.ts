@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsDateString,
   IsEmail,
@@ -5,12 +6,15 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
+  isPhoneNumber,
   IsPhoneNumber,
   IsString,
   IsUUID,
-  Validate
+  Validate,
+  ValidateIf
 } from 'class-validator';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
+import { RunValidation } from 'src/common/validators/run-validation.validators';
 import { ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
@@ -29,8 +33,15 @@ export class BookingDto {
   @IsEmail()
   email: string;
 
+  @ValidateIf((object) => !!object.phone)
   @IsNotEmpty()
-  @IsPhoneNumber()
+  @IsString()
+  dialCode: string;
+
+  @ValidateIf((object, value) => !!value)
+  @Validate(RunValidation, [(dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`), 'dialCode'], {
+    message: 'invalid phone number'
+  })
   phone: string;
 
   @IsNotEmpty()
@@ -43,7 +54,7 @@ export class BookingDto {
   @Validate(IsValidForeignKey, [ServiceEntity])
   serviceId: string;
 
-  @IsNotEmpty()
+  @ValidateIf((object, value) => !!value)
   @IsUUID(4)
   @Validate(IsValidForeignKey, [SpecialistEntity])
   specialistId: string;

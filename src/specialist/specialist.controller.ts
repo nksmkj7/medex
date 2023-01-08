@@ -24,6 +24,7 @@ import { CreateSpecialistDto } from './dto/create-specialist.dto';
 import { UpdateSpecialistDto } from './dto/update-specialist.dto';
 import { SpecialistSerializer } from './serializer/specialist.serializer';
 import { SpecialistFilterDto } from './dto/specialist-filter.dto';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Specialist')
 @UseGuards(JwtTwoFactorGuard, PermissionGuard)
@@ -59,6 +60,7 @@ export class SpecialistController {
     return this.specialistService.findAll(specialistFilterDto);
   }
 
+  @Public()
   @Get('active')
   getActiveSpecialists() {
     return this.specialistService.activeSpecialists();

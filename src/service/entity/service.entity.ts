@@ -18,6 +18,7 @@ import {
 } from 'typeorm';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceSpecialistEntity } from './specialist-service.entity';
+import { ScheduleTypeEnum } from '../enums/schedule-type.enum';
 
 @Entity('services')
 @Unique(['slug', 'userId'])
@@ -54,6 +55,15 @@ export class ServiceEntity extends CustomUuidBaseEntity {
 
   @Column('decimal', { default: 0, precision: 12, scale: 4 })
   price: number;
+
+  @Column('integer', { default: 0 })
+  additionalTime: number;
+
+  @Column('time', { nullable: true })
+  startTime: string;
+
+  @Column('time', { nullable: true })
+  endTime: string;
 
   @OneToOne(() => CategoryEntity)
   @JoinColumn()
@@ -114,4 +124,19 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     this.amount_after_service_charge =
       this.amount_after_discount + this.service_charge_amount;
   }
+
+  @Column('enum', {
+    enum: [
+      ScheduleTypeEnum.BOTH,
+      ScheduleTypeEnum.SERVICE_ONLY,
+      ScheduleTypeEnum.SPEICIALIST_ONLY
+    ],
+    default: ScheduleTypeEnum.SPEICIALIST_ONLY
+  })
+  scheduleType: string;
+
+  @Column('varchar', {
+    nullable: true
+  })
+  image: string;
 }

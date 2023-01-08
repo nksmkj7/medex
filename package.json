@@ -81,8 +81,8 @@
     "typeorm-seeding": "^1.6.1",
     "ua-parser-js": "^1.0.2",
     "uuid": "^8.3.2",
-    "winston": "^3.6.0",
-    "winston-cloudwatch": "^3.2.0"
+    "winston-cloudwatch": "^3.2.0",
+    "winston": "^3.6.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",

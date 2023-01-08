@@ -32,6 +32,7 @@ import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 
 import * as config from 'config';
 import { ServiceFilterDto } from 'src/service/dto/service-filter.dto';
+import { ServiceFilterDtoWithoutProvider } from './provider.controller';
 
 const appConfig = config.get('app');
 
@@ -91,7 +92,6 @@ export class ProviderService {
         manager
       );
       if (!user) throw new BadRequestException();
-      console.log(providerInformation, 'provider information is --->');
       const provider = await this.providerRepository.store(
         {
           ...providerInformation,
@@ -181,7 +181,7 @@ export class ProviderService {
         }
       });
       const previousFile = provider.businessLogo;
-      providerDto = !!file
+      providerDto = Object.keys(file).length
         ? { ...providerDto, businessLogo: file.filename }
         : {
             ...providerDto,
@@ -193,7 +193,7 @@ export class ProviderService {
         providerDto
       );
       await queryRunner.commitTransaction();
-      if (providerDto.businessLogo && previousFile) {
+      if (providerDto.businessLogo && !!Object.keys(file).length) {
         const path = `public/images/profile/${previousFile}`;
         if (existsSync(path)) {
           unlinkSync(`public/images/profile/${previousFile}`);
@@ -249,19 +249,20 @@ export class ProviderService {
 
   async providerServices(
     id: number,
-    serviceFilterDto: ServiceFilterDto,
+    serviceFilterDto: ServiceFilterDtoWithoutProvider,
     referer?: string
   ) {
     let searchCondition = {};
-    if (referer == appConfig.frontendUrl) {
+    if (referer !== appConfig.frontendUrl+"/") {
       searchCondition['status'] = true;
     }
-    const user = await this.userRepository.findOneOrFail(id, {
+    const user = await this.userRepository.findOne(id, {
       relations: ['role']
     });
     if (!user || user.role.name !== 'provider') {
       throw new BadRequestException('Invalid user or user is not a provider');
     }
+    searchCondition['userId'] = id;
     return this.serviceRepository.paginate(
       serviceFilterDto,
       [],
@@ -356,6 +357,12 @@ export class ProviderService {
         }
       }
     );
+      if (banner.image) {
+        const path = `public/images/provider-banners/${banner.image}`;
+        if (existsSync(path)) {
+          unlinkSync(`public/images/provider-banners/${banner.image}`);
+        }
+    }
     return banner.remove();
   }
 
