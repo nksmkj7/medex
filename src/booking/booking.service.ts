@@ -30,6 +30,8 @@ import { paginate } from 'src/common/helper/pagination.helper';
 import { CustomerBookingFilterDto } from './dto/customer-booking-filter.dto';
 import { ISchedule, ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import dayjs = require('dayjs');
+import { ModuleRef } from '@nestjs/core';
+import { OmiseService } from 'src/payment/omise/omise.service';
 
 const appConfig = config.get('app');
 
@@ -43,7 +45,8 @@ export class BookingService {
     @InjectRepository(TransactionRepository)
     private readonly transactionRepository: TransactionRepository,
     @InjectConnection()
-    private readonly connection: Connection
+    private readonly connection: Connection,
+    private moduleRef: ModuleRef
   ) {
     this.transactionCodeLength = 16;
   }
@@ -81,9 +84,11 @@ export class BookingService {
       `${schedule.date} ${scheduleTime.startTime}`,
       'YYYY-mm-dd HH:mm'
     );
-    if (scheduleDayTime.isBefore(dayjs())) {
-      throw new UnprocessableEntityException('Cannot booked past date.');
-    }
+    //uncomment this
+    // if (scheduleDayTime.isBefore(dayjs())) {
+    //   throw new UnprocessableEntityException('Cannot booked past date.');
+    // }
+
     scheduleTime['isBooked'] = true;
     const service = schedule.service;
     const queryRunner = this.connection.createQueryRunner();
@@ -106,16 +111,20 @@ export class BookingService {
       const transaction = await this.getBookingTransaction(customer, service);
       transaction.booking = booking;
       let paymentResponse = {};
-      if (
-        Number(bookingDto.totalAmount) !==
-        Number(this.calculateServiceTotalAmount(service))
-      ) {
-        throw new BadRequestException(
-          'Sent amount is not matched with the system calculated amount '
-        );
-      }
+      // if (
+      //   Number(bookingDto.totalAmount) !==
+      //   Number(this.calculateServiceTotalAmount(service))
+      // ) {
+      //   throw new BadRequestException(
+      //     'Sent amount is not matched with the system calculated amount '
+      //   );
+      // }
+
       try {
-        paymentResponse = await this.verifyPayment(
+        const paymentService = this.getPaymentService(
+          bookingDto.paymentGateway
+        );
+        paymentResponse = await paymentService.verifyPayment(
           bookingDto,
           customer,
           service
@@ -130,7 +139,7 @@ export class BookingService {
       transaction.paymentMethod = bookingDto.paymentMethod;
       transaction.status = TransactionStatusEnum.PAID;
       await manager.save(transaction);
-      await queryRunner.commitTransaction();
+      // await queryRunner.commitTransaction();
       //   booking.transactions = [transaction];
       return booking;
     } catch (error) {
@@ -138,6 +147,15 @@ export class BookingService {
       throw error;
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  getPaymentService(paymentGateway: string) {
+    switch (paymentGateway) {
+      case 'omise':
+        return this.moduleRef.get(OmiseService, { strict: false });
+      default:
+        throw new UnprocessableEntityException('Unknown payment method');
     }
   }
 

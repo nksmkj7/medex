@@ -39,9 +39,16 @@ export class BookingDto {
   dialCode: string;
 
   @ValidateIf((object, value) => !!value)
-  @Validate(RunValidation, [(dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`), 'dialCode'], {
-    message: 'invalid phone number'
-  })
+  @Validate(
+    RunValidation,
+    [
+      (dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`),
+      'dialCode'
+    ],
+    {
+      message: 'invalid phone number'
+    }
+  )
   phone: string;
 
   @IsNotEmpty()
