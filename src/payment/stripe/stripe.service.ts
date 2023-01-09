@@ -29,18 +29,18 @@ export class StripeService extends PaymentAbstract<
   async pay(
     bookingDto: BookingDto,
     customer: CustomerEntity,
-    service: ServiceEntity,
-    booking: BookingEntity
+    service: ServiceEntity
+    // booking: BookingEntity
   ) {
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: this.calculateServiceTotalAmount(service) * 100,
       currency: bookingDto.currency,
       automatic_payment_methods: {
         enabled: true
-      },
-      metadata: {
-        booking_id: booking.id
       }
+      // metadata: {
+      //   booking_id: booking.id
+      // }
     });
     return paymentIntent;
   }

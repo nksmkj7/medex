@@ -19,9 +19,22 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
   async pay(
     bookingDto: BookingDto,
     customer: CustomerEntity,
-    service: ServiceEntity,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    booking?: BookingEntity
+    service: ServiceEntity
+  ) {
+    try {
+      const response = await this.verify(customer, bookingDto, service);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+
+    return this.verifyOtherPayment(customer, bookingDto, service);
+  }
+
+  verify(
+    customer: CustomerEntity,
+    bookingDto: BookingDto,
+    service: ServiceEntity
   ) {
     this.checkPaymentValidity(bookingDto, service);
     if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {

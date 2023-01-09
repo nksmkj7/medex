@@ -37,6 +37,7 @@ import { PaymentGatewayEnum } from './enums/payment-gateway.enum';
 import Stripe from 'stripe';
 import { StripeService } from 'src/payment/stripe/stripe.service';
 import { Request } from 'express';
+import { BookingInitiationLogEntity } from './entity/booking-initiation-log.entity';
 
 const appConfig = config.get('app');
 
@@ -97,68 +98,86 @@ export class BookingService {
 
     scheduleTime['isBooked'] = true;
     const service = schedule.service;
-    const queryRunner = this.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const manager = queryRunner.manager;
-      await manager.save(schedule);
-      const booking = new BookingEntity();
-      booking.customerId = customer.id;
-      booking.scheduleId = schedule.id;
-      booking.scheduleDate = schedule.date;
-      booking.serviceStartTime = scheduleTime.startTime;
-      booking.serviceEndTime = scheduleTime.endTime;
-      booking.firstName = bookingDto.firstName;
-      booking.lastName = bookingDto.lastName;
-      booking.email = bookingDto.email;
-      booking.phone = bookingDto.phone;
-      await manager.save(booking);
-      const transaction = await this.getBookingTransaction(customer, service);
-      transaction.booking = booking;
-      let paymentResponse = {};
-      // if (
-      //   Number(bookingDto.totalAmount) !==
-      //   Number(this.calculateServiceTotalAmount(service))
-      // ) {
-      //   throw new BadRequestException(
-      //     'Sent amount is not matched with the system calculated amount '
-      //   );
-      // }
+    this.storeBookingInitiationLog(
+      schedule,
+      customer,
+      scheduleTime,
+      bookingDto
+    );
+    const paymentService = this.getPaymentService(bookingDto.paymentGateway);
+    let paymentResponse = {};
 
-      const paymentService = this.getPaymentService(bookingDto.paymentGateway);
-      try {
-        paymentResponse = await paymentService.pay(
-          bookingDto,
-          customer,
-          service,
-          booking
-        );
-      } catch (error) {
-        console.log(error, '------>');
-        paymentResponse = error.message;
-        throw new PaymentGatewayException(error.message);
-      }
-      transaction.response_json = paymentResponse;
-      transaction.currency = bookingDto.currency;
-      transaction.paymentGateway = bookingDto.paymentGateway;
-      transaction.paymentMethod = bookingDto.paymentMethod;
-      transaction.status = paymentService.transactionStatus;
-      await manager.save(transaction);
-      // await queryRunner.commitTransaction();
-      //   booking.transactions = [transaction];
-      const bookingResponse = { booking };
-      if (bookingDto.paymentGateway === PaymentGatewayEnum.STRIPE) {
-        bookingResponse['stripeClientSecret'] =
-          paymentResponse['client_secret'];
-      }
-      return bookingResponse;
+    try {
+      paymentResponse = await paymentService.pay(bookingDto, customer, service);
     } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
+      console.log(error, '------>');
+      paymentResponse = error.message;
+      throw new PaymentGatewayException(error.message);
     }
+    return paymentResponse;
+
+    // const queryRunner = this.connection.createQueryRunner();
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
+    // try {
+    //   const manager = queryRunner.manager;
+    //   await manager.save(schedule);
+    //   const booking = new BookingEntity();
+    //   booking.customerId = customer.id;
+    //   booking.scheduleId = schedule.id;
+    //   booking.scheduleDate = schedule.date;
+    //   booking.serviceStartTime = scheduleTime.startTime;
+    //   booking.serviceEndTime = scheduleTime.endTime;
+    //   booking.firstName = bookingDto.firstName;
+    //   booking.lastName = bookingDto.lastName;
+    //   booking.email = bookingDto.email;
+    //   booking.phone = bookingDto.phone;
+    //   await manager.save(booking);
+    //   const transaction = await this.getBookingTransaction(customer, service);
+    //   transaction.booking = booking;
+    //   let paymentResponse = {};
+    //   // if (
+    //   //   Number(bookingDto.totalAmount) !==
+    //   //   Number(this.calculateServiceTotalAmount(service))
+    //   // ) {
+    //   //   throw new BadRequestException(
+    //   //     'Sent amount is not matched with the system calculated amount '
+    //   //   );
+    //   // }
+
+    //   const paymentService = this.getPaymentService(bookingDto.paymentGateway);
+    //   try {
+    //     paymentResponse = await paymentService.pay(
+    //       bookingDto,
+    //       customer,
+    //       service,
+    //       booking
+    //     );
+    //   } catch (error) {
+    //     console.log(error, '------>');
+    //     paymentResponse = error.message;
+    //     throw new PaymentGatewayException(error.message);
+    //   }
+    //   transaction.response_json = paymentResponse;
+    //   transaction.currency = bookingDto.currency;
+    //   transaction.paymentGateway = bookingDto.paymentGateway;
+    //   transaction.paymentMethod = bookingDto.paymentMethod;
+    //   transaction.status = paymentService.transactionStatus;
+    //   await manager.save(transaction);
+    //   // await queryRunner.commitTransaction();
+    //   //   booking.transactions = [transaction];
+    //   const bookingResponse = { booking };
+    //   if (bookingDto.paymentGateway === PaymentGatewayEnum.STRIPE) {
+    //     bookingResponse['stripeClientSecret'] =
+    //       paymentResponse['client_secret'];
+    //   }
+    //   return bookingResponse;
+    // } catch (error) {
+    //   await queryRunner.rollbackTransaction();
+    //   throw error;
+    // } finally {
+    //   await queryRunner.release();
+    // }
   }
 
   getPaymentService(paymentGateway: string) {
@@ -377,5 +396,30 @@ export class BookingService {
   handleStripeEventHook(req: RawBodyRequest<Request>) {
     const stripeService = this.moduleRef.get(StripeService, { strict: false });
     return stripeService.handleWebHook(req);
+  }
+
+  async storeBookingInitiationLog(
+    schedule: ScheduleEntity,
+    customer: CustomerEntity,
+    scheduleTime: ISchedule,
+    bookingDto: BookingDto
+  ) {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const manager = queryRunner.manager;
+      const booking = new BookingInitiationLogEntity();
+      booking.customerId = customer.id;
+      booking.scheduleId = schedule.id;
+      booking.scheduleDate = schedule.date;
+      booking.serviceStartTime = scheduleTime.startTime;
+      booking.serviceEndTime = scheduleTime.endTime;
+      booking.firstName = bookingDto.firstName;
+      booking.lastName = bookingDto.lastName;
+      booking.email = bookingDto.email;
+      booking.phone = bookingDto.phone;
+      await manager.save(booking);
+    } catch (error) {
+      throw error;
+    }
   }
 }
