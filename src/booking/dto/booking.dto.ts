@@ -82,6 +82,9 @@ export class BookingDto {
   @IsEnum(PaymentGatewayEnum)
   paymentGateway: PaymentGatewayEnum;
 
+  @ValidateIf((object) => {
+    return object.paymentGateway !== PaymentGatewayEnum.STRIPE;
+  })
   @IsNotEmpty()
   @IsString()
   token: string;

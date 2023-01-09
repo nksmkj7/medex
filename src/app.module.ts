@@ -110,7 +110,7 @@ const appConfig = config.get('app');
       publicKey: process.env.OMISE_PUBLIC_KEY,
       secretKey: process.env.OMISE_SECRET_KEY
     }),
-    StripeModule
+    StripeModule.register(process.env.STRIPE_SECRET_KEY)
   ],
   providers: [
     {

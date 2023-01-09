@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Omise from 'omise';
 import { BookingDto } from 'src/booking/dto/booking.dto';
 import { PaymentMethodEnum } from 'src/booking/enums/payment-method.enum';
@@ -7,6 +7,7 @@ import { ServiceEntity } from 'src/service/entity/service.entity';
 import { PaymentAbstract } from '../payment.abstract';
 
 import * as config from 'config';
+import { BookingEntity } from 'src/booking/entity/booking.entity';
 const appConfig = config.get('app');
 
 @Injectable()
@@ -15,11 +16,14 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     super();
   }
 
-  async verifyPayment(
+  async pay(
     bookingDto: BookingDto,
     customer: CustomerEntity,
-    service: ServiceEntity
+    service: ServiceEntity,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    booking?: BookingEntity
   ) {
+    this.checkPaymentValidity(bookingDto, service);
     if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
       return this.verifyOmiseCardPayment(customer, bookingDto, service);
     }
@@ -55,5 +59,17 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       currency,
       return_uri: `${appConfig.frontendUrl}/booking`
     });
+  }
+
+  checkPaymentValidity(bookingDto: BookingDto, service: ServiceEntity) {
+    if (
+      Number(bookingDto.totalAmount) !==
+      Number(this.calculateServiceTotalAmount(service))
+    ) {
+      throw new BadRequestException(
+        'Sent amount is not matched with the system calculated amount '
+      );
+    }
+    return true;
   }
 }

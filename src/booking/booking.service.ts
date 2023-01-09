@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  RawBodyRequest,
   UnprocessableEntityException
 } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
@@ -32,6 +33,10 @@ import { ISchedule, ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import dayjs = require('dayjs');
 import { ModuleRef } from '@nestjs/core';
 import { OmiseService } from 'src/payment/omise/omise.service';
+import { PaymentGatewayEnum } from './enums/payment-gateway.enum';
+import Stripe from 'stripe';
+import { StripeService } from 'src/payment/stripe/stripe.service';
+import { Request } from 'express';
 
 const appConfig = config.get('app');
 
@@ -84,6 +89,7 @@ export class BookingService {
       `${schedule.date} ${scheduleTime.startTime}`,
       'YYYY-mm-dd HH:mm'
     );
+
     //uncomment this
     // if (scheduleDayTime.isBefore(dayjs())) {
     //   throw new UnprocessableEntityException('Cannot booked past date.');
@@ -120,16 +126,16 @@ export class BookingService {
       //   );
       // }
 
+      const paymentService = this.getPaymentService(bookingDto.paymentGateway);
       try {
-        const paymentService = this.getPaymentService(
-          bookingDto.paymentGateway
-        );
-        paymentResponse = await paymentService.verifyPayment(
+        paymentResponse = await paymentService.pay(
           bookingDto,
           customer,
-          service
+          service,
+          booking
         );
       } catch (error) {
+        console.log(error, '------>');
         paymentResponse = error.message;
         throw new PaymentGatewayException(error.message);
       }
@@ -137,11 +143,16 @@ export class BookingService {
       transaction.currency = bookingDto.currency;
       transaction.paymentGateway = bookingDto.paymentGateway;
       transaction.paymentMethod = bookingDto.paymentMethod;
-      transaction.status = TransactionStatusEnum.PAID;
+      transaction.status = paymentService.transactionStatus;
       await manager.save(transaction);
       // await queryRunner.commitTransaction();
       //   booking.transactions = [transaction];
-      return booking;
+      const bookingResponse = { booking };
+      if (bookingDto.paymentGateway === PaymentGatewayEnum.STRIPE) {
+        bookingResponse['stripeClientSecret'] =
+          paymentResponse['client_secret'];
+      }
+      return bookingResponse;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -154,6 +165,8 @@ export class BookingService {
     switch (paymentGateway) {
       case 'omise':
         return this.moduleRef.get(OmiseService, { strict: false });
+      case 'stripe':
+        return this.moduleRef.get(StripeService, { strict: false });
       default:
         throw new UnprocessableEntityException('Unknown payment method');
     }
@@ -359,5 +372,10 @@ export class BookingService {
     booking.status = bookingUpdateStatusDto.status;
     await booking.save();
     return this.repository.transform(booking);
+  }
+
+  handleStripeEventHook(req: RawBodyRequest<Request>) {
+    const stripeService = this.moduleRef.get(StripeService, { strict: false });
+    return stripeService.handleWebHook(req);
   }
 }
