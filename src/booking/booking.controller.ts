@@ -37,7 +37,7 @@ export class BookingController {
     @GetCustomer() customer: CustomerEntity,
     @Body() bookingDto: BookingDto
   ) {
-    return this.service.storeBooking(bookingDto, customer);
+    return this.service.initiateBooking(bookingDto, customer);
   }
 
   @UseGuards(CustomerJwtAuthGuard)

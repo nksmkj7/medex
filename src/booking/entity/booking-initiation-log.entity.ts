@@ -1,10 +1,21 @@
-import { OmitType } from '@nestjs/swagger';
-import { Column } from 'typeorm';
-import { BookingEntity } from './booking.entity';
+import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
+import { Column, Entity } from 'typeorm';
+import {
+  BookingData,
+  TransactionData
+} from '../interface/booking-initiation-log.interface';
+@Entity('booking_initiation_logs')
+export class BookingInitiationLogEntity extends CustomUuidBaseEntity {
+  @Column('jsonb', {
+    nullable: false
+  })
+  bookingData: BookingData;
 
-export class BookingInitiationLogEntity extends OmitType(BookingEntity, [
-  'status'
-]) {
+  @Column('jsonb', {
+    nullable: false
+  })
+  transactionData: TransactionData;
+
   @Column('boolean', {
     default: false
   })

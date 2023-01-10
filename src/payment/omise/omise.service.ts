@@ -8,27 +8,41 @@ import { PaymentAbstract } from '../payment.abstract';
 
 import * as config from 'config';
 import { BookingEntity } from 'src/booking/entity/booking.entity';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { InjectConnection } from '@nestjs/typeorm';
+import { Connection } from 'typeorm';
+import { ISchedule } from 'src/schedule/entity/schedule.entity';
 const appConfig = config.get('app');
 
 @Injectable()
 export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
-  constructor(@Inject('OMISE_CLIENT') private omise: Omise.IOmise) {
+  constructor(
+    @Inject('OMISE_CLIENT') private omise: Omise.IOmise,
+    @InjectQueue(config.get('booking.queueName')) private bookingQueue: Queue,
+    @InjectConnection() protected readonly connection: Connection
+  ) {
     super();
   }
 
   async pay(
     bookingDto: BookingDto,
     customer: CustomerEntity,
-    service: ServiceEntity
+    service: ServiceEntity,
+    scheduleTime: ISchedule
   ) {
     try {
+      const bookingInitiation = this.bookingInitiation;
       const response = await this.verify(customer, bookingDto, service);
+      this.bookingQueue.add('booking', {
+        bookingInitiation,
+        paymentResponse: response
+      });
       return response;
     } catch (error) {
       throw error;
     }
-
-    return this.verifyOtherPayment(customer, bookingDto, service);
+    // return this.verifyOtherPayment(customer, bookingDto, service);
   }
 
   verify(
@@ -80,7 +94,7 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       Number(this.calculateServiceTotalAmount(service))
     ) {
       throw new BadRequestException(
-        'Sent amount is not matched with the system calculated amount '
+        "Sent amount doesn't not match with the system calculated amount "
       );
     }
     return true;

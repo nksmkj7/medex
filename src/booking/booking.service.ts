@@ -38,6 +38,10 @@ import Stripe from 'stripe';
 import { StripeService } from 'src/payment/stripe/stripe.service';
 import { Request } from 'express';
 import { BookingInitiationLogEntity } from './entity/booking-initiation-log.entity';
+import {
+  BookingData,
+  TransactionData
+} from './interface/booking-initiation-log.interface';
 
 const appConfig = config.get('app');
 
@@ -57,7 +61,7 @@ export class BookingService {
     this.transactionCodeLength = 16;
   }
 
-  async storeBooking(bookingDto: BookingDto, customer: CustomerEntity) {
+  async initiateBooking(bookingDto: BookingDto, customer: CustomerEntity) {
     const whereCondition = {
       serviceId: bookingDto.serviceId,
       date: bookingDto.scheduleDate
@@ -96,24 +100,40 @@ export class BookingService {
     //   throw new UnprocessableEntityException('Cannot booked past date.');
     // }
 
-    scheduleTime['isBooked'] = true;
+    // scheduleTime['isBooked'] = true;
     const service = schedule.service;
-    this.storeBookingInitiationLog(
-      schedule,
-      customer,
-      scheduleTime,
-      bookingDto
-    );
     const paymentService = this.getPaymentService(bookingDto.paymentGateway);
     let paymentResponse = {};
-
     try {
-      paymentResponse = await paymentService.pay(bookingDto, customer, service);
+      paymentService.bookingInitiationLog =
+        await this.storeBookingInitiationLog(
+          schedule,
+          customer,
+          scheduleTime,
+          bookingDto,
+          service
+        );
+      paymentResponse = await paymentService.pay(
+        bookingDto,
+        customer,
+        service,
+        scheduleTime
+      );
     } catch (error) {
-      console.log(error, '------>');
-      paymentResponse = error.message;
       throw new PaymentGatewayException(error.message);
     }
+
+    // try {
+    //   paymentResponse = await paymentService.pay(
+    //     bookingDto,
+    //     customer,
+    //     service,
+    //     scheduleTime
+    //   );
+    // } catch (error) {
+    //   console.log(error, '------>');
+    //   paymentResponse = error.message;
+    // }
     return paymentResponse;
 
     // const queryRunner = this.connection.createQueryRunner();
@@ -139,7 +159,12 @@ export class BookingService {
     //   // if (
     //   //   Number(bookingDto.totalAmount) !==
     //   //   Number(this.calculateServiceTotalAmount(service))
-    //   // ) {
+    //   // ) { paymentResponse = await paymentService.pay(
+    //   bookingDto,
+    //   customer,
+    //   service,
+    //   scheduleTime
+    // );
     //   //   throw new BadRequestException(
     //   //     'Sent amount is not matched with the system calculated amount '
     //   //   );
@@ -402,24 +427,84 @@ export class BookingService {
     schedule: ScheduleEntity,
     customer: CustomerEntity,
     scheduleTime: ISchedule,
-    bookingDto: BookingDto
+    bookingDto: BookingDto,
+    service: ServiceEntity
   ) {
     const queryRunner = this.connection.createQueryRunner();
     try {
+      const booking: BookingData = {
+        customerId: customer.id,
+        scheduleId: schedule.id,
+        scheduleDate: schedule.date,
+        serviceStartTime: scheduleTime.startTime,
+        serviceEndTime: scheduleTime.endTime,
+        firstName: bookingDto.firstName,
+        lastName: bookingDto.lastName,
+        email: bookingDto.email,
+        phone: bookingDto.phone,
+        dialCode: bookingDto.dialCode
+      };
+
+      const transaction: TransactionData = {
+        totalAmount: this.calculateServiceTotalAmount(service),
+        transactionCode: await this.generateUniqueTransactionCode(customer),
+        customerId: customer.id,
+        price: service.price,
+        discount: service.discount,
+        serviceCharge: service.serviceCharge,
+        currency: bookingDto.currency,
+        paymentGateway: bookingDto.paymentGateway,
+        paymentMethod: bookingDto.paymentMethod
+      };
+      const bookingInitiationLog = new BookingInitiationLogEntity();
       const manager = queryRunner.manager;
-      const booking = new BookingInitiationLogEntity();
-      booking.customerId = customer.id;
-      booking.scheduleId = schedule.id;
-      booking.scheduleDate = schedule.date;
-      booking.serviceStartTime = scheduleTime.startTime;
-      booking.serviceEndTime = scheduleTime.endTime;
-      booking.firstName = bookingDto.firstName;
-      booking.lastName = bookingDto.lastName;
-      booking.email = bookingDto.email;
-      booking.phone = bookingDto.phone;
-      await manager.save(booking);
+      bookingInitiationLog.bookingData = booking;
+      bookingInitiationLog.transactionData = transaction;
+      return await manager.save(bookingInitiationLog);
+      // return await manager.save(BookingInitiationLogEntity, {
+      // bookingData: booking,
+      // transactionData: transaction
+      // });
     } catch (error) {
       throw error;
+    }
+  }
+
+  async storeBooking(
+    bookingInitiateLogData: BookingInitiationLogEntity,
+    paymentGatewayResponse?: object
+  ) {
+    const { bookingData, transactionData } = bookingInitiateLogData;
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const manager = queryRunner.manager;
+      // await manager.save(schedule);
+      const booking = await manager.save(BookingEntity, bookingData);
+      const transaction = new TransactionEntity();
+      transaction.booking = booking;
+      if (paymentGatewayResponse) {
+        manager.merge(
+          TransactionEntity,
+          transaction,
+          {
+            response_json: paymentGatewayResponse
+          },
+          transactionData
+        );
+      }
+
+      await manager.save(transaction);
+      await queryRunner.commitTransaction();
+      return booking;
+      //   booking.transactions = [transaction];
+      // return bookingResponse;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
   }
 }

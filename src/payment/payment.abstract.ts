@@ -1,19 +1,20 @@
 import { BookingDto } from 'src/booking/dto/booking.dto';
-import { BookingEntity } from 'src/booking/entity/booking.entity';
+import { BookingInitiationLogEntity } from 'src/booking/entity/booking-initiation-log.entity';
 import { TransactionStatusEnum } from 'src/booking/enums/transaction-status.enum';
 import { CustomerEntity } from 'src/customer/entity/customer.entity';
+import { ISchedule } from 'src/schedule/entity/schedule.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { IPayment } from './payment.interface';
 
 export abstract class PaymentAbstract<T> implements IPayment<T> {
-  //   protected transactionStatus: TransactionStatusEnum;
   protected status = TransactionStatusEnum.PAID;
+  protected bookingInitiation: BookingInitiationLogEntity;
 
   abstract pay(
     bookingDto: BookingDto,
     customer: CustomerEntity,
     service: ServiceEntity,
-    booking?: BookingEntity
+    scheduleTime: ISchedule
   ): Promise<T>;
 
   get transactionStatus(): TransactionStatusEnum {
@@ -22,6 +23,14 @@ export abstract class PaymentAbstract<T> implements IPayment<T> {
 
   set transactionStatus(status: TransactionStatusEnum) {
     this.status = status;
+  }
+
+  get bookingInitiationLog(): BookingInitiationLogEntity {
+    return this.bookingInitiation;
+  }
+
+  set bookingInitiationLog(bookingInitiation: BookingInitiationLogEntity) {
+    this.bookingInitiation = bookingInitiation;
   }
 
   calculateServiceTotalAmount(service: ServiceEntity) {
