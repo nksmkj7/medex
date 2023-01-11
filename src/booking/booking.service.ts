@@ -17,17 +17,11 @@ import { BookingFilterDto } from './dto/booking-filter.dto';
 import { BookingUpdateStatusDto } from './dto/booking-update-status.dto';
 import { BookingDto } from './dto/booking.dto';
 import { BookingEntity } from './entity/booking.entity';
-import {
-  adminUserGroupsForSerializing,
-  basicFieldGroupsForSerializing
-} from './serializer/booking.serializer';
+import { adminUserGroupsForSerializing } from './serializer/booking.serializer';
 import * as Omise from 'omise';
-import { Public } from 'src/common/decorators/public.decorator';
 import { PaymentGatewayException } from 'src/exception/payment-gateway.exception';
-import { TransactionStatusEnum } from './enums/transaction-status.enum';
 import { PaymentMethodEnum } from './enums/payment-method.enum';
 import * as config from 'config';
-import { paginate } from 'src/common/helper/pagination.helper';
 import { CustomerBookingFilterDto } from './dto/customer-booking-filter.dto';
 import { ISchedule, ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import dayjs = require('dayjs');
@@ -94,13 +88,9 @@ export class BookingService {
       `${schedule.date} ${scheduleTime.startTime}`,
       'YYYY-mm-dd HH:mm'
     );
-
-    //uncomment this
-    // if (scheduleDayTime.isBefore(dayjs())) {
-    //   throw new UnprocessableEntityException('Cannot booked past date.');
-    // }
-
-    // scheduleTime['isBooked'] = true;
+    if (scheduleDayTime.isBefore(dayjs())) {
+      throw new UnprocessableEntityException('Cannot booked past date.');
+    }
     const service = schedule.service;
     const paymentService = this.getPaymentService(bookingDto.paymentGateway);
     let paymentResponse = {};
@@ -113,96 +103,16 @@ export class BookingService {
           bookingDto,
           service
         );
-      paymentResponse = await paymentService.pay(
+      paymentResponse = await paymentService.pay({
         bookingDto,
         customer,
         service,
         scheduleTime
-      );
+      });
     } catch (error) {
       throw new PaymentGatewayException(error.message);
     }
-
-    // try {
-    //   paymentResponse = await paymentService.pay(
-    //     bookingDto,
-    //     customer,
-    //     service,
-    //     scheduleTime
-    //   );
-    // } catch (error) {
-    //   console.log(error, '------>');
-    //   paymentResponse = error.message;
-    // }
     return paymentResponse;
-
-    // const queryRunner = this.connection.createQueryRunner();
-    // await queryRunner.connect();
-    // await queryRunner.startTransaction();
-    // try {
-    //   const manager = queryRunner.manager;
-    //   await manager.save(schedule);
-    //   const booking = new BookingEntity();
-    //   booking.customerId = customer.id;
-    //   booking.scheduleId = schedule.id;
-    //   booking.scheduleDate = schedule.date;
-    //   booking.serviceStartTime = scheduleTime.startTime;
-    //   booking.serviceEndTime = scheduleTime.endTime;
-    //   booking.firstName = bookingDto.firstName;
-    //   booking.lastName = bookingDto.lastName;
-    //   booking.email = bookingDto.email;
-    //   booking.phone = bookingDto.phone;
-    //   await manager.save(booking);
-    //   const transaction = await this.getBookingTransaction(customer, service);
-    //   transaction.booking = booking;
-    //   let paymentResponse = {};
-    //   // if (
-    //   //   Number(bookingDto.totalAmount) !==
-    //   //   Number(this.calculateServiceTotalAmount(service))
-    //   // ) { paymentResponse = await paymentService.pay(
-    //   bookingDto,
-    //   customer,
-    //   service,
-    //   scheduleTime
-    // );
-    //   //   throw new BadRequestException(
-    //   //     'Sent amount is not matched with the system calculated amount '
-    //   //   );
-    //   // }
-
-    //   const paymentService = this.getPaymentService(bookingDto.paymentGateway);
-    //   try {
-    //     paymentResponse = await paymentService.pay(
-    //       bookingDto,
-    //       customer,
-    //       service,
-    //       booking
-    //     );
-    //   } catch (error) {
-    //     console.log(error, '------>');
-    //     paymentResponse = error.message;
-    //     throw new PaymentGatewayException(error.message);
-    //   }
-    //   transaction.response_json = paymentResponse;
-    //   transaction.currency = bookingDto.currency;
-    //   transaction.paymentGateway = bookingDto.paymentGateway;
-    //   transaction.paymentMethod = bookingDto.paymentMethod;
-    //   transaction.status = paymentService.transactionStatus;
-    //   await manager.save(transaction);
-    //   // await queryRunner.commitTransaction();
-    //   //   booking.transactions = [transaction];
-    //   const bookingResponse = { booking };
-    //   if (bookingDto.paymentGateway === PaymentGatewayEnum.STRIPE) {
-    //     bookingResponse['stripeClientSecret'] =
-    //       paymentResponse['client_secret'];
-    //   }
-    //   return bookingResponse;
-    // } catch (error) {
-    //   await queryRunner.rollbackTransaction();
-    //   throw error;
-    // } finally {
-    //   await queryRunner.release();
-    // }
   }
 
   getPaymentService(paymentGateway: string) {
@@ -442,7 +352,8 @@ export class BookingService {
         lastName: bookingDto.lastName,
         email: bookingDto.email,
         phone: bookingDto.phone,
-        dialCode: bookingDto.dialCode
+        dialCode: bookingDto.dialCode,
+        scheduleTimeId: bookingDto.scheduleTimeId
       };
 
       const transaction: TransactionData = {
@@ -461,10 +372,6 @@ export class BookingService {
       bookingInitiationLog.bookingData = booking;
       bookingInitiationLog.transactionData = transaction;
       return await manager.save(bookingInitiationLog);
-      // return await manager.save(BookingInitiationLogEntity, {
-      // bookingData: booking,
-      // transactionData: transaction
-      // });
     } catch (error) {
       throw error;
     }
@@ -480,7 +387,20 @@ export class BookingService {
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
-      // await manager.save(schedule);
+      const whereCondition = {
+        id: bookingData.scheduleId,
+        date: bookingData.scheduleDate
+      };
+      const schedule = (await manager.findOne(
+        ScheduleEntity,
+        whereCondition
+      )) as ScheduleEntity;
+
+      const scheduleTime = schedule.schedules.find(
+        (time) => time.id === bookingData.scheduleTimeId
+      );
+      scheduleTime['isBooked'] = true;
+      await manager.save(schedule);
       const booking = await manager.save(BookingEntity, bookingData);
       const transaction = new TransactionEntity();
       transaction.booking = booking;

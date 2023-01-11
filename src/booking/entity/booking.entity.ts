@@ -101,4 +101,9 @@ export class BookingEntity extends CustomBaseEntity {
     nullable: true
   })
   dialCode: string;
+
+  @Column('varchar', {
+    nullable: true
+  })
+  scheduleTimeId: string;
 }

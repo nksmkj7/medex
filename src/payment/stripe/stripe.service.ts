@@ -4,15 +4,17 @@ import {
   RawBodyRequest,
   UnprocessableEntityException
 } from '@nestjs/common';
-import { BookingDto } from 'src/booking/dto/booking.dto';
-import { CustomerEntity } from 'src/customer/entity/customer.entity';
-import { ServiceEntity } from 'src/service/entity/service.entity';
+
 import { PaymentAbstract } from '../payment.abstract';
 import Stripe from 'stripe';
-import { BookingEntity } from 'src/booking/entity/booking.entity';
 import { Request } from 'express';
-import { InjectRepository } from '@nestjs/typeorm';
-import { TransactionRepository } from 'src/transaction/transaction.repository';
+import { IPaymentPay } from '../interface/payment-pay.interface';
+import { InjectQueue } from '@nestjs/bull';
+import * as config from 'config';
+import { Queue } from 'bull';
+import { InjectConnection } from '@nestjs/typeorm';
+import { Connection } from 'typeorm';
+import { BookingInitiationLogEntity } from 'src/booking/entity/booking-initiation-log.entity';
 
 @Injectable()
 export class StripeService extends PaymentAbstract<
@@ -20,27 +22,24 @@ export class StripeService extends PaymentAbstract<
 > {
   constructor(
     @Inject('STRIPE_CLIENT') private stripe: Stripe,
-    @InjectRepository(TransactionRepository)
-    private readonly transactionRepository: TransactionRepository
+    @InjectQueue(config.get('booking.queueName')) private bookingQueue: Queue,
+    @InjectConnection() private connection: Connection
   ) {
     super();
   }
 
-  async pay(
-    bookingDto: BookingDto,
-    customer: CustomerEntity,
-    service: ServiceEntity
-    // booking: BookingEntity
-  ) {
+  async pay(paymentObj: IPaymentPay) {
+    const { bookingDto, service } = paymentObj;
+    const bookingInitiation = this.bookingInitiation;
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: this.calculateServiceTotalAmount(service) * 100,
       currency: bookingDto.currency,
       automatic_payment_methods: {
         enabled: true
+      },
+      metadata: {
+        bookingInitiationId: bookingInitiation.id
       }
-      // metadata: {
-      //   booking_id: booking.id
-      // }
     });
     return paymentIntent;
   }
@@ -48,14 +47,9 @@ export class StripeService extends PaymentAbstract<
   async handleWebHook(request: RawBodyRequest<Request>) {
     let event: Stripe.Event;
 
-    const endpointSecret =
-      'whsec_7678047e966bae21f82b84ef126dd08cc7c66bf857242db13a39218c70ed9500';
+    const endpointSecret = process.env.STRIPE_WEB_HOOK_SECRET_KEY;
     if (endpointSecret) {
-      // Get the signature sent by Stripe
       const signature = request.headers['stripe-signature'];
-      //   console.log(request, 'request is --->');
-      //   return;
-
       try {
         event = this.stripe.webhooks.constructEvent(
           request.rawBody,
@@ -63,7 +57,6 @@ export class StripeService extends PaymentAbstract<
           endpointSecret
         );
       } catch (err) {
-        console.log(err);
         throw new UnprocessableEntityException(
           `⚠️  Webhook signature verification failed.`,
           err.message
@@ -75,19 +68,20 @@ export class StripeService extends PaymentAbstract<
       case 'payment_intent.succeeded':
         const paymentIntent: Stripe.PaymentIntent = event.data
           .object as Stripe.PaymentIntent;
-        const bookingId = paymentIntent.metadata.booking_id;
-        // await this.transactionRepository.update({
-        //   bookingId
-        // });
-        // console.log(paymentIntent.metadata, '------>');
-        // console.log(
-        //   `PaymentIntent for ${paymentIntent.amount} was successful!`
-        // );
-        // Then define and call a method to handle the successful payment intent.
-        // handlePaymentIntentSucceeded(paymentIntent);
+        const bookingInitiationId = paymentIntent.metadata.bookingInitiationId;
+        const manager = this.connection.manager;
+        const bookingInitiation = await manager.findOne(
+          BookingInitiationLogEntity,
+          {
+            id: bookingInitiationId
+          }
+        );
+        this.bookingQueue.add('booking', {
+          bookingInitiation,
+          paymentResponse: event
+        });
         break;
       default:
-        // Unexpected event type
         console.log(`Unhandled event type ${event.type}.`);
     }
   }

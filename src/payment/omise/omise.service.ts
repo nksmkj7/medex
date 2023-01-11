@@ -7,30 +7,24 @@ import { ServiceEntity } from 'src/service/entity/service.entity';
 import { PaymentAbstract } from '../payment.abstract';
 
 import * as config from 'config';
-import { BookingEntity } from 'src/booking/entity/booking.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
-import { ISchedule } from 'src/schedule/entity/schedule.entity';
+import { IPaymentPay } from '../interface/payment-pay.interface';
 const appConfig = config.get('app');
 
 @Injectable()
 export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
   constructor(
     @Inject('OMISE_CLIENT') private omise: Omise.IOmise,
-    @InjectQueue(config.get('booking.queueName')) private bookingQueue: Queue,
-    @InjectConnection() protected readonly connection: Connection
+    @InjectQueue(config.get('booking.queueName')) private bookingQueue: Queue
   ) {
     super();
   }
 
-  async pay(
-    bookingDto: BookingDto,
-    customer: CustomerEntity,
-    service: ServiceEntity,
-    scheduleTime: ISchedule
-  ) {
+  async pay(paymentObj: IPaymentPay) {
+    const { bookingDto, customer, service } = paymentObj;
     try {
       const bookingInitiation = this.bookingInitiation;
       const response = await this.verify(customer, bookingDto, service);

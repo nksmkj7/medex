@@ -13,6 +13,7 @@ export type BookingData = Pick<
   | 'email'
   | 'phone'
   | 'dialCode'
+  | 'scheduleTimeId'
 >;
 
 export type TransactionData = Pick<

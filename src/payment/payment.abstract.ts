@@ -4,18 +4,14 @@ import { TransactionStatusEnum } from 'src/booking/enums/transaction-status.enum
 import { CustomerEntity } from 'src/customer/entity/customer.entity';
 import { ISchedule } from 'src/schedule/entity/schedule.entity';
 import { ServiceEntity } from 'src/service/entity/service.entity';
+import { IPaymentPay } from './interface/payment-pay.interface';
 import { IPayment } from './payment.interface';
 
 export abstract class PaymentAbstract<T> implements IPayment<T> {
   protected status = TransactionStatusEnum.PAID;
   protected bookingInitiation: BookingInitiationLogEntity;
 
-  abstract pay(
-    bookingDto: BookingDto,
-    customer: CustomerEntity,
-    service: ServiceEntity,
-    scheduleTime: ISchedule
-  ): Promise<T>;
+  abstract pay(paymentObj: IPaymentPay): Promise<T>;
 
   get transactionStatus(): TransactionStatusEnum {
     return this.status;
