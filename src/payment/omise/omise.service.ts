@@ -9,13 +9,20 @@ import { PaymentAbstract } from '../payment.abstract';
 import * as config from 'config';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
 import { IPaymentPay } from '../interface/payment-pay.interface';
+import { TransactionStatusEnum } from 'src/booking/enums/transaction-status.enum';
 const appConfig = config.get('app');
 
 @Injectable()
 export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
+  protected paymentStatus = {
+    failed: 'failed',
+    expired: 'expired',
+    pending: 'pending',
+    reserved: 'reserved',
+    successful: 'successful'
+  };
+
   constructor(
     @Inject('OMISE_CLIENT') private omise: Omise.IOmise,
     @InjectQueue(config.get('booking.queueName')) private bookingQueue: Queue
@@ -28,9 +35,11 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     try {
       const bookingInitiation = this.bookingInitiation;
       const response = await this.verify(customer, bookingDto, service);
+      const transactionStatus = this.transactionStatus(response['status']);
       this.bookingQueue.add('booking', {
         bookingInitiation,
-        paymentResponse: response
+        paymentResponse: response,
+        transactionStatus
       });
       return response;
     } catch (error) {
@@ -88,9 +97,21 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       Number(this.calculateServiceTotalAmount(service))
     ) {
       throw new BadRequestException(
-        "Sent amount doesn't not match with the system calculated amount "
+        "Sent amount doesn't match with the system calculated amount "
       );
     }
     return true;
+  }
+
+  transactionStatus(status: string) {
+    const paid = [this.paymentStatus.successful];
+    const unpaid = [
+      this.paymentStatus.expired,
+      this.paymentStatus.reserved,
+      this.paymentStatus.pending
+    ];
+    if (paid.includes(status)) return TransactionStatusEnum.PAID;
+    if (unpaid.includes(status)) return TransactionStatusEnum.UNPAID;
+    return TransactionStatusEnum.FAILED;
   }
 }

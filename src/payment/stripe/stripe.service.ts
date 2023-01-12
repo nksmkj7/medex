@@ -15,11 +15,20 @@ import { Queue } from 'bull';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { BookingInitiationLogEntity } from 'src/booking/entity/booking-initiation-log.entity';
+import { TransactionStatusEnum } from 'src/booking/enums/transaction-status.enum';
 
 @Injectable()
 export class StripeService extends PaymentAbstract<
   Stripe.Response<Stripe.PaymentIntent>
 > {
+  protected paymentStatus = {
+    requires_payment_method: 'requires_payment_method',
+    requires_confirmation: 'requires_confirmation',
+    requires_action: 'requires_action',
+    processing: 'processing',
+    canceled: 'canceled',
+    succeeded: 'succeeded'
+  };
   constructor(
     @Inject('STRIPE_CLIENT') private stripe: Stripe,
     @InjectQueue(config.get('booking.queueName')) private bookingQueue: Queue,
@@ -76,13 +85,28 @@ export class StripeService extends PaymentAbstract<
             id: bookingInitiationId
           }
         );
+        const transactionStatus = this.transactionStatus(paymentIntent.status);
         this.bookingQueue.add('booking', {
           bookingInitiation,
-          paymentResponse: event
+          paymentResponse: event,
+          transactionStatus
         });
         break;
       default:
         console.log(`Unhandled event type ${event.type}.`);
     }
+  }
+
+  transactionStatus(status: string) {
+    const paid = [this.paymentStatus.succeeded];
+    const unpaid = [
+      this.paymentStatus.processing,
+      this.paymentStatus.requires_action,
+      this.paymentStatus.requires_confirmation,
+      this.paymentStatus.requires_payment_method
+    ];
+    if (paid.includes(status)) return TransactionStatusEnum.PAID;
+    if (unpaid.includes(status)) return TransactionStatusEnum.UNPAID;
+    return TransactionStatusEnum.FAILED;
   }
 }

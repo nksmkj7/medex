@@ -27,8 +27,6 @@ import { ISchedule, ScheduleEntity } from 'src/schedule/entity/schedule.entity';
 import dayjs = require('dayjs');
 import { ModuleRef } from '@nestjs/core';
 import { OmiseService } from 'src/payment/omise/omise.service';
-import { PaymentGatewayEnum } from './enums/payment-gateway.enum';
-import Stripe from 'stripe';
 import { StripeService } from 'src/payment/stripe/stripe.service';
 import { Request } from 'express';
 import { BookingInitiationLogEntity } from './entity/booking-initiation-log.entity';
@@ -36,6 +34,7 @@ import {
   BookingData,
   TransactionData
 } from './interface/booking-initiation-log.interface';
+import { TransactionStatusEnum } from './enums/transaction-status.enum';
 
 const appConfig = config.get('app');
 
@@ -379,7 +378,8 @@ export class BookingService {
 
   async storeBooking(
     bookingInitiateLogData: BookingInitiationLogEntity,
-    paymentGatewayResponse?: object
+    paymentGatewayResponse: object,
+    transactionStatus: TransactionStatusEnum
   ) {
     const { bookingData, transactionData } = bookingInitiateLogData;
     const queryRunner = this.connection.createQueryRunner();
@@ -409,7 +409,8 @@ export class BookingService {
           TransactionEntity,
           transaction,
           {
-            response_json: paymentGatewayResponse
+            response_json: paymentGatewayResponse,
+            status: transactionStatus
           },
           transactionData
         );

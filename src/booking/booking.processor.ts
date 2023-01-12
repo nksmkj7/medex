@@ -44,11 +44,12 @@ export class BookingProcessor {
 
   @Process('booking')
   async book(job: Job): Promise<any> {
-    const { bookingInitiation, paymentResponse } = job.data;
+    const { bookingInitiation, paymentResponse, transactionStatus } = job.data;
     try {
       return this.bookingService.storeBooking(
         bookingInitiation,
-        paymentResponse
+        paymentResponse,
+        transactionStatus
       );
     } catch (error) {
       this.logger.error(error.stack);
