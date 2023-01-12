@@ -45,11 +45,12 @@ export class ServiceController {
     )
   )
   @ApiConsumes('multipart/form-data')
-  create(@Body() serviceDto: ServiceDto,
+  create(
+    @Body() serviceDto: ServiceDto,
     @UploadedFile()
     file: Express.Multer.File
   ) {
-    return this.service.create({...serviceDto,image: file.filename});
+    return this.service.create({ ...serviceDto, image: file.filename });
   }
 
   @Public()
@@ -76,9 +77,9 @@ export class ServiceController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateServiceDto: UpdateServiceDto,
     @UploadedFile()
-    file: Express.Multer.File,
+    file: Express.Multer.File
   ): Promise<ServiceSerializer> {
-    return this.service.update(id, updateServiceDto,file);
+    return this.service.update(id, updateServiceDto, file);
   }
 
   @ApiTags('Public')
