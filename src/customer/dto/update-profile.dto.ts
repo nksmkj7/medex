@@ -1,17 +1,13 @@
 import { OmitType } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import {
   IsDateString,
   IsEmpty,
   IsEnum,
   IsNotEmpty,
-  IsNumberString,
   IsOptional,
   isPhoneNumber,
-  IsPhoneNumber,
   IsString,
   Validate,
-  validate,
   ValidateIf
 } from 'class-validator';
 import { RunValidation } from 'src/common/validators/run-validation.validators';
@@ -41,9 +37,16 @@ export class UpdateProfileDto extends OmitType(CustomerSignupDto, [
   dialCode: string;
 
   @ValidateIf((object, value) => !!value)
-  @Validate(RunValidation, [(dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`), 'dialCode'], {
-    message: 'invalid phone number'
-  })
+  @Validate(
+    RunValidation,
+    [
+      (value: string, dialCode: string) => isPhoneNumber(`${dialCode}${value}`),
+      'dialCode'
+    ],
+    {
+      message: 'invalid phone number'
+    }
+  )
   phoneNumber: string;
 
   @IsOptional()

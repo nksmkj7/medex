@@ -1,4 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
 import {
   ValidatorConstraintInterface,
@@ -14,10 +13,10 @@ export class RunValidation implements ValidatorConstraintInterface {
 
   async validate<E>(value: string | number, args: ValidationArguments) {
     const [validationFn, checkValueAgainst] = args.constraints;
-    if (!args.object.hasOwnProperty(checkValueAgainst)) {
-      return false;
-    }
-    return validationFn(args.object[checkValueAgainst], value);
+    // if (!args.object.hasOwnProperty(checkValueAgainst)) {
+    //   return false;
+    // }
+    return validationFn(value, args.object[checkValueAgainst]);
   }
 
   defaultMessage(args: ValidationArguments) {
