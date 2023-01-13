@@ -4,10 +4,6 @@ import { RunValidation } from 'src/common/validators/run-validation.validators';
 
 export class HomeJsonDto {
   @IsNotEmpty()
-  // @Transform(({ value }) => {
-  //   console.log(value, 'value is --->');
-  //   // if (typeof value !== 'string') return JSON.stringify(value);
-  // })
   @Validate(
     RunValidation,
     [
@@ -23,6 +19,5 @@ export class HomeJsonDto {
       message: 'invalid json'
     }
   )
-  // @IsJSON()
   json: string;
 }

@@ -92,7 +92,9 @@ export class BookingEntity extends CustomBaseEntity {
   @AfterLoad()
   afterLoad() {
     this.paymentStatus =
-      this.transactions && Array.isArray(this.transactions)
+      this.transactions &&
+      Array.isArray(this.transactions) &&
+      this.transactions.length
         ? this.transactions[this.transactions.length - 1].status
         : 'unpaid';
   }
@@ -106,4 +108,7 @@ export class BookingEntity extends CustomBaseEntity {
     nullable: true
   })
   scheduleTimeId: string;
+
+  @Column('integer')
+  bookingNumber: number;
 }

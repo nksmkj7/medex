@@ -13,6 +13,7 @@ import { Pagination } from 'src/paginate';
 import { PaginationInfoInterface } from 'src/paginate/pagination-info.interface';
 import { SearchFilterInterface } from 'src/common/interfaces/search-filter.interface';
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
+import { exit } from 'process';
 
 /**
  * Base Repository for code reuse
