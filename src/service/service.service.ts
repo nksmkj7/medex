@@ -101,7 +101,7 @@ export class ServiceService {
       relationalSearchCriteria = {
         ...relationalSearchCriteria,
         user: {
-          name: ILike(`%${keywords}%`)
+          username: ILike(`%${keywords}%`)
         },
         category: {
           title: ILike(`%${keywords}%`)
