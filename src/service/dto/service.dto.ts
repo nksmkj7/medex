@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
+  IsJSON,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -28,7 +29,6 @@ import { RunValidation } from 'src/common/validators/run-validation.validators';
 import { IsTime } from 'src/common/validators/time-only.decorator';
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceEntity } from '../entity/service.entity';
-import * as dayjs from 'dayjs';
 import { ScheduleTypeEnum } from '../enums/schedule-type.enum';
 
 export class ServiceDto {
@@ -52,7 +52,7 @@ export class ServiceDto {
   categoryId: string;
 
   @ApiPropertyOptional()
-  @Transform(({value}) => !!value ? value:null)
+  @Transform(({ value }) => (!!value ? value : null))
   @ValidateIf((object, value) => {
     return value;
   })
@@ -71,18 +71,18 @@ export class ServiceDto {
   description: string;
 
   @ApiPropertyOptional()
-  @Transform(({value}) => value ? Number(value) : 0)  
-  @ValidateIf((object, value) => { 
-    return !!value
+  @Transform(({ value }) => (value ? Number(value) : 0))
+  @ValidateIf((object, value) => {
+    return !!value;
   })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   durationInMinutes: number;
 
   @ApiPropertyOptional()
-  @Transform(({value}) => value ? Number(value) : 0)
-  @ValidateIf((object, value) => { 
-    return !!value
+  @Transform(({ value }) => (value ? Number(value) : 0))
+  @ValidateIf((object, value) => {
+    return !!value;
   })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
@@ -90,9 +90,9 @@ export class ServiceDto {
   discount: number;
 
   @ApiPropertyOptional()
-  @Transform(({value}) => value ? Number(value) : 0)
-  @ValidateIf((object, value) => { 
-    return !!value
+  @Transform(({ value }) => (value ? Number(value) : 0))
+  @ValidateIf((object, value) => {
+    return !!value;
   })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
@@ -106,9 +106,9 @@ export class ServiceDto {
   price: number;
 
   @ApiPropertyOptional()
-  @Transform(({value}) => !!value ? value: null)
-  @ValidateIf((object, value) => { 
-    return !!value
+  @Transform(({ value }) => (!!value ? value : null))
+  @ValidateIf((object, value) => {
+    return !!value;
   })
   @IsArray()
   @IsUUID('4', { each: true })
@@ -116,9 +116,9 @@ export class ServiceDto {
   specialistIds: string[];
 
   @ApiPropertyOptional()
-  @Transform(({value}) => value ? Number(value) : 0)
-  @ValidateIf((object, value) => { 
-    return !!value
+  @Transform(({ value }) => (value ? Number(value) : 0))
+  @ValidateIf((object, value) => {
+    return !!value;
   })
   @IsInt()
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
@@ -142,7 +142,7 @@ export class ServiceDto {
     default: true
   })
   @IsNotEmpty()
-  @Transform(({ value }) => value === 'true' ? true : false)
+  @Transform(({ value }) => (value === 'true' ? true : false))
   @IsBoolean()
   status: boolean;
 
@@ -152,17 +152,31 @@ export class ServiceDto {
   @IsNotEmpty()
   @IsEnum(ScheduleTypeEnum)
   scheduleType: ScheduleTypeEnum;
-  
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Service Image ',
-    type: 'string',
+    type: [String],
     format: 'binary'
   })
-  @ValidateIf((object, value) => { 
-    return !!value
+  @ValidateIf((object, value) => {
+    return !!value;
   })
-  image:string
+  image: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  shortDescription: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsJSON()
+  tags: string;
+
+  @ApiPropertyOptional({
+    type: 'string'
+  })
+  @IsOptional()
+  @IsString()
+  searchKeywords: string;
 }
-
-

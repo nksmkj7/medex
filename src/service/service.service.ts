@@ -59,7 +59,7 @@ export class ServiceService {
     @InjectRepository(SpecialistRepository)
     private readonly specialistRepository: SpecialistRepository
   ) {}
-  async create(createServiceDto: ServiceDto) {
+  async create(createServiceDto: ServiceDto, files: Express.Multer.File[]) {
     const { categoryId, subCategoryId, userId } = createServiceDto;
     await this.validIds({ userId, categoryId, subCategoryId });
     const queryRunner = this.connection.createQueryRunner();
@@ -67,6 +67,12 @@ export class ServiceService {
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
+      if (files) {
+        createServiceDto.image = files.map((file) => file.filename).join(', ');
+      }
+      if (createServiceDto.tags) {
+        createServiceDto.tags = JSON.parse(createServiceDto.tags);
+      }
       const service = manager.create(ServiceEntity, createServiceDto);
       await manager.save(service);
       if (createServiceDto?.specialistIds?.length > 0) {
