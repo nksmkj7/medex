@@ -111,6 +111,7 @@ export class ServiceController {
     return this.service.searchProviderService(searchCategoryProvideServiceDto);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ServiceSerializer> {
     return this.service.findOne(id);

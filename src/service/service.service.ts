@@ -206,7 +206,12 @@ export class ServiceService {
   }
 
   async findOne(id: string): Promise<ServiceSerializer> {
-    return this.repository.get(id, ['user', 'category', 'subCategory']);
+    return this.repository.get(id, [
+      'user',
+      'user.providerInformation',
+      'category',
+      'subCategory'
+    ]);
   }
 
   async validIds(ids: ICheckIds) {
