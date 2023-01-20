@@ -76,9 +76,16 @@ export class ServiceController {
   }
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))
+  // @UseInterceptors(
+  //   FileInterceptor(
+  //     'image',
+  //     multerOptionsHelper('public/images/service', 1000000)
+  //   )
+  // )
   @UseInterceptors(
-    FileInterceptor(
+    FilesInterceptor(
       'image',
+      null,
       multerOptionsHelper('public/images/service', 1000000)
     )
   )
@@ -87,10 +94,10 @@ export class ServiceController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateServiceDto: UpdateServiceDto,
-    @UploadedFile()
-    file: Express.Multer.File
+    @UploadedFiles()
+    files: Array<Express.Multer.File>
   ): Promise<ServiceSerializer> {
-    return this.service.update(id, updateServiceDto, file);
+    return this.service.update(id, updateServiceDto, files);
   }
 
   @ApiTags('Public')

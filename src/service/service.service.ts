@@ -133,7 +133,7 @@ export class ServiceService {
   async update(
     id: string,
     updateServiceDto: UpdateServiceDto,
-    file?: Express.Multer.File
+    files?: Express.Multer.File[]
   ) {
     const queryRunner = this.connection.createQueryRunner();
     const manager = queryRunner.manager;
@@ -154,14 +154,27 @@ export class ServiceService {
       // }
       await this.validIds({ userId, categoryId, subCategoryId });
       const { specialists, ...serviceOnlyData } = service;
-      updateServiceDto = Object.keys(file).length
-        ? { ...updateServiceDto, image: file.filename }
-        : { ...updateServiceDto, image: service.image };
-      if (service.image && Object.keys(file).length) {
-        const path = `public/images/service/${service.image}`;
-        if (existsSync(path)) {
-          unlinkSync(`public/images/service/${service.image}`);
+      if (files.length) {
+        let uploadedImages = [];
+        uploadedImages = files.map((file) => file.filename);
+        if (service.image) {
+          service.image.split(',').forEach((image) => {
+            const path = `public/images/service/${image}`;
+            if (!files.find((file) => file.path === path)) {
+              uploadedImages.push(image);
+            } else {
+              if (existsSync(path)) {
+                unlinkSync(`public/images/service/${image}`);
+              }
+            }
+          });
         }
+        updateServiceDto.image = uploadedImages.join(',');
+      } else {
+        updateServiceDto.image = service.image;
+      }
+      if (updateServiceDto.tags) {
+        updateServiceDto.tags = JSON.parse(updateServiceDto.tags);
       }
       const updatedService = manager.merge(
         ServiceEntity,

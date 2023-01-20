@@ -71,13 +71,13 @@ export class ServiceSerializer extends ModelSerializer {
   @ApiProperty()
   @Transform(({ value }) => {
     if (value) {
-      value = value.split(', ');
+      value = value.split(',');
       if (Array.isArray(value)) {
         return value.map(
-          (image) => `${appConfig.appUrl}/images/service/${image}`
+          (image) => `${appConfig.appUrl}/images/service/${image.trim()}`
         );
       }
-      return `${appConfig.appUrl}/images/service/${value}`;
+      return `${appConfig.appUrl}/images/service/${value.trim()}`;
     }
     return null;
   })

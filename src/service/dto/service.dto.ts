@@ -41,7 +41,7 @@ export class ServiceDto {
     UniqueValidatorPipe,
     [ServiceEntity, [(value: string) => ({ slug: slugify(value) }), 'userId']],
     {
-      message: 'has already been assigned to this user'
+      message: 'Title has already been assigned to this user'
     }
   )
   title: string;
@@ -169,7 +169,7 @@ export class ServiceDto {
   shortDescription: string;
 
   @ApiPropertyOptional()
-  @IsOptional()
+  @ValidateIf((object, value) => !!value)
   @IsJSON()
   tags: string;
 
