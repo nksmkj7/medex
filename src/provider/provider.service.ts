@@ -213,7 +213,7 @@ export class ProviderService {
     id: number,
     providerDayScheduleDto: ProviderDayScheduleDto
   ) {
-    let user = await this.userRepository.findOne(id, {
+    const user = await this.userRepository.findOne(id, {
       relations: ['providerInformation']
     });
     await this.connection
@@ -228,7 +228,7 @@ export class ProviderService {
   }
 
   async getDaySchedule(id: number): Promise<IDaySchedules> {
-    let user = await this.userRepository.findOne(id, {
+    const user = await this.userRepository.findOne(id, {
       relations: ['providerInformation']
     });
     const daySchedules = user.providerInformation.daySchedules;
@@ -252,8 +252,8 @@ export class ProviderService {
     serviceFilterDto: ServiceFilterDtoWithoutProvider,
     referer?: string
   ) {
-    let searchCondition = {};
-    if (referer !== appConfig.frontendUrl+"/") {
+    const searchCondition = {};
+    if (referer !== appConfig.frontendUrl + '/') {
       searchCondition['status'] = true;
     }
     const user = await this.userRepository.findOne(id, {
@@ -357,11 +357,11 @@ export class ProviderService {
         }
       }
     );
-      if (banner.image) {
-        const path = `public/images/provider-banners/${banner.image}`;
-        if (existsSync(path)) {
-          unlinkSync(`public/images/provider-banners/${banner.image}`);
-        }
+    if (banner.image) {
+      const path = `public/images/provider-banners/${banner.image}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/provider-banners/${banner.image}`);
+      }
     }
     return banner.remove();
   }
