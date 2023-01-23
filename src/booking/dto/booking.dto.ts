@@ -7,7 +7,6 @@ import {
   IsNumber,
   IsNumberString,
   isPhoneNumber,
-  IsPhoneNumber,
   IsString,
   IsUUID,
   Validate,
@@ -42,7 +41,7 @@ export class BookingDto {
   @Validate(
     RunValidation,
     [
-      (dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`),
+      (value: string, dialCode: string) => isPhoneNumber(`${dialCode}${value}`),
       'dialCode'
     ],
     {
