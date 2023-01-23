@@ -42,8 +42,8 @@ export interface IProviderWithService {
   banner?: string;
   banner_link?: string;
   category_title: string;
-  service_image?: string;
-  [index: string]: string | number;
+  service_image?: string | string[];
+  [index: string]: string | number | string[];
 }
 
 export class ServiceService {
@@ -562,9 +562,18 @@ export class ServiceService {
 
   groupProviderWithService(providerWithService: IProviderWithService[]) {
     const getFormattedData = (data: IProviderWithService) => {
-      data.service_image = data?.service_image
-        ? `${appConfig.appUrl}/images/service/${data.service_image}`
-        : null;
+      // data.service_image = data?.service_image
+      //   ? `${appConfig.appUrl}/images/service/${data.service_image}`
+      //   : null;
+      data.service_image = (
+        data?.service_image
+          ? (data.service_image as string)
+              .split(',')
+              .map(
+                (image) => `${appConfig.appUrl}/images/service/${image.trim()}`
+              )
+          : []
+      ) as string[];
       return omit(data, [
         'row_number',
         'provider_id',
