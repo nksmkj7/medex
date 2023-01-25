@@ -49,6 +49,8 @@ import { StaticPageModule } from './static-page/static-page.module';
 import { FaqModule } from './faq/faq.module';
 import { OmiseModule } from './payment/omise/omise.module';
 import { StripeModule } from './payment/stripe/stripe.module';
+import { FileModule } from './file/file.module';
+import { CacheManagerModule } from './cache-manager/cache-manager.module';
 
 const appConfig = config.get('app');
 
@@ -110,7 +112,9 @@ const appConfig = config.get('app');
       publicKey: process.env.OMISE_PUBLIC_KEY,
       secretKey: process.env.OMISE_SECRET_KEY
     }),
-    StripeModule.register(process.env.STRIPE_SECRET_KEY)
+    StripeModule.register(process.env.STRIPE_SECRET_KEY),
+    FileModule,
+    CacheManagerModule
   ],
   providers: [
     {
