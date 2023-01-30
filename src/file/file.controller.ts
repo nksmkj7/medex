@@ -1,6 +1,9 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   UploadedFiles,
   UseGuards,
@@ -10,10 +13,12 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
-import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { FileService } from './file.service';
 import * as config from 'config';
+import { dynamicPathMulterOptionsHelper } from 'src/common/helper/dynamic-path-multer-options.helper';
+import { CreateFolderDto } from './dto/create-folder.dto';
+import { DeleteAssetDto } from './dto/delete-asset.dto';
 const appConfig = config.get('app');
 
 @ApiTags('File')
@@ -28,11 +33,16 @@ export class FileController {
     return this.service.getFiles();
   }
 
+  @Post('/folder/create')
+  createFolder(@Body() createFolderDto: CreateFolderDto) {
+    return this.service.createFolder(createFolderDto);
+  }
+
   @UseInterceptors(
     FilesInterceptor(
       'files',
       null,
-      multerOptionsHelper('public/files', 1000000)
+      dynamicPathMulterOptionsHelper(1000000, true)
     )
   )
   @ApiConsumes('multipart/form-data')
@@ -45,5 +55,13 @@ export class FileController {
     return files.map(
       (file) => `${appConfig.appUrl}/images/service/${file.filename}`
     );
+  }
+
+  @Delete('/:type/delete')
+  removeFileOrFolder(
+    @Body() deleteAssetDto: DeleteAssetDto,
+    @Param('type') assetType: string
+  ) {
+    return this.service.deleteAsset(assetType, deleteAssetDto);
   }
 }

@@ -1047,6 +1047,31 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'File management',
+      resource: 'file',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View faq list',
+          route: [
+            {
+              path: '/file',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Delete file',
+          route: [
+            {
+              path: '/faq/:filePath',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
     }
   ]
 };

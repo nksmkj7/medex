@@ -1,14 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class UploadFileDto {
+export class CreateFolderDto {
   @ApiProperty({
-    description: 'Upload files',
-    type: [String],
-    format: 'binary'
+    description: 'Upload files'
   })
   @IsNotEmpty()
-  files: string;
+  @IsString()
+  name: string;
 
   @ApiProperty({
     type: 'string',
