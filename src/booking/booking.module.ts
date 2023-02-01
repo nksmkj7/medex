@@ -16,7 +16,7 @@ const queueConfig = config.get('queue');
 
 @Module({
   controllers: [BookingController],
-  providers: [BookingService,BackOfficeProcessor],
+  providers: [BookingService, BackOfficeProcessor],
   imports: [
     CustomerModule,
     TypeOrmModule.forFeature([
@@ -36,7 +36,7 @@ const queueConfig = config.get('queue');
           }
         }
       })
-    }),
+    })
   ]
 })
 export class BookingModule {}

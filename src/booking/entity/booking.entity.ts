@@ -6,6 +6,7 @@ import {
   AfterLoad,
   Column,
   Entity,
+  Generated,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -96,4 +97,8 @@ export class BookingEntity extends CustomBaseEntity {
         ? this.transactions[this.transactions.length - 1].status
         : 'unpaid';
   }
+
+  @Column('int')
+  @Generated('increment')
+  bookingNumber: number;
 }

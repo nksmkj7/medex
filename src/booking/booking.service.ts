@@ -45,7 +45,8 @@ export class BookingService {
     private readonly transactionRepository: TransactionRepository,
     @InjectConnection()
     private readonly connection: Connection,
-    @InjectQueue(config.get('backOffice.queueName')) private backOfficeQueue: Queue
+    @InjectQueue(config.get('backOffice.queueName'))
+    private backOfficeQueue: Queue
   ) {
     this.transactionCodeLength = 16;
   }
@@ -59,9 +60,15 @@ export class BookingService {
           specialistId: bookingDto.specialistId,
           date: bookingDto.scheduleDate
         },
-        relations: ['service']
+        relations: [
+          'service',
+          'service.user',
+          'service.user.providerInformation',
+          'service.user.providerInformation.country'
+        ]
       }
     );
+
     if (!schedule) {
       throw new UnprocessableEntityException('Schedule not found.');
     }
@@ -93,7 +100,7 @@ export class BookingService {
       await manager.save(booking);
       const transaction = await this.getBookingTransaction(customer, service);
       transaction.booking = booking;
-      let paymentResponse = {};
+      const paymentResponse = {};
       // if (
       //   Number(bookingDto.totalAmount) !==
       //   Number(this.calculateServiceTotalAmount(service))
@@ -123,7 +130,7 @@ export class BookingService {
         service,
         booking,
         transaction
-      })
+      });
       //   booking.transactions = [transaction];
       return booking;
     } catch (error) {

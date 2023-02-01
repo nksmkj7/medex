@@ -67,6 +67,4 @@ export class BookingController {
   ) {
     return this.service.updateBookingStatus(bookingId, bookingUpdateStatusDto);
   }
-
-  
 }
