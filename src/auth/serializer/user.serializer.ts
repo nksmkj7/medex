@@ -86,9 +86,9 @@ export class UserSerializer extends ModelSerializer {
   updatedAt: Date;
 
   @ApiHideProperty()
-  @Expose({
-    groups: adminUserGroupsForSerializing
-  })
+  // @Expose({
+  //   groups: adminUserGroupsForSerializing
+  // })
   @Type(() => ProviderSerializer)
   providerInformation: ProviderSerializer;
 }

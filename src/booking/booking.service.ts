@@ -1,7 +1,6 @@
 import {
-  BadRequestException,
-  Get,
   Injectable,
+  RawBodyRequest,
   UnprocessableEntityException
 } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
@@ -17,20 +16,26 @@ import { BookingFilterDto } from './dto/booking-filter.dto';
 import { BookingUpdateStatusDto } from './dto/booking-update-status.dto';
 import { BookingDto } from './dto/booking.dto';
 import { BookingEntity } from './entity/booking.entity';
-import {
-  adminUserGroupsForSerializing,
-  basicFieldGroupsForSerializing
-} from './serializer/booking.serializer';
+import { adminUserGroupsForSerializing } from './serializer/booking.serializer';
 import * as Omise from 'omise';
-import { Public } from 'src/common/decorators/public.decorator';
 import { PaymentGatewayException } from 'src/exception/payment-gateway.exception';
-import { TransactionStatusEnum } from './enums/transaction-status.enum';
 import { PaymentMethodEnum } from './enums/payment-method.enum';
 import * as config from 'config';
-import { paginate } from 'src/common/helper/pagination.helper';
 import { CustomerBookingFilterDto } from './dto/customer-booking-filter.dto';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
+import { ISchedule, ScheduleEntity } from 'src/schedule/entity/schedule.entity';
+import dayjs = require('dayjs');
+import { ModuleRef } from '@nestjs/core';
+import { OmiseService } from 'src/payment/omise/omise.service';
+import { StripeService } from 'src/payment/stripe/stripe.service';
+import { Request } from 'express';
+import { BookingInitiationLogEntity } from './entity/booking-initiation-log.entity';
+import {
+  BookingData,
+  TransactionData
+} from './interface/booking-initiation-log.interface';
+import { TransactionStatusEnum } from './enums/transaction-status.enum';
 
 const appConfig = config.get('app');
 
@@ -46,20 +51,25 @@ export class BookingService {
     @InjectConnection()
     private readonly connection: Connection,
     @InjectQueue(config.get('backOffice.queueName'))
-    private backOfficeQueue: Queue
+    private backOfficeQueue: Queue,
+    private moduleRef: ModuleRef
   ) {
     this.transactionCodeLength = 16;
   }
 
-  async storeBooking(bookingDto: BookingDto, customer: CustomerEntity) {
+  async initiateBooking(bookingDto: BookingDto, customer: CustomerEntity) {
+    const whereCondition = {
+      serviceId: bookingDto.serviceId,
+      specialistId: bookingDto.specialistId,
+      date: bookingDto.scheduleDate
+    };
+    if (bookingDto.specialistId) {
+      whereCondition['specialistId'] = bookingDto.specialistId;
+    }
     const schedule = await this.scheduleRepository.findOne(
       bookingDto.scheduleId,
       {
-        where: {
-          serviceId: bookingDto.serviceId,
-          specialistId: bookingDto.specialistId,
-          date: bookingDto.scheduleDate
-        },
+        where: whereCondition,
         relations: [
           'service',
           'service.user',
@@ -78,66 +88,50 @@ export class BookingService {
     if (!scheduleTime || scheduleTime.isBooked) {
       throw new UnprocessableEntityException('Schedule not available');
     }
-
-    scheduleTime['isBooked'] = true;
+    if (schedule.specialistId && !bookingDto.specialistId) {
+      throw new UnprocessableEntityException(
+        'Specialist has been assigned to schedule. Specialist is missing in booking'
+      );
+    }
+    const scheduleDayTime = dayjs(
+      `${schedule.date} ${scheduleTime.startTime}`,
+      'YYYY-mm-dd HH:mm'
+    );
+    if (scheduleDayTime.isBefore(dayjs())) {
+      throw new UnprocessableEntityException('Cannot booked past date.');
+    }
     const service = schedule.service;
-    const queryRunner = this.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const paymentService = this.getPaymentService(bookingDto.paymentGateway);
+    let paymentResponse = {};
     try {
-      const manager = queryRunner.manager;
-      await manager.save(schedule);
-      const booking = new BookingEntity();
-      booking.customerId = customer.id;
-      booking.scheduleId = schedule.id;
-      booking.scheduleDate = schedule.date;
-      booking.serviceStartTime = scheduleTime.startTime;
-      booking.serviceEndTime = scheduleTime.endTime;
-      booking.firstName = bookingDto.firstName;
-      booking.lastName = bookingDto.lastName;
-      booking.email = bookingDto.email;
-      booking.phone = bookingDto.phone;
-      await manager.save(booking);
-      const transaction = await this.getBookingTransaction(customer, service);
-      transaction.booking = booking;
-      const paymentResponse = {};
-      // if (
-      //   Number(bookingDto.totalAmount) !==
-      //   Number(this.calculateServiceTotalAmount(service))
-      // ) {
-      //   throw new BadRequestException(
-      //     'Sent amount is not matched with the system calculated amount '
-      //   );
-      // }
-      // try {
-      //   paymentResponse = await this.verifyPayment(
-      //     bookingDto,
-      //     customer,
-      //     service
-      //   );
-      // } catch (error) {
-      //   paymentResponse = error.message;
-      //   throw new PaymentGatewayException(error.message);
-      // }
-      transaction.response_json = paymentResponse;
-      transaction.currency = bookingDto.currency;
-      transaction.paymentGateway = bookingDto.paymentGateway;
-      transaction.paymentMethod = bookingDto.paymentMethod;
-      transaction.status = TransactionStatusEnum.PAID;
-      await manager.save(transaction);
-      await queryRunner.commitTransaction();
-      await this.backOfficeQueue.add('booking', {
+      paymentService.bookingInitiationLog =
+        await this.storeBookingInitiationLog(
+          schedule,
+          customer,
+          scheduleTime,
+          bookingDto,
+          service
+        );
+      paymentResponse = await paymentService.pay({
+        bookingDto,
+        customer,
         service,
-        booking,
-        transaction
+        scheduleTime
       });
-      //   booking.transactions = [transaction];
-      return booking;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
+      throw new PaymentGatewayException(error.message);
+    }
+    return paymentResponse;
+  }
+
+  getPaymentService(paymentGateway: string) {
+    switch (paymentGateway) {
+      case 'omise':
+        return this.moduleRef.get(OmiseService, { strict: false });
+      case 'stripe':
+        return this.moduleRef.get(StripeService, { strict: false });
+      default:
+        throw new UnprocessableEntityException('Unknown payment method');
     }
   }
 
@@ -305,6 +299,7 @@ export class BookingService {
         }
       };
     }
+
     return this.repository.paginate(
       bookingFilterDto,
       [
@@ -341,5 +336,107 @@ export class BookingService {
     booking.status = bookingUpdateStatusDto.status;
     await booking.save();
     return this.repository.transform(booking);
+  }
+
+  handleStripeEventHook(req: RawBodyRequest<Request>) {
+    const stripeService = this.moduleRef.get(StripeService, { strict: false });
+    return stripeService.handleWebHook(req);
+  }
+
+  async storeBookingInitiationLog(
+    schedule: ScheduleEntity,
+    customer: CustomerEntity,
+    scheduleTime: ISchedule,
+    bookingDto: BookingDto,
+    service: ServiceEntity
+  ) {
+    const queryRunner = this.connection.createQueryRunner();
+    try {
+      const booking: BookingData = {
+        customerId: customer.id,
+        scheduleId: schedule.id,
+        scheduleDate: schedule.date,
+        serviceStartTime: scheduleTime.startTime,
+        serviceEndTime: scheduleTime.endTime,
+        firstName: bookingDto.firstName,
+        lastName: bookingDto.lastName,
+        email: bookingDto.email,
+        phone: bookingDto.phone,
+        dialCode: bookingDto.dialCode,
+        scheduleTimeId: bookingDto.scheduleTimeId
+      };
+
+      const transaction: TransactionData = {
+        totalAmount: this.calculateServiceTotalAmount(service),
+        transactionCode: await this.generateUniqueTransactionCode(customer),
+        customerId: customer.id,
+        price: service.price,
+        discount: service.discount,
+        serviceCharge: service.serviceCharge,
+        currency: bookingDto.currency,
+        paymentGateway: bookingDto.paymentGateway,
+        paymentMethod: bookingDto.paymentMethod
+      };
+      const bookingInitiationLog = new BookingInitiationLogEntity();
+      const manager = queryRunner.manager;
+      bookingInitiationLog.bookingData = booking;
+      bookingInitiationLog.transactionData = transaction;
+      return await manager.save(bookingInitiationLog);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async storeBooking(
+    bookingInitiateLogData: BookingInitiationLogEntity,
+    paymentGatewayResponse: object,
+    transactionStatus: TransactionStatusEnum
+  ) {
+    const { bookingData, transactionData } = bookingInitiateLogData;
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const manager = queryRunner.manager;
+      const whereCondition = {
+        id: bookingData.scheduleId,
+        date: bookingData.scheduleDate
+      };
+      const schedule = (await manager.findOne(
+        ScheduleEntity,
+        whereCondition
+      )) as ScheduleEntity;
+
+      const scheduleTime = schedule.schedules.find(
+        (time) => time.id === bookingData.scheduleTimeId
+      );
+      scheduleTime['isBooked'] = true;
+      await manager.save(schedule);
+      const booking = await manager.save(BookingEntity, bookingData);
+      const transaction = new TransactionEntity();
+      transaction.booking = booking;
+      if (paymentGatewayResponse) {
+        manager.merge(
+          TransactionEntity,
+          transaction,
+          {
+            response_json: paymentGatewayResponse,
+            status: transactionStatus
+          },
+          transactionData
+        );
+      }
+
+      await manager.save(transaction);
+      await queryRunner.commitTransaction();
+      return booking;
+      //   booking.transactions = [transaction];
+      // return bookingResponse;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

@@ -93,10 +93,22 @@ export class BookingEntity extends CustomBaseEntity {
   @AfterLoad()
   afterLoad() {
     this.paymentStatus =
-      this.transactions && Array.isArray(this.transactions)
+      this.transactions &&
+      Array.isArray(this.transactions) &&
+      this.transactions.length
         ? this.transactions[this.transactions.length - 1].status
         : 'unpaid';
   }
+
+  @Column('varchar', {
+    nullable: true
+  })
+  dialCode: string;
+
+  @Column('varchar', {
+    nullable: true
+  })
+  scheduleTimeId: string;
 
   @Column('int')
   @Generated('increment')

@@ -11,6 +11,7 @@ import { CreateBannerDto } from './dto/create-bannter.dto';
 import { BannerRepository } from './banner.repository';
 import { BannerFilterDto } from './dto/banner-filter.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
+import {isEmpty} from 'lodash'
 
 import * as config from 'config';
 
@@ -32,7 +33,7 @@ export class BannerService implements CommonServiceInterface<BannerSerializer> {
     referer?: string
   ): Promise<Pagination<BannerSerializer>> {
     let searchCriteria = {};
-    if (referer == appConfig.frontendUrl) {
+    if (referer !== appConfig.frontendUrl+"/") {
       searchCriteria['status'] = true;
     }
     return this.repository.paginate(
@@ -52,7 +53,7 @@ export class BannerService implements CommonServiceInterface<BannerSerializer> {
     id: number,
     updateBannerDto: UpdateBannerDto,
     file?: Express.Multer.File
-  ): Promise<BannerSerializer> {
+  ) {
     const banner = await this.repository.findOne(id);
     if (!banner) {
       throw new NotFoundException();
@@ -60,7 +61,7 @@ export class BannerService implements CommonServiceInterface<BannerSerializer> {
     updateBannerDto = file
       ? { ...updateBannerDto, image: file.filename }
       : { ...updateBannerDto, image: banner.image };
-    if (banner.image && file) {
+    if (banner.image && !isEmpty(file)) {
       const path = `public/images/banner/${banner.image}`;
       if (existsSync(path)) {
         unlinkSync(`public/images/banner/${banner.image}`);

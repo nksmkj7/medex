@@ -1,6 +1,9 @@
 import * as dayjs from 'dayjs';
 import * as duration from 'dayjs/plugin/duration';
+import { IDaySchedules } from 'src/provider/entity/provider-information.entity';
+import { memoize } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { weekDays } from '../constants/weekdays.constants';
 dayjs.extend(duration);
 
 export const daysOfTheMonth = (
@@ -10,10 +13,21 @@ export const daysOfTheMonth = (
     holidays?: number[];
     startDate: dayjs.Dayjs;
     endDate: dayjs.Dayjs;
+    providerDaySchedules?: IDaySchedules;
   },
   format = 'YYYY-MM-DD'
 ) => {
-  let { year, startDate, endDate, holidays = [] } = dateObj;
+  // eslint-disable-next-line prefer-const
+
+  let {
+    year,
+    startDate,
+    endDate,
+    // eslint-disable-next-line prefer-const
+    holidays = [],
+    // eslint-disable-next-line prefer-const
+    providerDaySchedules
+  } = dateObj;
   // month is always one less than expected. 0 for jan and 11 for dec
   const month = dayjs(startDate).month();
   year = year ?? dayjs().year();
@@ -23,17 +37,44 @@ export const daysOfTheMonth = (
     startDate ?? dayjs(`${year}-${month}-${startOfMonth.date()}`, 'YYYY-M-D');
   endDate =
     endDate ?? dayjs(`${year}-${month}-${endOfMonth.date()}`, 'YYYY-M-D');
-  let days = [];
-  if (!isHoliday(holidays, startDate.day()))
-    days.push(startDate.format(format));
+  const days: Array<{
+    date: string;
+    startTime: string | null;
+    endTime: string | null;
+  }> = [];
+
+  const getDayStartEndTimeMemoizeFn = memoize(getDayStartEndTime);
+  const pushDaysFn = (startDate: dayjs.Dayjs) => {
+    const { startTime, endTime } = getDayStartEndTimeMemoizeFn(
+      weekDays[startDate.day()],
+      providerDaySchedules
+    );
+    days.push({
+      date: startDate.format(format),
+      startTime: startTime,
+      endTime: endTime
+    });
+  };
+  if (!isHoliday(holidays, startDate.day())) {
+    pushDaysFn(startDate);
+  }
   while (!startDate.isSame(endDate)) {
     startDate = startDate.add(1, 'day');
     if (isHoliday(holidays, startDate.day())) {
       continue;
     }
-    days.push(startDate.format(format));
+    pushDaysFn(startDate);
   }
   return days;
+};
+
+const getDayStartEndTime = (
+  day: string,
+  daySchedules: IDaySchedules
+): { startTime: string | null; endTime: string | null } => {
+  return daySchedules?.[day]
+    ? daySchedules[day]
+    : { startTime: null, endTime: null };
 };
 
 const isHoliday = (holidays: number[], currentDay: number) =>
@@ -62,11 +103,11 @@ export const daySchedules = (
   const times = [];
 
   let startTimeNumber = getTimeDurationFn(startTime);
-  let endTimeNumber = getTimeDurationFn(endTime);
+  const endTimeNumber = getTimeDurationFn(endTime);
 
   while (startTimeNumber < endTimeNumber) {
-    let formattedStartTime = getTimeFn(startTime);
-    let formattedEndTime = getTimeFn(startTime, additionalTime);
+    const formattedStartTime = getTimeFn(startTime);
+    const formattedEndTime = getTimeFn(startTime, additionalTime);
     times.push({
       startTime: formattedStartTime,
       endTime: formattedEndTime,

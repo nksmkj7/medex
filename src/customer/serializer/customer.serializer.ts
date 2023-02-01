@@ -31,6 +31,10 @@ export class CustomerSerializer extends ModelSerializer {
 
   @ApiProperty()
   @Transform(({ value }) => (value !== 'null' ? value : ''))
+  dialCode: string;
+
+  @ApiProperty()
+  @Transform(({ value }) => (value !== 'null' ? value : ''))
   phoneNumber: string;
 
   @ApiProperty()

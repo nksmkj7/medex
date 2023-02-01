@@ -10,7 +10,10 @@ import {
   IsOptional,
   Validate,
   ValidateIf,
-  IsDate
+  IsDate,
+  IsDecimal,
+  IsLatitude,
+  IsLongitude
 } from 'class-validator';
 import dayjs = require('dayjs');
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto';
@@ -61,7 +64,7 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   timezone?: string;
 
   @IsOptional()
-  currency?: string;
+  currency: string;
 
   @IsOptional()
   contactPerson?: string;
@@ -88,4 +91,17 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
 
   @IsOptional()
   termsCondition?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsLatitude()
+  latitude: number
+
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsLongitude()
+  longitude: number
+
+
 }

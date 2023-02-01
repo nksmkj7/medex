@@ -7,16 +7,16 @@ import { TransactionRepository } from 'src/transaction/transaction.repository';
 import { BookingController } from './booking.controller';
 import { BookingRepository } from './booking.repository';
 import { BookingService } from './booking.service';
-
 import * as config from 'config';
+import { BookingProcessor } from './booking.processor';
+
 import { BackOfficeProcessor } from './backoffice.processor';
 
-const mailConfig = config.get('mail');
 const queueConfig = config.get('queue');
 
 @Module({
   controllers: [BookingController],
-  providers: [BookingService, BackOfficeProcessor],
+  providers: [BookingService, BackOfficeProcessor, BookingProcessor],
   imports: [
     CustomerModule,
     TypeOrmModule.forFeature([
@@ -37,6 +37,7 @@ const queueConfig = config.get('queue');
         }
       })
     })
-  ]
+  ],
+  exports: [BookingService, BookingProcessor]
 })
 export class BookingModule {}

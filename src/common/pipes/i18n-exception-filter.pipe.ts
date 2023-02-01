@@ -120,7 +120,7 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
       const item = errors[i];
       let message = [];
 
-      let getErrorMessage = async (constraints) => {
+      const getErrorMessage = async (constraints) => {
         return await Promise.allSettled(
           Object.keys(constraints).map(async (key: string) => {
             let validationKey: string = key,
@@ -132,7 +132,7 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
               validationKey = title;
               validationArgument = argument;
             }
-            
+
             const message = await this.i18n.translate(
               `validation.${validationKey}`,
               {

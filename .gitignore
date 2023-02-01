@@ -39,3 +39,4 @@ dump.rdb
 /src/i18n/*
 
 public/images/*
+public/files/*

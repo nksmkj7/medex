@@ -17,7 +17,7 @@ export class FaqService {
   ) {}
   getAllFaqs(faqFilterDto: FaqFilterDto, referer?: string) {
     let searchCriteria = {};
-    if (referer == appConfig.frontendUrl) {
+    if (referer !== appConfig.frontendUrl+"/") {
       searchCriteria['status'] = true;
     }
     return this.repository.paginate(

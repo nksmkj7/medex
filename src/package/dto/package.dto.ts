@@ -60,7 +60,7 @@ export class PackageDto {
   })
   link: string;
 
-  @Type(() => Boolean)
+  @Transform(({value}) => value === 'true' ? true: false)
   @IsBoolean()
   status: boolean;
 }

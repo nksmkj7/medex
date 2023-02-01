@@ -139,4 +139,19 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     nullable: true
   })
   image: string;
+
+  @Column('varchar', {
+    nullable: true
+  })
+  searchKeywords: string;
+
+  @Column('jsonb', {
+    nullable: true
+  })
+  tags: string;
+
+  @Column('text', {
+    nullable: true
+  })
+  shortDescription: string;
 }

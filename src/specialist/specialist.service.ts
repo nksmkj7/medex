@@ -57,10 +57,10 @@ export class SpecialistService {
     if (!specialist) {
       throw new NotFoundException();
     }
-    updateSpecialistDto = file
+    updateSpecialistDto = Object.keys(file).length
       ? { ...updateSpecialistDto, image: file.filename }
       : { ...updateSpecialistDto, image: specialist.image };
-    if (specialist.image) {
+    if (specialist.image && Object.keys(file).length) {
       const path = `public/images/specialist/${specialist.image}`;
       if (existsSync(path)) {
         unlinkSync(`public/images/specialist/${specialist.image}`);

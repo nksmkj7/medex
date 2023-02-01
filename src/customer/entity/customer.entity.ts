@@ -82,6 +82,9 @@ export class CustomerEntity extends CustomUuidBaseEntity {
   salt: string;
   user: any;
 
+  @Column('varchar')
+  dialCode: string;
+
   @BeforeInsert()
   // @BeforeUpdate()
   async hashPasswordBeforeInsert() {
