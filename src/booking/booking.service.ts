@@ -36,6 +36,7 @@ import {
   TransactionData
 } from './interface/booking-initiation-log.interface';
 import { TransactionStatusEnum } from './enums/transaction-status.enum';
+import { ScheduleTypeEnum } from 'src/service/enums/schedule-type.enum';
 
 const appConfig = config.get('app');
 
@@ -78,14 +79,17 @@ export class BookingService {
         ]
       }
     );
-
     if (!schedule) {
       throw new UnprocessableEntityException('Schedule not found.');
     }
     const scheduleTime = schedule.schedules.find(
       (time) => time.id === bookingDto.scheduleTimeId
     );
-    if (!scheduleTime || scheduleTime.isBooked) {
+    if (
+      !scheduleTime ||
+      (scheduleTime.isBooked &&
+        schedule.service.scheduleType === ScheduleTypeEnum.SPEICIALIST_ONLY)
+    ) {
       throw new UnprocessableEntityException('Schedule not available');
     }
     if (schedule.specialistId && !bookingDto.specialistId) {
@@ -402,15 +406,16 @@ export class BookingService {
         id: bookingData.scheduleId,
         date: bookingData.scheduleDate
       };
-      const schedule = (await manager.findOne(
-        ScheduleEntity,
-        whereCondition
-      )) as ScheduleEntity;
+      const schedule = (await manager.findOne(ScheduleEntity, whereCondition, {
+        relations: ['service']
+      })) as ScheduleEntity;
 
       const scheduleTime = schedule.schedules.find(
         (time) => time.id === bookingData.scheduleTimeId
       );
-      scheduleTime['isBooked'] = true;
+      if (schedule.service.scheduleType === ScheduleTypeEnum.SPEICIALIST_ONLY) {
+        scheduleTime['isBooked'] = true;
+      }
       await manager.save(schedule);
       const booking = await manager.save(BookingEntity, bookingData);
       const transaction = new TransactionEntity();
