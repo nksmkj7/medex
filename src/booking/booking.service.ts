@@ -402,14 +402,21 @@ export class BookingService {
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
+      bookingInitiateLogData.bookingCreated = true;
+      await manager.save(BookingInitiationLogEntity, bookingInitiateLogData);
       const whereCondition = {
         id: bookingData.scheduleId,
         date: bookingData.scheduleDate
       };
       const schedule = (await manager.findOne(ScheduleEntity, whereCondition, {
-        relations: ['service']
+        relations: [
+          'service',
+          'service.user',
+          'service.user.providerInformation',
+          'service.user.providerInformation.country'
+        ]
       })) as ScheduleEntity;
-
+      const service = schedule.service;
       const scheduleTime = schedule.schedules.find(
         (time) => time.id === bookingData.scheduleTimeId
       );
@@ -434,6 +441,12 @@ export class BookingService {
 
       await manager.save(transaction);
       await queryRunner.commitTransaction();
+      await this.backOfficeQueue.add('back-office', {
+        service,
+        booking,
+        transaction
+      });
+
       return booking;
       //   booking.transactions = [transaction];
       // return bookingResponse;

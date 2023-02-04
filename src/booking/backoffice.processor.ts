@@ -1,4 +1,4 @@
-import { OnQueueActive, Process, Processor } from '@nestjs/bull';
+import { Process, Processor } from '@nestjs/bull';
 import { InjectConnection } from '@nestjs/typeorm';
 import axios, { Axios } from 'axios';
 import { Job } from 'bull';
@@ -33,9 +33,10 @@ export class BackOfficeProcessor {
 
   constructor(@InjectConnection() protected readonly connection: Connection) {}
 
-  @Process('booking')
+  @Process('back-office')
   async processBooking(job: Job) {
     const { service, booking, transaction } = job.data;
+
     const payload = this.getApiPayloads({ service, booking, transaction });
     axios
       .post(this.backOfficeWebHookEndPoint, payload, {
@@ -45,9 +46,11 @@ export class BackOfficeProcessor {
         }
       })
       .then((response) => {
+        console.log(response);
         this.storeBackOfficeResponse(response, booking.id, true);
       })
       .catch(async (e) => {
+        console.log(e);
         this.storeBackOfficeResponse(e, booking.id, false);
       });
   }
@@ -83,8 +86,8 @@ export class BackOfficeProcessor {
         total_price: transaction.totalAmount,
         currency: transaction.currency,
         discount_price: transaction.discount,
-        pay_status: transaction.status,
-        status: booking.status,
+        pay_status: transaction.status.toUpperCase(),
+        status: booking.status.toUpperCase(),
         package_id: '1',
         linked_customer_name: '',
         memo: '',
