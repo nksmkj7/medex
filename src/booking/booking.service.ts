@@ -61,7 +61,6 @@ export class BookingService {
   async initiateBooking(bookingDto: BookingDto, customer: CustomerEntity) {
     const whereCondition = {
       serviceId: bookingDto.serviceId,
-      specialistId: bookingDto.specialistId,
       date: bookingDto.scheduleDate
     };
     if (bookingDto.specialistId) {
