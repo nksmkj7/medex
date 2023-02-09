@@ -113,4 +113,9 @@ export class BookingEntity extends CustomBaseEntity {
   @Column('int')
   @Generated('increment')
   bookingNumber: number;
+
+  @Column('int', {
+    default: 1
+  })
+  numberOfPeople: number;
 }

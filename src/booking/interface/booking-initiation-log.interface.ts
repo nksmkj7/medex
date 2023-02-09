@@ -14,6 +14,7 @@ export type BookingData = Pick<
   | 'phone'
   | 'dialCode'
   | 'scheduleTimeId'
+  | 'numberOfPeople'
 >;
 
 export type TransactionData = Pick<

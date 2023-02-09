@@ -366,7 +366,8 @@ export class BookingService {
         email: bookingDto.email,
         phone: bookingDto.phone,
         dialCode: bookingDto.dialCode,
-        scheduleTimeId: bookingDto.scheduleTimeId
+        scheduleTimeId: bookingDto.scheduleTimeId,
+        numberOfPeople: bookingDto.numberOfPeople
       };
 
       const transaction: TransactionData = {

@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsDateString,
@@ -6,6 +7,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
+  IsOptional,
   isPhoneNumber,
   IsString,
   IsUUID,
@@ -99,4 +101,13 @@ export class BookingDto {
   @IsNotEmpty()
   @IsEnum(PaymentMethodEnum)
   paymentMethod: PaymentMethodEnum;
+
+  @ApiPropertyOptional({
+    default: 1,
+    description:
+      'Number of people for booking. If left blanked, default value is 1'
+  })
+  @IsOptional()
+  @IsNumber()
+  numberOfPeople: number;
 }
