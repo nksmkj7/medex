@@ -13,12 +13,15 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
-  Headers
+  Headers,
+  UploadedFile
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { CreateMenuDto } from './dto/create-menu.dto';
@@ -33,12 +36,17 @@ import { MenuSerializer } from './serializer/menu.serializer';
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
+  @UseInterceptors(
+    FileInterceptor('icon', multerOptionsHelper('public/images/menu', 1000000))
+  )
   @Post()
+  @ApiConsumes('multipart/form-data')
   create(
     @Body()
-    createMenuDto: CreateMenuDto
+    createMenuDto: CreateMenuDto,
+    @UploadedFile() file: Express.Multer.File
   ) {
-    return this.menuService.create(createMenuDto);
+    return this.menuService.create(createMenuDto, file);
   }
 
   @Public()
@@ -62,13 +70,19 @@ export class MenuController {
 
   @Put(':id')
   @UseInterceptors(new InjectRequestInterceptor(['params']))
+  @UseInterceptors(
+    FileInterceptor('icon', multerOptionsHelper('public/images/menu', 1000000))
+  )
+  @ApiConsumes('multipart/form-data')
   update(
     @Param('id', ParseIntPipe)
     id: number,
     @Body()
-    updateMenuDto: UpdateMenuDto
+    updateMenuDto: UpdateMenuDto,
+    @UploadedFile()
+    file: Express.Multer.File
   ) {
-    return this.menuService.update(id, updateMenuDto);
+    return this.menuService.update(id, updateMenuDto, file);
   }
 
   @Delete(':id')

@@ -11,7 +11,7 @@ import { CreateBannerDto } from './dto/create-bannter.dto';
 import { BannerRepository } from './banner.repository';
 import { BannerFilterDto } from './dto/banner-filter.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
-import {isEmpty} from 'lodash'
+import { isEmpty } from 'lodash';
 
 import * as config from 'config';
 
@@ -32,8 +32,8 @@ export class BannerService implements CommonServiceInterface<BannerSerializer> {
     bannerFilterDto: BannerFilterDto,
     referer?: string
   ): Promise<Pagination<BannerSerializer>> {
-    let searchCriteria = {};
-    if (referer !== appConfig.frontendUrl+"/") {
+    const searchCriteria = {};
+    if (referer !== appConfig.frontendUrl + '/') {
       searchCriteria['status'] = true;
     }
     return this.repository.paginate(
