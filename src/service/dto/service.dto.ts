@@ -34,8 +34,8 @@ import { ScheduleTypeEnum } from '../enums/schedule-type.enum';
 export class ServiceDto {
   @IsNotEmpty()
   @IsString()
-  @MaxLength(50, {
-    message: 'maxLength-{"ln":50,"count":50}'
+  @MaxLength(100, {
+    message: 'maxLength-{"ln":100,"count":100}'
   })
   @Validate(
     UniqueValidatorPipe,
