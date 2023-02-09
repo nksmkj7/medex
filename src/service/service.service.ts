@@ -491,6 +491,7 @@ export class ServiceService {
         'service.durationInMinutes as duration_in_minutes',
         'service.description as description',
         `service.image as service_image`,
+        'service.tags as tags',
         'service.scheduleType as "scheduleType"',
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
@@ -574,6 +575,7 @@ export class ServiceService {
               )
           : []
       ) as string[];
+
       return omit(data, [
         'row_number',
         'provider_id',
@@ -587,6 +589,7 @@ export class ServiceService {
         'banner_link'
       ]);
     };
+
     return providerWithService.reduce(
       (
         prevValue: {
@@ -689,6 +692,7 @@ export class ServiceService {
       .offset(offset)
       .limit(limit)
       .getRawMany();
+
     categoryAssociatedProviders = categoryAssociatedProviders.map(
       (provider) => provider.userId
     );
@@ -704,6 +708,7 @@ export class ServiceService {
         'service.description as description',
         'service.image as service_image',
         'service.scheduleType as "scheduleType"',
+        'service.tags as tags',
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
         'CAST((discount/100)*price as DOUBLE PRECISION) as discounted_amount',
@@ -745,6 +750,7 @@ export class ServiceService {
       );
 
     let providerWithService = {};
+
     if (totalCategoryAssociatedProvidersCount.count > 0) {
       providerWithService = this.groupProviderWithService(
         await this.connection
@@ -758,6 +764,7 @@ export class ServiceService {
           .getRawMany()
       );
     }
+
     return {
       results: providerWithService,
       totalItems: +totalCategoryAssociatedProvidersCount?.count ?? 0,
