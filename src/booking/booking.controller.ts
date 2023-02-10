@@ -76,4 +76,10 @@ export class BookingController {
   stripeWebHook(@Req() req: RawBodyRequest<Request>) {
     return this.service.handleStripeEventHook(req);
   }
+
+  @Public()
+  @Post('omise/webhook')
+  omiseWebHook(@Req() req: RawBodyRequest<Request>) {
+    return this.service.handleOmiseEventHook(req);
+  }
 }
