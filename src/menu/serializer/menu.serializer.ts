@@ -49,6 +49,8 @@ export class MenuSerializer extends ModelSerializer {
   updatedAt: Date;
 
   @ApiProperty()
-  @Transform(({ value }) => `${appConfig.appUrl}/images/menu/${value}`)
+  @Transform(({ value }) =>
+    !!value ? `${appConfig.appUrl}/images/menu/${value}` : null
+  )
   icon: string;
 }
