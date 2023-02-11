@@ -138,78 +138,86 @@ export class BookingService {
     }
   }
 
-  async verifyPayment(
-    bookingDto: BookingDto,
-    customer: CustomerEntity,
-    service: ServiceEntity
-  ) {
-    const omise = Omise({
-      publicKey: process.env.OMISE_PUBLIC_KEY,
-      secretKey: process.env.OMISE_SECRET_KEY
-    });
+  // async verifyPayment(
+  //   bookingDto: BookingDto,
+  //   customer: CustomerEntity,
+  //   service: ServiceEntity
+  // ) {
+  //   const omise = Omise({
+  //     publicKey: process.env.OMISE_PUBLIC_KEY,
+  //     secretKey: process.env.OMISE_SECRET_KEY
+  //   });
 
-    if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
-      return this.verifyOmiseCardPayment(omise, customer, bookingDto, service);
-    }
-    return this.verifyOtherPayment(omise, customer, bookingDto, service);
-  }
+  //   if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
+  //     return this.verifyOmiseCardPayment(omise, customer, bookingDto, service);
+  //   }
+  //   return this.verifyOtherPayment(omise, customer, bookingDto, service);
+  // }
 
-  async verifyOmiseCardPayment(
-    omise: Omise.IOmise,
-    customer: CustomerEntity,
-    bookingDto: BookingDto,
-    service: ServiceEntity
-  ) {
-    const omiseCustomer = await omise.customers.create({
-      email: customer.email,
-      card: bookingDto.token
-    });
-    return omise.charges.create({
-      amount: this.calculateServiceTotalAmount(service) * 100,
-      currency: bookingDto.currency,
-      customer: omiseCustomer.id
-    });
-  }
+  // async verifyOmiseCardPayment(
+  //   omise: Omise.IOmise,
+  //   customer: CustomerEntity,
+  //   bookingDto: BookingDto,
+  //   service: ServiceEntity
+  // ) {
+  //   const omiseCustomer = await omise.customers.create({
+  //     email: customer.email,
+  //     card: bookingDto.token
+  //   });
+  //   return omise.charges.create({
+  //     amount:
+  //       this.calculateServiceTotalAmount(
+  //         service,
+  //         bookingDto?.numberOfPeople ?? 1
+  //       ) * 100,
+  //     currency: bookingDto.currency,
+  //     customer: omiseCustomer.id
+  //   });
+  // }
 
-  async verifyOtherPayment(
-    omise: Omise.IOmise,
-    customer: CustomerEntity,
-    bookingDto: BookingDto,
-    service: ServiceEntity
-  ) {
-    const { currency, token } = bookingDto;
+  // async verifyOtherPayment(
+  //   omise: Omise.IOmise,
+  //   customer: CustomerEntity,
+  //   bookingDto: BookingDto,
+  //   service: ServiceEntity
+  // ) {
+  //   const { currency, token } = bookingDto;
 
-    return omise.charges.create({
-      amount: this.calculateServiceTotalAmount(service) * 100,
-      source: token,
-      currency,
-      return_uri: `${appConfig.frontendUrl}/booking`
-    });
-  }
+  //   return omise.charges.create({
+  //     amount:
+  //       this.calculateServiceTotalAmount(
+  //         service,
+  //         bookingDto?.numberOfPeople ?? 1
+  //       ) * 100,
+  //     source: token,
+  //     currency,
+  //     return_uri: `${appConfig.frontendUrl}/booking`
+  //   });
+  // }
 
-  calculateServiceTotalAmount(service: ServiceEntity) {
-    const price = +service.price;
-    const serviceCharge = +service.serviceCharge;
-    const discount = +service.discount;
-    const priceAfterDiscount = price - (discount / 100) * price;
-    return priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount;
-  }
+  // calculateServiceTotalAmount(service: ServiceEntity) {
+  //   const price = +service.price;
+  //   const serviceCharge = +service.serviceCharge;
+  //   const discount = +service.discount;
+  //   const priceAfterDiscount = price - (discount / 100) * price;
+  //   return priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount;
+  // }
 
-  async getBookingTransaction(
-    customer: CustomerEntity,
-    service: ServiceEntity
-  ) {
-    const transaction = new TransactionEntity();
-    transaction.totalAmount = this.calculateServiceTotalAmount(service);
-    transaction.transactionCode = await this.generateUniqueTransactionCode(
-      customer
-    );
-    transaction.customerId = customer.id;
-    transaction.price = service.price;
-    transaction.discount = service.discount;
-    transaction.serviceCharge = service.serviceCharge;
-    return transaction;
-  }
+  // async getBookingTransaction(
+  //   customer: CustomerEntity,
+  //   service: ServiceEntity
+  // ) {
+  //   const transaction = new TransactionEntity();
+  //   transaction.totalAmount = this.calculateServiceTotalAmount(service);
+  //   transaction.transactionCode = await this.generateUniqueTransactionCode(
+  //     customer
+  //   );
+  //   transaction.customerId = customer.id;
+  //   transaction.price = service.price;
+  //   transaction.discount = service.discount;
+  //   transaction.serviceCharge = service.serviceCharge;
+  //   return transaction;
+  // }
 
   async generateUniqueTransactionCode(customer: CustomerEntity) {
     const checkUniqueFn = async (token: string) => {

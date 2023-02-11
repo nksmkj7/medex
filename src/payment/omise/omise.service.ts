@@ -70,7 +70,11 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       card: bookingDto.token
     });
     return this.omise.charges.create({
-      amount: this.calculateServiceTotalAmount(service) * 100,
+      amount:
+        this.calculateServiceTotalAmount(
+          service,
+          bookingDto?.numberOfPeople ?? 1
+        ) * 100,
       currency: bookingDto.currency,
       customer: omiseCustomer.id
     });
@@ -84,7 +88,11 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     const { currency, token } = bookingDto;
 
     return this.omise.charges.create({
-      amount: this.calculateServiceTotalAmount(service) * 100,
+      amount:
+        this.calculateServiceTotalAmount(
+          service,
+          bookingDto?.numberOfPeople ?? 1
+        ) * 100,
       source: token,
       currency,
       return_uri: `${appConfig.frontendUrl}/booking`
@@ -94,7 +102,12 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
   checkPaymentValidity(bookingDto: BookingDto, service: ServiceEntity) {
     if (
       Number(bookingDto.totalAmount) !==
-      Number(this.calculateServiceTotalAmount(service))
+      Number(
+        this.calculateServiceTotalAmount(
+          service,
+          bookingDto?.numberOfPeople ?? 1
+        )
+      )
     ) {
       throw new BadRequestException(
         "Sent amount doesn't match with the system calculated amount "

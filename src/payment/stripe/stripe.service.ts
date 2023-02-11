@@ -41,7 +41,11 @@ export class StripeService extends PaymentAbstract<
     const { bookingDto, service } = paymentObj;
     const bookingInitiation = this.bookingInitiation;
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: this.calculateServiceTotalAmount(service) * 100,
+      amount:
+        this.calculateServiceTotalAmount(
+          service,
+          bookingDto?.numberOfPeople ?? 1
+        ) * 100,
       currency: bookingDto.currency,
       automatic_payment_methods: {
         enabled: true

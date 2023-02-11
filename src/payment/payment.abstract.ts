@@ -16,12 +16,15 @@ export abstract class PaymentAbstract<T> implements IPayment<T> {
     this.bookingInitiation = bookingInitiation;
   }
 
-  calculateServiceTotalAmount(service: ServiceEntity) {
+  calculateServiceTotalAmount(service: ServiceEntity, numberOfPerson = 1) {
     const price = +service.price;
     const serviceCharge = +service.serviceCharge;
     const discount = +service.discount;
     const priceAfterDiscount = price - (discount / 100) * price;
-    return priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount;
+    return (
+      (priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount) *
+      numberOfPerson
+    );
   }
 
   abstract transactionStatus(status: string): string;
