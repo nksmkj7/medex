@@ -13,65 +13,62 @@ import { omit } from 'lodash';
 @Injectable()
 export class CustomValidationPipe extends ValidationPipe {
   constructor(options: ValidationPipeOptions) {
-    super(options)
+    super(options);
   }
 
   async transform(value: any, metadata: ArgumentMetadata) {
     if (this.expectedType) {
-        metadata = Object.assign(Object.assign({}, metadata), { metatype: this.expectedType });
+      metadata = Object.assign(Object.assign({}, metadata), {
+        metatype: this.expectedType
+      });
     }
     const metatype = metadata.metatype;
     if (!metatype || !this.toValidate(metadata)) {
-        return this.isTransformEnabled
-            ? this.transformPrimitive(value, metadata)
-            : value;
+      return this.isTransformEnabled
+        ? this.transformPrimitive(value, metadata)
+        : value;
     }
     const originalValue = value;
     value = this.toEmptyIfNil(value);
     const isNil = value !== originalValue;
     const isPrimitive = this.isPrimitive(value);
     this.stripProtoKeys(value);
-    let entity:object = plainToClass(metatype, value, this.transformOptions);
-     const originalEntity = entity;
-        const isCtorNotEqual = entity.constructor !== metatype;
-        if (isCtorNotEqual && !isPrimitive) {
-            entity.constructor = metatype;
-        }
-        else if (isCtorNotEqual) {
-            // when "entity" is a primitive value, we have to temporarily
-            // replace the entity to perform the validation against the original
-            // metatype defined inside the handler
-            entity = { constructor: metatype };
-        }
+    let entity: object = plainToClass(metatype, value, this.transformOptions);
+    const originalEntity = entity;
+    const isCtorNotEqual = entity.constructor !== metatype;
+    if (isCtorNotEqual && !isPrimitive) {
+      entity.constructor = metatype;
+    } else if (isCtorNotEqual) {
+      // when "entity" is a primitive value, we have to temporarily
+      // replace the entity to perform the validation against the original
+      // metatype defined inside the handler
+      entity = { constructor: metatype };
+    }
     const errors = await this.validate(entity, this.validatorOptions);
     if (value?._requestContext) {
-      value = omit(value, ['_requestContext'])
-      entity= omit(entity, ['_requestContext'])
-    };
-      if (errors.length > 0) {
-        const translatedError = await this.transformError(errors);
-        throw new UnprocessableEntityException(translatedError);
-      }
-      if (isPrimitive) {
-          // if the value is a primitive value and the validation process has been successfully completed
-          // we have to revert the original value passed through the pipe
-          entity = originalEntity;
-      }
-      if (this.isTransformEnabled) {
-          return entity;
-      }
-      if (isNil) {
-          // if the value was originally undefined or null, revert it back
-          return originalValue;
-      }
+      value = omit(value, ['_requestContext']);
+      entity = omit(entity, ['_requestContext']);
+    }
+    if (errors.length > 0) {
+      const translatedError = await this.transformError(errors);
+      throw new UnprocessableEntityException(translatedError);
+    }
+    if (isPrimitive) {
+      // if the value is a primitive value and the validation process has been successfully completed
+      // we have to revert the original value passed through the pipe
+      entity = originalEntity;
+    }
+    if (this.isTransformEnabled) {
+      return entity;
+    }
+    if (isNil) {
+      // if the value was originally undefined or null, revert it back
+      return originalValue;
+    }
 
-  
-  
-      return Object.keys(this.validatorOptions).length > 0
-          ? classToPlain(entity, this.transformOptions)
-          : value;
-
-  
+    return Object.keys(this.validatorOptions).length > 0
+      ? classToPlain(entity, this.transformOptions)
+      : value;
   }
 
   async transformError(errors: ValidationError[]) {
@@ -114,7 +111,7 @@ export class CustomValidationPipe extends ValidationPipe {
 
       errorAccumulator['children'] = errorAccumulator?.['children'] ?? [];
       Object.values(error.children).forEach((childError: ValidationError) => {
-        let err = { property: childError.property };
+        const err = { property: childError.property };
         if (!hasChildren(childError?.['children'])) {
           err['constraints'] = childError.constraints;
         } else {
