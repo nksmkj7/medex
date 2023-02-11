@@ -434,12 +434,12 @@ export class ProviderService {
           return [...accumulator, currentCategory.categoryId];
         }, [])
       : [];
+
     const results = await this.categoryRepository
       .createQueryBuilder('category')
       .where(`category.id IN (:...categories)`, { categories })
       .andWhere(`status = :status`, { status: true })
       .getRawMany();
-
     const finalResults = [];
     providerCategoriesIds.forEach((category) => {
       if (!finalResults.length) {
@@ -464,10 +464,16 @@ export class ProviderService {
             ...results.find(
               (result) => result.category_id === category.categoryId
             ),
-            category_subCategories: []
+            category_subCategories: category.subCategoryId
+              ? [
+                  results.find(
+                    (result) => result.category_id === category.subCategoryId
+                  )
+                ]
+              : []
           });
         }
-        if (category.subCategoryId) {
+        if (category.subCategoryId && resultCategory) {
           resultCategory['category_subCategories'].push(
             finalResults.find(
               (finalCategory) =>
