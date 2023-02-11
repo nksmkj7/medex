@@ -195,13 +195,16 @@ export class BookingService {
   //   });
   // }
 
-  // calculateServiceTotalAmount(service: ServiceEntity) {
-  //   const price = +service.price;
-  //   const serviceCharge = +service.serviceCharge;
-  //   const discount = +service.discount;
-  //   const priceAfterDiscount = price - (discount / 100) * price;
-  //   return priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount;
-  // }
+  calculateServiceTotalAmount(service: ServiceEntity, numberOfPeople = 1) {
+    const price = +service.price;
+    const serviceCharge = +service.serviceCharge;
+    const discount = +service.discount;
+    const priceAfterDiscount = price - (discount / 100) * price;
+    return (
+      (priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount) *
+      numberOfPeople
+    );
+  }
 
   // async getBookingTransaction(
   //   customer: CustomerEntity,
