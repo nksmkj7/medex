@@ -382,7 +382,10 @@ export class BookingService {
       };
 
       const transaction: TransactionData = {
-        totalAmount: this.calculateServiceTotalAmount(service),
+        totalAmount: this.calculateServiceTotalAmount(
+          service,
+          bookingDto?.numberOfPeople ?? 1
+        ),
         transactionCode: await this.generateUniqueTransactionCode(customer),
         customerId: customer.id,
         price: service.price,
