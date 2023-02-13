@@ -95,13 +95,10 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   @ApiPropertyOptional()
   @IsOptional()
   @IsLatitude()
-  latitude: number
-
+  latitude: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsLongitude()
-  longitude: number
-
-
+  longitude: number;
 }

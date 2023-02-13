@@ -42,8 +42,8 @@ export interface IProviderWithService {
   banner?: string;
   banner_link?: string;
   category_title: string;
-  service_image?:string;
-  [index: string]: string | number;
+  service_image?: string | string[];
+  [index: string]: string | number | string[];
 }
 
 export class ServiceService {
@@ -59,7 +59,7 @@ export class ServiceService {
     @InjectRepository(SpecialistRepository)
     private readonly specialistRepository: SpecialistRepository
   ) {}
-  async create(createServiceDto: ServiceDto) {
+  async create(createServiceDto: ServiceDto, files: Express.Multer.File[]) {
     const { categoryId, subCategoryId, userId } = createServiceDto;
     await this.validIds({ userId, categoryId, subCategoryId });
     const queryRunner = this.connection.createQueryRunner();
@@ -67,6 +67,12 @@ export class ServiceService {
     await queryRunner.startTransaction();
     try {
       const manager = queryRunner.manager;
+      if (files) {
+        createServiceDto.image = files.map((file) => file.filename).join(', ');
+      }
+      if (createServiceDto.tags) {
+        createServiceDto.tags = JSON.parse(createServiceDto.tags);
+      }
       const service = manager.create(ServiceEntity, createServiceDto);
       await manager.save(service);
       if (createServiceDto?.specialistIds?.length > 0) {
@@ -91,8 +97,8 @@ export class ServiceService {
     serviceFilterDto: ServiceFilterDto,
     referer?: string
   ): Promise<Pagination<ServiceSerializer>> {
-    let searchCriteria = {};
-    if (referer !== appConfig.frontendUrl+"/") {
+    const searchCriteria = {};
+    if (referer !== appConfig.frontendUrl + '/') {
       searchCriteria['status'] = true;
     }
     const { keywords, provider = null } = serviceFilterDto;
@@ -101,7 +107,7 @@ export class ServiceService {
       relationalSearchCriteria = {
         ...relationalSearchCriteria,
         user: {
-          name: ILike(`%${keywords}%`)
+          username: ILike(`%${keywords}%`)
         },
         category: {
           title: ILike(`%${keywords}%`)
@@ -127,7 +133,7 @@ export class ServiceService {
   async update(
     id: string,
     updateServiceDto: UpdateServiceDto,
-    file?: Express.Multer.File
+    files?: Express.Multer.File[]
   ) {
     const queryRunner = this.connection.createQueryRunner();
     const manager = queryRunner.manager;
@@ -141,21 +147,34 @@ export class ServiceService {
     await queryRunner.connect();
     try {
       const { categoryId, subCategoryId, userId } = updateServiceDto;
-      if (!(await this.canBeUpdate(service))) {
-        throw new BadRequestException(
-          "Service can't be updated. It has reservations"
-        );
-      }
+      // if (!(await this.canBeUpdate(service))) {
+      //   throw new BadRequestException(
+      //     "Service can't be updated. It has reservations"
+      //   );
+      // }
       await this.validIds({ userId, categoryId, subCategoryId });
       const { specialists, ...serviceOnlyData } = service;
-       updateServiceDto = Object.keys(file).length
-      ? { ...updateServiceDto, image: file.filename }
-      : { ...updateServiceDto, image: service.image };
-      if (service.image && Object.keys(file).length) {
-        const path = `public/images/service/${service.image}`;
-        if (existsSync(path)) {
-          unlinkSync(`public/images/service/${service.image}`);
+      if (files.length) {
+        let uploadedImages = [];
+        uploadedImages = files.map((file) => file.filename);
+        if (service.image) {
+          service.image.split(',').forEach((image) => {
+            const path = `public/images/service/${image}`;
+            if (!files.find((file) => file.path === path)) {
+              uploadedImages.push(image);
+            } else {
+              if (existsSync(path)) {
+                unlinkSync(`public/images/service/${image}`);
+              }
+            }
+          });
         }
+        updateServiceDto.image = uploadedImages.join(',');
+      } else {
+        updateServiceDto.image = service.image;
+      }
+      if (updateServiceDto.tags) {
+        updateServiceDto.tags = JSON.parse(updateServiceDto.tags);
       }
       const updatedService = manager.merge(
         ServiceEntity,
@@ -200,7 +219,12 @@ export class ServiceService {
   }
 
   async findOne(id: string): Promise<ServiceSerializer> {
-    return this.repository.get(id, ['user', 'category', 'subCategory']);
+    return this.repository.get(id, [
+      'user',
+      'user.providerInformation',
+      'category',
+      'subCategory'
+    ]);
   }
 
   async validIds(ids: ICheckIds) {
@@ -242,10 +266,10 @@ export class ServiceService {
   }
 
   //TODO: not allow to update service if it already has reservations
-  async canBeUpdate(service: ServiceEntity) {
-    const bookings = await this.serviceBookings(service.id);
-    return bookings.length <= 0;
-  }
+  // async canBeUpdate(service: ServiceEntity) {
+  //   const bookings = await this.serviceBookings(service.id);
+  //   return bookings.length <= 0;
+  // }
 
   assignSpecialistToService(
     manager: EntityManager,
@@ -310,7 +334,7 @@ export class ServiceService {
       query
         .from(ServiceSpecialistEntity, 's')
         .select(
-          's."additionalTime", s."startTime",s."endTime",service."durationInMinutes",service."scheduleType"'
+          's."additionalTime", s."startTime",s."endTime",service."durationInMinutes",service."scheduleType",service."userId"'
         )
         .where('s.serviceId = :serviceId', {
           serviceId
@@ -324,7 +348,7 @@ export class ServiceService {
         .from(ServiceEntity, 'service')
         .where('service.id = :serviceId', { serviceId })
         .select(
-          'service."additionalTime", service."startTime",service."endTime",service."durationInMinutes",service."scheduleType"'
+          'service."additionalTime", service."startTime",service."endTime",service."durationInMinutes",service."scheduleType",service."userId"'
         );
     }
     const specialistServiceDetail = query.getRawOne();
@@ -412,15 +436,19 @@ export class ServiceService {
     } = categoryProviderServiceDto;
     const query = this.connection
       .createQueryBuilder(ServiceEntity, 'service')
-      .leftJoin(UserEntity,'usr','usr.id = service."userId"')
-      .leftJoin(CategoryEntity,'category','category.id = service."categoryId"')
+      .leftJoin(UserEntity, 'usr', 'usr.id = service."userId"')
+      .leftJoin(
+        CategoryEntity,
+        'category',
+        'category.id = service."categoryId"'
+      )
       .leftJoin(
         'provider_informations',
         'provider',
         'provider.userId = service.userId'
       )
-      .where(`usr.status = :userStatus`,{userStatus: 'active'})
-      .andWhere(`category.status = :categoryStatus`,{categoryStatus: true})
+      .where(`usr.status = :userStatus`, { userStatus: 'active' })
+      .andWhere(`category.status = :categoryStatus`, { categoryStatus: true })
       .andWhere('service.status = :status', {
         status: true
       });
@@ -463,6 +491,7 @@ export class ServiceService {
         'service.durationInMinutes as duration_in_minutes',
         'service.description as description',
         `service.image as service_image`,
+        'service.tags as tags',
         'service.scheduleType as "scheduleType"',
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
@@ -534,7 +563,19 @@ export class ServiceService {
 
   groupProviderWithService(providerWithService: IProviderWithService[]) {
     const getFormattedData = (data: IProviderWithService) => {
-      data.service_image = data?.service_image ? `${appConfig.appUrl}/images/service/${data.service_image}`: null 
+      // data.service_image = data?.service_image
+      //   ? `${appConfig.appUrl}/images/service/${data.service_image}`
+      //   : null;
+      data.service_image = (
+        data?.service_image
+          ? (data.service_image as string)
+              .split(',')
+              .map(
+                (image) => `${appConfig.appUrl}/images/service/${image.trim()}`
+              )
+          : []
+      ) as string[];
+
       return omit(data, [
         'row_number',
         'provider_id',
@@ -548,6 +589,7 @@ export class ServiceService {
         'banner_link'
       ]);
     };
+
     return providerWithService.reduce(
       (
         prevValue: {
@@ -565,7 +607,7 @@ export class ServiceService {
         }[],
         currentValue: IProviderWithService
       ) => {
-        let currentProvider =
+        const currentProvider =
           prevValue.length > 0
             ? prevValue.find(
                 (value) => value.provider_id === currentValue.provider_id
@@ -608,28 +650,35 @@ export class ServiceService {
     } = searchCategoryProvideServiceDto;
     const query = this.connection
       .createQueryBuilder(ServiceEntity, 'service')
-      .leftJoin(UserEntity,'usr','usr.id = service."userId"')
-      .leftJoin(CategoryEntity,'category','category.id = service."categoryId"')
+      .leftJoin(UserEntity, 'usr', 'usr.id = service."userId"')
+      .leftJoin(
+        CategoryEntity,
+        'category',
+        'category.id = service."categoryId"'
+      )
       .leftJoin(
         'provider_informations',
         'provider',
         'provider.userId = service.userId'
       )
-      .where(`usr.status = :userStatus`,{userStatus: 'active'})
-      .andWhere(`category.status = :categoryStatus`,{categoryStatus: true})
+      .where(`usr.status = :userStatus`, { userStatus: 'active' })
+      .andWhere(`category.status = :categoryStatus`, { categoryStatus: true })
       .andWhere('service.status = :status', {
         status: true
       });
-  
+
     if (categoryId) {
       query.andWhere(`service.categoryId=:categoryId`, {
         categoryId
       });
     }
     if (keywords) {
-      query.andWhere(`service.title Ilike :keywords OR provider."companyName" Ilike :keywords OR category.title Ilike :keywords`, {
-        keywords: `%${keywords}%`
-      });
+      query.andWhere(
+        `service.title Ilike :keywords OR provider."companyName" Ilike :keywords OR category.title Ilike :keywords`,
+        {
+          keywords: `%${keywords}%`
+        }
+      );
     }
     const offset = (page - 1) * limit;
     const totalCategoryAssociatedProvidersCount = await query
@@ -643,6 +692,7 @@ export class ServiceService {
       .offset(offset)
       .limit(limit)
       .getRawMany();
+
     categoryAssociatedProviders = categoryAssociatedProviders.map(
       (provider) => provider.userId
     );
@@ -658,6 +708,7 @@ export class ServiceService {
         'service.description as description',
         'service.image as service_image',
         'service.scheduleType as "scheduleType"',
+        'service.tags as tags',
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
         'CAST((discount/100)*price as DOUBLE PRECISION) as discounted_amount',
@@ -699,6 +750,7 @@ export class ServiceService {
       );
 
     let providerWithService = {};
+
     if (totalCategoryAssociatedProvidersCount.count > 0) {
       providerWithService = this.groupProviderWithService(
         await this.connection
@@ -712,6 +764,7 @@ export class ServiceService {
           .getRawMany()
       );
     }
+
     return {
       results: providerWithService,
       totalItems: +totalCategoryAssociatedProvidersCount?.count ?? 0,

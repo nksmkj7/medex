@@ -90,4 +90,13 @@ export class MenuDto {
     message: 'isEnum-{"items":"direct,dropdown"}'
   })
   menuType: MenuType;
+
+  @ApiPropertyOptional({
+    description: 'Menu Icon ',
+    type: String,
+    format: 'binary'
+  })
+  @ValidateIf((object, value) => !!value)
+  @IsString()
+  icon: string;
 }

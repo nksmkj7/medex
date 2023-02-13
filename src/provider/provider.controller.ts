@@ -16,7 +16,8 @@ import {
   Headers
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiTags, OmitType } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiTags, OmitType } from '@nestjs/swagger';
+import { CategoryFilterDto } from 'src/category/dto/category-filter.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
@@ -26,6 +27,7 @@ import { ServiceFilterDto } from 'src/service/dto/service-filter.dto';
 import { ServiceDto } from 'src/service/dto/service.dto';
 import { ObjectLiteral } from 'typeorm';
 import { ProviderBannerDto } from './dto/provider-banner.dto';
+import { ProviderCategoryFilterDto } from './dto/provider-category-filter.dto';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import { RegisterProviderDto } from './dto/register-provider.dto';
@@ -219,5 +221,15 @@ export class ProviderController {
   @Get(':providerId/banners-list')
   activeProviderBanners(@Param('providerId', ParseIntPipe) providerId: number) {
     return this.providerService.providerBanners(providerId, { status: true });
+  }
+
+  @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: "list provider's categories"
+  })
+  @Get(':id/categories')
+  providerCategories(@Param('id', ParseIntPipe) providerId: number) {
+    return this.providerService.getProviderCategories(providerId);
   }
 }

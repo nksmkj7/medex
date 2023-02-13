@@ -8,10 +8,15 @@ import { ProviderRepository } from './provider.repository';
 import { RoleRepository } from 'src/role/role.repository';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
 import { ServiceRepository } from 'src/service/service.repository';
+import { CategoryRepository } from 'src/category/category.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProviderRepository, ServiceRepository]),
+    TypeOrmModule.forFeature([
+      ProviderRepository,
+      ServiceRepository,
+      CategoryRepository
+    ]),
     TypeOrmModule.forFeature([UserRepository]),
     TypeOrmModule.forFeature([RoleRepository]),
     AuthModule,

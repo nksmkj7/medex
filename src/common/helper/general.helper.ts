@@ -12,8 +12,8 @@ export const slugify = (...args: (string | number)[]): string => {
 };
 
 export const isGreaterThanTime = (
-  timeToCompare: string,
   timeToCompareWith: string,
+  timeToCompare: string,
   compareEquality?: boolean
 ) => {
   timeToCompare = timeToCompare.replace(':', '');
@@ -25,8 +25,8 @@ export const isGreaterThanTime = (
 };
 
 export const isSmallerThanTime = (
-  timeToCompare: string,
   timeToCompareWith: string,
+  timeToCompare: string,
   compareEquality?: boolean
 ) => {
   timeToCompare = timeToCompare.replace(':', '');

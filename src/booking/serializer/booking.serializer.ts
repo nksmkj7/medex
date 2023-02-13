@@ -96,4 +96,7 @@ export class BookingSerializer extends ModelSerializer {
     groups: [...basicFieldGroupsForSerializing]
   })
   paymentStatus: string;
+
+  @ApiProperty()
+  bookingNumber: number;
 }

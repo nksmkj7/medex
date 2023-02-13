@@ -76,4 +76,9 @@ export class MenuEntity extends CustomBaseEntity {
       this.slug = slugify(this.title);
     }
   }
+
+  @Column('varchar', {
+    nullable: true
+  })
+  icon: string;
 }

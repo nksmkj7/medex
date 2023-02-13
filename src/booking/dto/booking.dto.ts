@@ -1,3 +1,4 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsDateString,
@@ -6,8 +7,8 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
+  IsOptional,
   isPhoneNumber,
-  IsPhoneNumber,
   IsString,
   IsUUID,
   Validate,
@@ -39,9 +40,16 @@ export class BookingDto {
   dialCode: string;
 
   @ValidateIf((object, value) => !!value)
-  @Validate(RunValidation, [(dialCode: string, value: string) => isPhoneNumber(`${dialCode}${value}`), 'dialCode'], {
-    message: 'invalid phone number'
-  })
+  @Validate(
+    RunValidation,
+    [
+      (value: string, dialCode: string) => isPhoneNumber(`${dialCode}${value}`),
+      'dialCode'
+    ],
+    {
+      message: 'invalid phone number'
+    }
+  )
   phone: string;
 
   @IsNotEmpty()
@@ -75,6 +83,9 @@ export class BookingDto {
   @IsEnum(PaymentGatewayEnum)
   paymentGateway: PaymentGatewayEnum;
 
+  @ValidateIf((object) => {
+    return object.paymentGateway !== PaymentGatewayEnum.STRIPE;
+  })
   @IsNotEmpty()
   @IsString()
   token: string;
@@ -90,4 +101,13 @@ export class BookingDto {
   @IsNotEmpty()
   @IsEnum(PaymentMethodEnum)
   paymentMethod: PaymentMethodEnum;
+
+  @ApiPropertyOptional({
+    default: 1,
+    description:
+      'Number of people for booking. If left blanked, default value is 1'
+  })
+  @IsOptional()
+  @IsNumber()
+  numberOfPeople: number;
 }

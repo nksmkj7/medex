@@ -6,7 +6,13 @@ import { UserSerializer } from 'src/auth/serializer/user.serializer';
 import { UserRepository } from 'src/auth/user.repository';
 import { Pagination } from 'src/paginate';
 import { RoleRepository } from 'src/role/role.repository';
-import { Connection, DeepPartial, EntityManager, FindOperator } from 'typeorm';
+import {
+  Connection,
+  DeepPartial,
+  EntityManager,
+  FindOperator,
+  In
+} from 'typeorm';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import {
   ProviderInformationEntity,
@@ -24,15 +30,15 @@ import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
 import { ServiceRepository } from 'src/service/service.repository';
 import { weekDays } from 'src/common/constants/weekdays.constants';
 import { NotFoundException } from 'src/exception/not-found.exception';
-import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { ProviderBannerDto } from './dto/provider-banner.dto';
 import { ProviderBannerEntity } from './entity/provider-banner.entity';
-import { Multer } from 'multer';
 import { UpdateProviderBannerDto } from './dto/update-provider-banner.dto';
 
 import * as config from 'config';
-import { ServiceFilterDto } from 'src/service/dto/service-filter.dto';
 import { ServiceFilterDtoWithoutProvider } from './provider.controller';
+import { CategoryRepository } from 'src/category/category.repository';
+import { CategoryFilterDto } from 'src/category/dto/category-filter.dto';
+import { ProviderCategoryFilterDto } from './dto/provider-category-filter.dto';
 
 const appConfig = config.get('app');
 
@@ -49,7 +55,9 @@ export class ProviderService {
     private readonly roleRepository: RoleRepository,
     private readonly authService: AuthService,
     @InjectRepository(ServiceRepository)
-    private readonly serviceRepository: ServiceRepository
+    private readonly serviceRepository: ServiceRepository,
+    @InjectRepository(CategoryRepository)
+    private readonly categoryRepository: CategoryRepository
   ) {}
 
   async registerUser(
@@ -213,7 +221,7 @@ export class ProviderService {
     id: number,
     providerDayScheduleDto: ProviderDayScheduleDto
   ) {
-    let user = await this.userRepository.findOne(id, {
+    const user = await this.userRepository.findOne(id, {
       relations: ['providerInformation']
     });
     await this.connection
@@ -228,7 +236,7 @@ export class ProviderService {
   }
 
   async getDaySchedule(id: number): Promise<IDaySchedules> {
-    let user = await this.userRepository.findOne(id, {
+    const user = await this.userRepository.findOne(id, {
       relations: ['providerInformation']
     });
     const daySchedules = user.providerInformation.daySchedules;
@@ -252,8 +260,8 @@ export class ProviderService {
     serviceFilterDto: ServiceFilterDtoWithoutProvider,
     referer?: string
   ) {
-    let searchCondition = {};
-    if (referer !== appConfig.frontendUrl+"/") {
+    const searchCondition = {};
+    if (referer !== appConfig.frontendUrl + '/') {
       searchCondition['status'] = true;
     }
     const user = await this.userRepository.findOne(id, {
@@ -357,11 +365,11 @@ export class ProviderService {
         }
       }
     );
-      if (banner.image) {
-        const path = `public/images/provider-banners/${banner.image}`;
-        if (existsSync(path)) {
-          unlinkSync(`public/images/provider-banners/${banner.image}`);
-        }
+    if (banner.image) {
+      const path = `public/images/provider-banners/${banner.image}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/provider-banners/${banner.image}`);
+      }
     }
     return banner.remove();
   }
@@ -409,5 +417,72 @@ export class ProviderService {
       }
     );
     return this.providerRepository.transformProviderBanner(banner);
+  }
+
+  async getProviderCategories(providerId: number) {
+    const providerCategoriesIds = await this.serviceRepository
+      .createQueryBuilder('service')
+      .where(`service."userId" = :providerId`, { providerId })
+      .select(['service."categoryId"', 'service."subCategoryId"'])
+      .distinctOn(['service."categoryId"', 'service."subCategoryId"'])
+      .getRawMany();
+    const categories = providerCategoriesIds.length
+      ? providerCategoriesIds.reduce((accumulator, currentCategory) => {
+          if (currentCategory.subCategoryId) {
+            accumulator.push(currentCategory.subCategoryId);
+          }
+          return [...accumulator, currentCategory.categoryId];
+        }, [])
+      : [];
+
+    const results = await this.categoryRepository
+      .createQueryBuilder('category')
+      .where(`category.id IN (:...categories)`, { categories })
+      .andWhere(`status = :status`, { status: true })
+      .getRawMany();
+    const finalResults = [];
+    providerCategoriesIds.forEach((category) => {
+      if (!finalResults.length) {
+        finalResults.push({
+          ...results.find(
+            (result) => result.category_id === category.categoryId
+          ),
+          category_subCategories: category.subCategoryId
+            ? [
+                results.find(
+                  (result) => result.category_id === category.subCategoryId
+                )
+              ]
+            : []
+        });
+      } else {
+        const resultCategory = finalResults.find(
+          (finalCategory) => finalCategory.category_id === category.categoryId
+        );
+        if (!resultCategory) {
+          finalResults.push({
+            ...results.find(
+              (result) => result.category_id === category.categoryId
+            ),
+            category_subCategories: category.subCategoryId
+              ? [
+                  results.find(
+                    (result) => result.category_id === category.subCategoryId
+                  )
+                ]
+              : []
+          });
+        }
+        if (category.subCategoryId && resultCategory) {
+          resultCategory['category_subCategories'].push(
+            finalResults.find(
+              (finalCategory) =>
+                finalCategory.category_id === category.subCategoryId
+            )
+          );
+        }
+      }
+    });
+    return finalResults;
   }
 }

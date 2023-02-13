@@ -1,11 +1,23 @@
 import { Transform } from 'class-transformer';
-import { IsJSON, IsNotEmpty } from 'class-validator';
+import { isJSON, IsJSON, IsNotEmpty, Validate } from 'class-validator';
+import { RunValidation } from 'src/common/validators/run-validation.validators';
 
 export class HomeJsonDto {
   @IsNotEmpty()
-  @Transform(({ value }) => {
-    if (typeof value !== 'string') return JSON.stringify(value);
-  })
-  @IsJSON()
+  @Validate(
+    RunValidation,
+    [
+      (value: string) => {
+        let jsonString = '{}';
+        if (typeof value !== 'string') {
+          jsonString = JSON.stringify(value);
+        }
+        return isJSON(JSON.stringify(value));
+      }
+    ],
+    {
+      message: 'invalid json'
+    }
+  )
   json: string;
 }

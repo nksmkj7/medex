@@ -10,7 +10,6 @@ import {
   Put
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { scheduled } from 'rxjs';
 import { Public } from 'src/common/decorators/public.decorator';
 import { AutoGenerateScheduleDto } from './dto/auto-generate-schedule.dto';
 import { DailyDeleteScheduleDto } from './dto/daily-delete-schedule.dto';

@@ -10,9 +10,13 @@ import {
   UseGuards,
   UseInterceptors,
   Headers,
-  UploadedFile
+  UploadedFile,
+  UploadedFiles
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express/multer';
+import {
+  FileInterceptor,
+  FilesInterceptor
+} from '@nestjs/platform-express/multer';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
@@ -38,18 +42,26 @@ export class ServiceController {
   constructor(private readonly service: ServiceService) {}
 
   @Post()
+  // @UseInterceptors(
+  //   FileInterceptor(
+  //     'image',
+  //     multerOptionsHelper('public/images/service', 1000000)
+  //   )
+  // )
+  // @ApiMultiFile()
   @UseInterceptors(
-    FileInterceptor(
+    FilesInterceptor(
       'image',
+      null,
       multerOptionsHelper('public/images/service', 1000000)
     )
   )
   @ApiConsumes('multipart/form-data')
-  create(@Body() serviceDto: ServiceDto,
-    @UploadedFile()
-    file: Express.Multer.File
+  create(
+    @Body() serviceDto: ServiceDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
   ) {
-    return this.service.create({...serviceDto,image: file.filename});
+    return this.service.create(serviceDto, files);
   }
 
   @Public()
@@ -64,9 +76,16 @@ export class ServiceController {
   }
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))
+  // @UseInterceptors(
+  //   FileInterceptor(
+  //     'image',
+  //     multerOptionsHelper('public/images/service', 1000000)
+  //   )
+  // )
   @UseInterceptors(
-    FileInterceptor(
+    FilesInterceptor(
       'image',
+      null,
       multerOptionsHelper('public/images/service', 1000000)
     )
   )
@@ -75,10 +94,10 @@ export class ServiceController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateServiceDto: UpdateServiceDto,
-    @UploadedFile()
-    file: Express.Multer.File,
+    @UploadedFiles()
+    files: Array<Express.Multer.File>
   ): Promise<ServiceSerializer> {
-    return this.service.update(id, updateServiceDto,file);
+    return this.service.update(id, updateServiceDto, files);
   }
 
   @ApiTags('Public')
@@ -99,6 +118,7 @@ export class ServiceController {
     return this.service.searchProviderService(searchCategoryProvideServiceDto);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ServiceSerializer> {
     return this.service.findOne(id);

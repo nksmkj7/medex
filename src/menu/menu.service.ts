@@ -16,6 +16,8 @@ import { MenuFilterDto, SubMenuFilterDto } from './dto/menu-filter.dto';
 import { IsNull, Not } from 'typeorm';
 import { MenuEntity } from './entity/menu.entity';
 import * as config from 'config';
+import { isEmpty } from 'lodash';
+import { existsSync, unlinkSync } from 'fs';
 
 const appConfig = config.get('app');
 
@@ -26,7 +28,10 @@ export class MenuService {
     private repository: MenuRepository
   ) {}
 
-  async create(createMenuDto: CreateMenuDto): Promise<MenuSerializer> {
+  async create(
+    createMenuDto: CreateMenuDto,
+    file: Express.Multer.File
+  ): Promise<MenuSerializer> {
     if (!createMenuDto.parentId) {
       createMenuDto.parentId = null;
     } else if (createMenuDto.parentId) {
@@ -44,8 +49,9 @@ export class MenuService {
           'Parent menu with direct type cannot have children menu'
         );
       }
-      if (createMenuDto) {
-      }
+    }
+    if (Object.keys(file).length) {
+      createMenuDto.icon = file.filename;
     }
     return this.repository.store(createMenuDto);
   }
@@ -67,7 +73,7 @@ export class MenuService {
         searchCriteria['parentId'] = Not(IsNull());
       }
     }
-    if (referer !== appConfig.frontendUrl+"/") {
+    if (referer !== appConfig.frontendUrl + '/') {
       searchCriteria['status'] = true;
     }
     return this.repository.paginate(
@@ -85,14 +91,24 @@ export class MenuService {
 
   async update(
     id: number,
-    updateMenuDto: UpdateMenuDto
+    updateMenuDto: UpdateMenuDto,
+    file: Express.Multer.File
   ): Promise<MenuSerializer> {
-    const category = await this.repository.findOne(id);
-    await this.canBeUpdated(updateMenuDto, category);
+    const menu = await this.repository.findOne(id);
+    await this.canBeUpdated(updateMenuDto, menu);
     if (!updateMenuDto.parentId) {
       updateMenuDto.parentId = null;
     }
-    return this.repository.updateItem(category, updateMenuDto);
+    updateMenuDto = file?.filename
+      ? { ...updateMenuDto, icon: file.filename }
+      : { ...updateMenuDto, icon: menu.icon };
+    if (menu.icon && !isEmpty(file)) {
+      const path = `public/images/menu/${menu.icon}`;
+      if (existsSync(path)) {
+        unlinkSync(`public/images/menu/${menu.icon}`);
+      }
+    }
+    return this.repository.updateItem(menu, updateMenuDto);
   }
 
   async canBeUpdated(

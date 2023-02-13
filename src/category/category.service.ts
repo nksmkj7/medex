@@ -51,7 +51,7 @@ export class CategoryService {
         searchCriteria['parentId'] = Not(IsNull());
       }
     }
-    if (referer !== appConfig.frontendUrl+"/") {
+    if (referer !== appConfig.frontendUrl + '/') {
       searchCriteria['status'] = true;
     }
     return this.repository.paginate(

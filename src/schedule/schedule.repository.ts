@@ -3,7 +3,6 @@ import { Between, EntityRepository } from 'typeorm';
 import { ScheduleEntity } from './entity/schedule.entity';
 import { ScheduleSerializer } from './schedule.serializer';
 import * as dayjs from 'dayjs';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 @EntityRepository(ScheduleEntity)
 export class ScheduleRepository extends BaseRepository<
@@ -58,6 +57,9 @@ export class ScheduleRepository extends BaseRepository<
       where: {
         serviceId,
         specialistId
+      },
+      order: {
+        date: 'ASC'
       }
     });
     return this.transformMany(schedules);
