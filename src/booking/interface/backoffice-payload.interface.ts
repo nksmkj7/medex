@@ -30,4 +30,5 @@ export interface IBackOfficePayload {
     appointment_time: string;
     date_created: string;
   };
+  dev?: boolean;
 }

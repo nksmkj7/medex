@@ -95,7 +95,8 @@ export class BackOfficeProcessor {
         appointment_date: booking.scheduleDate,
         appointment_time: booking.serviceStartTime,
         date_created: dayjs(booking.createdAt).format('YYYY-MM-DD')
-      }
+      },
+      dev: config.get('backOffice.test')
     };
   }
 
