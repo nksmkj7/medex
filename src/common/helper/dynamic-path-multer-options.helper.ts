@@ -31,7 +31,7 @@ export const dynamicPathMulterOptionsHelper = (
   },
   storage: diskStorage({
     destination: (req: any, file: any, cb: any) => {
-      const destinationPath = path.join('public', ...req.body.destinationPath);
+      const destinationPath = getDestinationPath(req.body.destinationPath);
       // Create folder if doesn't exist
       if (!existsSync(destinationPath)) {
         mkdirSync(destinationPath);
@@ -43,3 +43,11 @@ export const dynamicPathMulterOptionsHelper = (
     }
   })
 });
+
+const getDestinationPath = (destinationMap) => {
+  if (!destinationMap) return 'public';
+  if (Array.isArray(destinationMap)) {
+    return path.join('public', ...destinationMap);
+  }
+  return path.join('public', destinationMap);
+};

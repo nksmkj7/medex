@@ -43,11 +43,10 @@ export class FileService {
       if (fileStat.isDirectory()) {
         this.generateFileJson(path.join(filePath, file), fileJson[name]);
       } else {
+        this.getFilePath(filePath);
         array.push({
           size: fileStat.size,
-          path: `${appConfig.appUrl}/${filePath
-            .split('public/')
-            .pop()}/${file}`,
+          path: `${appConfig.appUrl}/${this.getFilePath(filePath)}/${file}`,
           type: 'file',
           name: file
         });
@@ -84,5 +83,12 @@ export class FileService {
     if (type === 'file') {
       return unlinkSync(destinationPath);
     }
+  }
+
+  getFilePath(filePath: string) {
+    if (filePath.split('public/').length > 1) {
+      return filePath.split('public/').pop();
+    }
+    return '';
   }
 }
