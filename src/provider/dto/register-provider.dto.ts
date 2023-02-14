@@ -1,4 +1,4 @@
-import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -72,18 +72,20 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   @IsOptional()
   serviceArea?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
   businessLocation?: string;
 
-  @IsOptional()
-  @ApiPropertyOptional({
+  @IsNotEmpty()
+  @ApiProperty({
     description: 'Provider Image ',
     type: 'string',
     format: 'binary'
   })
   businessLogo?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
   businessDescription?: string;
 
   @IsOptional()
@@ -92,13 +94,13 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   @IsOptional()
   termsCondition?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
+  @IsNotEmpty()
   @IsLatitude()
   latitude: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
+  @IsNotEmpty()
   @IsLongitude()
   longitude: number;
 }
