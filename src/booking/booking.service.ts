@@ -244,7 +244,6 @@ export class BookingService {
   ) {
     const { limit = 10, page = 1 } = customerBookingFilterDto;
     const offset = (page - 1) * limit;
-
     const bookings = await this.connection.manager.query(
       `SELECT booking.*,
       "service"."title" as serviceTitle, 
@@ -265,7 +264,10 @@ export class BookingService {
         order by t."createdAt" desc ) as a
       where a."row_number" = 1) "transaction"
       on transaction."bookingId" = "booking"."id"
-      WHERE "booking"."customerId" =$2 limit $3 offset $4`,
+      WHERE "booking"."customerId" =$2 
+      order by booking."createdAt" desc
+      limit $3 offset $4
+      `,
       [customer.id, customer.id, limit, offset]
     );
 
