@@ -24,6 +24,7 @@ import { BookingEntity } from 'src/booking/entity/booking.entity';
 import { existsSync, unlinkSync } from 'fs';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
+import { UserStatusEnum } from 'src/auth/user-status.enum';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -447,7 +448,7 @@ export class ServiceService {
         'provider',
         'provider.userId = service.userId'
       )
-      .where(`usr.status = :userStatus`, { userStatus: 'active' })
+      .where(`usr.status = :userStatus`, { userStatus: UserStatusEnum.ACTIVE })
       .andWhere(`category.status = :categoryStatus`, { categoryStatus: true })
       .andWhere('service.status = :status', {
         status: true
@@ -661,7 +662,7 @@ export class ServiceService {
         'provider',
         'provider.userId = service.userId'
       )
-      .where(`usr.status = :userStatus`, { userStatus: 'active' })
+      .where(`usr.status = :userStatus`, { userStatus: UserStatusEnum.ACTIVE })
       .andWhere(`category.status = :categoryStatus`, { categoryStatus: true })
       .andWhere('service.status = :status', {
         status: true
