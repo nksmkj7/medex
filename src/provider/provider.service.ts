@@ -39,6 +39,7 @@ import { ServiceFilterDtoWithoutProvider } from './provider.controller';
 import { CategoryRepository } from 'src/category/category.repository';
 import { CategoryFilterDto } from 'src/category/dto/category-filter.dto';
 import { ProviderCategoryFilterDto } from './dto/provider-category-filter.dto';
+import { ProviderCategorywiseServiceDto } from './dto/provider-categorywise-service.dto';
 
 const appConfig = config.get('app');
 
@@ -484,5 +485,28 @@ export class ProviderService {
       }
     });
     return finalResults;
+  }
+
+  async getProviderCategoryServices(
+    providerId: number,
+    categoryId: string,
+    providerCategorywiseServiceDto: ProviderCategorywiseServiceDto
+  ) {
+    // eslint-disable-next-line prefer-const
+    let { limit, page, subCategoryId } = providerCategorywiseServiceDto;
+    if (!subCategoryId) {
+      subCategoryId = null;
+    }
+    return this.serviceRepository.paginate(
+      { limit, page },
+      [],
+      [],
+      {},
+      {
+        userId: providerId,
+        categoryId: categoryId,
+        subCategoryId
+      }
+    );
   }
 }

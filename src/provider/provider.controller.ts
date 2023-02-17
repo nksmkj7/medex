@@ -16,7 +16,13 @@ import {
   Headers
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiOperation, ApiTags, OmitType } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+  OmitType
+} from '@nestjs/swagger';
 import { CategoryFilterDto } from 'src/category/dto/category-filter.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
@@ -28,6 +34,7 @@ import { ServiceDto } from 'src/service/dto/service.dto';
 import { ObjectLiteral } from 'typeorm';
 import { ProviderBannerDto } from './dto/provider-banner.dto';
 import { ProviderCategoryFilterDto } from './dto/provider-category-filter.dto';
+import { ProviderCategorywiseServiceDto } from './dto/provider-categorywise-service.dto';
 import { ProviderDayScheduleDto } from './dto/provider-day-schedule.dto';
 import { ProviderSearchFilterDto } from './dto/provider-search-filter.dto';
 import { RegisterProviderDto } from './dto/register-provider.dto';
@@ -231,5 +238,29 @@ export class ProviderController {
   @Get(':id/categories')
   providerCategories(@Param('id', ParseIntPipe) providerId: number) {
     return this.providerService.getProviderCategories(providerId);
+  }
+
+  @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: "list provider's service categorywise"
+  })
+  @ApiQuery({
+    name: 'subCategoryId',
+    type: String,
+    description: 'sub category id. Optional',
+    required: false
+  })
+  @Get(':id/categories/:categoryId/services')
+  providerCategorywiseServices(
+    @Param('id', ParseIntPipe) providerId: number,
+    @Param('categoryId', ParseUUIDPipe) categoryId: string,
+    @Query() providerCategorywiseServiceDto: ProviderCategorywiseServiceDto
+  ) {
+    return this.providerService.getProviderCategoryServices(
+      providerId,
+      categoryId,
+      providerCategorywiseServiceDto
+    );
   }
 }
