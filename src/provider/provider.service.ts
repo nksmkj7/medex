@@ -40,6 +40,7 @@ import { CategoryRepository } from 'src/category/category.repository';
 import { CategoryFilterDto } from 'src/category/dto/category-filter.dto';
 import { ProviderCategoryFilterDto } from './dto/provider-category-filter.dto';
 import { ProviderCategorywiseServiceDto } from './dto/provider-categorywise-service.dto';
+import { UserStatusEnum } from 'src/auth/user-status.enum';
 
 const appConfig = config.get('app');
 
@@ -303,7 +304,7 @@ export class ProviderService {
     const providers = await this.userRepository
       .createQueryBuilder('user')
       .select(['user.id', 'user.username', 'providerInformation.companyName'])
-      // .where('user.status = :status', { status: UserStatusEnum.ACTIVE })
+      .where('user.status = :status', { status: UserStatusEnum.ACTIVE })
       .innerJoin('user.providerInformation', 'providerInformation')
       .innerJoin('user.role', 'role', 'role.name=:roleName', {
         roleName: 'provider'
