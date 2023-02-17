@@ -473,4 +473,11 @@ export class BookingService {
       await queryRunner.release();
     }
   }
+
+  handleOmiseEventHook(req: RawBodyRequest<Request>) {
+    const omiseService = this.moduleRef.get(OmiseService, {
+      strict: false
+    });
+    return omiseService.handleWebHook(req);
+  }
 }
