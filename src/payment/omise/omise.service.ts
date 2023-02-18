@@ -124,7 +124,7 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
         ) * 100,
       source: token,
       currency,
-      return_uri: `${appConfig.frontendUrl}/profile/bookings`,
+      return_uri: `${appConfig.customerEndUrl}/profile/bookings`,
       metadata: {
         bookingInitiationId: bookingInitiation.id
       }
