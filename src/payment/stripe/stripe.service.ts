@@ -16,6 +16,7 @@ import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { BookingInitiationLogEntity } from 'src/booking/entity/booking-initiation-log.entity';
 import { TransactionStatusEnum } from 'src/booking/enums/transaction-status.enum';
+import { BookingData } from 'src/booking/interface/booking-initiation-log.interface';
 
 @Injectable()
 export class StripeService extends PaymentAbstract<
@@ -40,6 +41,7 @@ export class StripeService extends PaymentAbstract<
   async pay(paymentObj: IPaymentPay) {
     const { bookingDto, service } = paymentObj;
     const bookingInitiation = this.bookingInitiation;
+    const customer = await this.customer(this.bookingInitiation.bookingData);
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount:
         this.calculateServiceTotalAmount(
@@ -52,7 +54,9 @@ export class StripeService extends PaymentAbstract<
       },
       metadata: {
         bookingInitiationId: bookingInitiation.id
-      }
+      },
+      customer: customer.id,
+      description: service.shortDescription
     });
     return paymentIntent;
   }
@@ -112,5 +116,18 @@ export class StripeService extends PaymentAbstract<
     if (paid.includes(status)) return TransactionStatusEnum.PAID;
     if (unpaid.includes(status)) return TransactionStatusEnum.UNPAID;
     return TransactionStatusEnum.FAILED;
+  }
+
+  customer(bookingData: BookingData) {
+    const { firstName, lastName, email, phone, customerId, dialCode } =
+      bookingData;
+    return this.stripe.customers.create({
+      email: email,
+      metadata: {
+        customerId
+      },
+      name: `${firstName} ${lastName}`,
+      phone: `${dialCode}${phone}`
+    });
   }
 }
