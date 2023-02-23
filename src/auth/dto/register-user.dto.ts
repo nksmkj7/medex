@@ -20,6 +20,9 @@ export class RegisterUserDto {
   @IsNotEmpty()
   @IsAlphanumeric()
   @IsLowercase()
+  @MaxLength(12, {
+    message: 'maxLength-{"ln":12,"count":12}'
+  })
   @Validate(UniqueValidatorPipe, [UserEntity], {
     message: 'already taken'
   })
