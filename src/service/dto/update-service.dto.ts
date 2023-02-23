@@ -28,8 +28,8 @@ export class UpdateServiceDto extends OmitType(ServiceDto, [
   // title: string;
   @IsNotEmpty()
   @IsString()
-  @MaxLength(50, {
-    message: 'maxLength-{"ln":50,"count":50}'
+  @MaxLength(100, {
+    message: 'maxLength-{"ln":100,"count":100}'
   })
   @Validate(
     UniqueValidatorPipe,
