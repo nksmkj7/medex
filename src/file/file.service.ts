@@ -13,6 +13,7 @@ import path = require('path');
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { DeleteAssetDto } from './dto/delete-asset.dto';
 import { capitalize } from 'lodash';
+import { DeleteFileDto } from './dto/delete-file.dto';
 const appConfig = config.get('app');
 
 @Injectable()
@@ -90,5 +91,13 @@ export class FileService {
       return filePath.split('public/').pop();
     }
     return '';
+  }
+
+  deleteFile(deleteFileDto: DeleteFileDto) {
+    console.log('hello from service');
+  }
+
+  getFileRelativePath(filePath: string) {
+    console.log(filePath, 'file path is --->');
   }
 }
