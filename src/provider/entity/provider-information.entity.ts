@@ -128,14 +128,20 @@ export class ProviderInformationEntity extends CustomBaseEntity {
   daySchedules: IDaySchedules;
 
   @Column({
-    type:  'decimal',
+    type: 'decimal',
     nullable: true
   })
-  latitude: number
+  latitude: number;
 
   @Column({
     type: 'decimal',
     nullable: true
   })
-  longitude: number
+  longitude: number;
+
+  @Column({
+    type: 'varchar',
+    nullable: true
+  })
+  showEmail: string;
 }

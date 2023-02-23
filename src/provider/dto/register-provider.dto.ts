@@ -13,7 +13,9 @@ import {
   IsDate,
   IsDecimal,
   IsLatitude,
-  IsLongitude
+  IsLongitude,
+  IsEmail,
+  IsLowercase
 } from 'class-validator';
 import dayjs = require('dayjs');
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto';
@@ -76,7 +78,6 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   @IsString()
   businessLocation?: string;
 
-  @IsNotEmpty()
   @ApiProperty({
     description: 'Provider Image ',
     type: 'string',
@@ -103,4 +104,9 @@ export class RegisterProviderDto extends OmitType(RegisterUserDto, [
   @IsNotEmpty()
   @IsLongitude()
   longitude: number;
+
+  @ValidateIf((object, value) => !!value)
+  @IsEmail()
+  @IsLowercase()
+  showEmail: string;
 }

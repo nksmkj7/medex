@@ -1,4 +1,5 @@
 import {
+  IsAlphanumeric,
   IsEmail,
   IsLowercase,
   IsNotEmpty,
@@ -17,7 +18,7 @@ import { UserEntity } from 'src/auth/entity/user.entity';
  */
 export class RegisterUserDto {
   @IsNotEmpty()
-  @IsString()
+  @IsAlphanumeric()
   @IsLowercase()
   @Validate(UniqueValidatorPipe, [UserEntity], {
     message: 'already taken'
