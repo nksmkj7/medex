@@ -18,7 +18,9 @@ export class BannerSerializer extends ModelSerializer {
   position: number;
 
   @ApiProperty()
-  @Transform(({ value }) => `${appConfig.appUrl}/images/banner/${value}`)
+  @Transform(({ value }) =>
+    !!value ? `${appConfig.appUrl}/images/banner/${value}` : null
+  )
   image: string;
 
   @ApiPropertyOptional()

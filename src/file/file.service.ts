@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException
+} from '@nestjs/common';
 import * as config from 'config';
 import {
   existsSync,
@@ -14,10 +19,14 @@ import { CreateFolderDto } from './dto/create-folder.dto';
 import { DeleteAssetDto } from './dto/delete-asset.dto';
 import { capitalize } from 'lodash';
 import { DeleteFileDto } from './dto/delete-file.dto';
+import { InjectConnection } from '@nestjs/typeorm';
+import { Connection } from 'typeorm';
 const appConfig = config.get('app');
 
 @Injectable()
 export class FileService {
+  constructor(@InjectConnection() private readonly connection: Connection) {}
+
   protected get publicPath() {
     return path.join(__dirname, '../../public');
   }
@@ -93,11 +102,34 @@ export class FileService {
     return '';
   }
 
-  deleteFile(deleteFileDto: DeleteFileDto) {
-    console.log('hello from service');
+  async deleteFile(deleteFileDto: DeleteFileDto) {
+    const { tableName, fieldName, findOption, fileUrl } = deleteFileDto;
+    const itemToDelete = await this.connection
+      .createQueryBuilder()
+      .from(tableName, 'table')
+      .where(findOption)
+      .getRawOne();
+    if (!itemToDelete) {
+      throw new NotFoundException('File with given options is not found.');
+    }
+    const relativePath = this.getFileRelativePath(fileUrl);
+    if (existsSync(relativePath)) {
+      unlinkSync(relativePath);
+    }
+    return this.connection
+      .getRepository(tableName)
+      .update(findOption, { [fieldName]: '' });
   }
 
   getFileRelativePath(filePath: string) {
-    console.log(filePath, 'file path is --->');
+    let [, relativePath] = filePath.split(`${appConfig.appUrl}`);
+    if (!relativePath)
+      throw new UnprocessableEntityException('invalid file path');
+    relativePath =
+      relativePath[0] !== '/'
+        ? `public/${relativePath}`
+        : `public${relativePath}`;
+
+    return relativePath;
   }
 }
