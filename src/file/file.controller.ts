@@ -68,6 +68,8 @@ export class FileController {
 
   @Post('/delete-file')
   deleteFile(@Body() deleteFileDto: DeleteFileDto) {
+    console.log(deleteFileDto, 'delete file dto is --->');
+    return;
     return this.service.deleteFile(deleteFileDto);
   }
 }
