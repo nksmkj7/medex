@@ -25,6 +25,7 @@ import { existsSync, unlinkSync } from 'fs';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
+import { FileService } from 'src/file/file.service';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -58,7 +59,8 @@ export class ServiceService {
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
     @InjectRepository(SpecialistRepository)
-    private readonly specialistRepository: SpecialistRepository
+    private readonly specialistRepository: SpecialistRepository,
+    private readonly fileService: FileService
   ) {}
   async create(createServiceDto: ServiceDto, files: Express.Multer.File[]) {
     const { categoryId, subCategoryId, userId } = createServiceDto;
@@ -155,24 +157,37 @@ export class ServiceService {
       // }
       await this.validIds({ userId, categoryId, subCategoryId });
       const { specialists, ...serviceOnlyData } = service;
-      if (files.length) {
-        let uploadedImages = [];
-        uploadedImages = files.map((file) => file.filename);
-        if (service.image) {
-          service.image.split(',').forEach((image) => {
-            const path = `public/images/service/${image}`;
-            if (!files.find((file) => file.path === path)) {
-              uploadedImages.push(image);
-            } else {
-              if (existsSync(path)) {
-                unlinkSync(`public/images/service/${image}`);
-              }
-            }
-          });
+      let removedImagesUrl = [];
+      if (updateServiceDto?.removedImages) {
+        removedImagesUrl = JSON.parse(updateServiceDto.removedImages);
+      }
+      const removedImagesRelativePaths: string[] = [];
+      const removedImages: string[] = [];
+      removedImagesUrl.forEach((url) => {
+        removedImagesRelativePaths.push(
+          this.fileService.getFileRelativePath(url)
+        );
+        removedImages.push(url.split('/').pop());
+      });
+
+      let uploadedImages = service.image.split(',').filter((image) => {
+        const path = `public/images/service/${image}`;
+        if (!removedImagesRelativePaths.includes(path)) {
+          return image;
+        } else {
+          if (existsSync(path)) {
+            unlinkSync(`public/images/service/${image}`);
+          }
         }
-        updateServiceDto.image = uploadedImages.join(',');
-      } else {
+      });
+      if (!files.length && !uploadedImages.length) {
         updateServiceDto.image = service.image;
+      } else {
+        uploadedImages = [
+          ...uploadedImages,
+          ...files.map((file) => file.filename)
+        ];
+        updateServiceDto.image = uploadedImages.join(',');
       }
       if (updateServiceDto.tags) {
         updateServiceDto.tags = JSON.parse(updateServiceDto.tags);
