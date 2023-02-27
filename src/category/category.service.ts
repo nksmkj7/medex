@@ -77,10 +77,12 @@ export class CategoryService {
     if (!updateCategoryDto.parentId) {
       updateCategoryDto.parentId = null;
     }
-    updateCategoryDto = file
+    updateCategoryDto = Object.keys(file).length
       ? { ...updateCategoryDto, image: file.filename }
-      : { ...updateCategoryDto, image: category.image };
-    if (category.image && file) {
+      : !!updateCategoryDto?.image
+      ? { ...updateCategoryDto, image: category.image }
+      : { ...updateCategoryDto, image: null };
+    if (category.image && Object.keys(file).length) {
       const path = `public/images/category/${category.image}`;
       if (existsSync(path)) {
         unlinkSync(`public/images/category/${category.image}`);

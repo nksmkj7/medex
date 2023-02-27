@@ -19,6 +19,7 @@ import * as config from 'config';
 import { dynamicPathMulterOptionsHelper } from 'src/common/helper/dynamic-path-multer-options.helper';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { DeleteAssetDto } from './dto/delete-asset.dto';
+import { DeleteFileDto } from './dto/delete-file.dto';
 const appConfig = config.get('app');
 
 @ApiTags('File')
@@ -63,5 +64,10 @@ export class FileController {
     @Param('type') assetType: string
   ) {
     return this.service.deleteAsset(assetType, deleteAssetDto);
+  }
+
+  @Post('/delete-file')
+  deleteFile(@Body() deleteFileDto: DeleteFileDto) {
+    return this.service.deleteFile(deleteFileDto);
   }
 }

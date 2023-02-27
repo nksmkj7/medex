@@ -99,9 +99,14 @@ export class MenuService {
     if (!updateMenuDto.parentId) {
       updateMenuDto.parentId = null;
     }
-    updateMenuDto = file?.filename
+    updateMenuDto = Object.keys(file).length
       ? { ...updateMenuDto, icon: file.filename }
-      : { ...updateMenuDto, icon: menu.icon };
+      : !!updateMenuDto?.icon
+      ? { ...updateMenuDto, icon: menu.icon }
+      : { ...updateMenuDto, icon: null };
+    // updateMenuDto = file?.filename
+    //   ? { ...updateMenuDto, icon: file.filename }
+    //   : { ...updateMenuDto, icon: menu.icon };
     if (menu.icon && !isEmpty(file)) {
       const path = `public/images/menu/${menu.icon}`;
       if (existsSync(path)) {

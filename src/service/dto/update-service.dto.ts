@@ -1,5 +1,14 @@
-import { OmitType } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength, Validate } from 'class-validator';
+import { ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsJSON,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Validate,
+  ValidateIf
+} from 'class-validator';
 import { slugify } from 'src/common/helper/general.helper';
 import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
 import { ServiceEntity } from '../entity/service.entity';
@@ -39,4 +48,9 @@ export class UpdateServiceDto extends OmitType(ServiceDto, [
     }
   )
   title: string;
+
+  @ApiPropertyOptional()
+  @ValidateIf((object, value) => !!value)
+  @IsJSON()
+  removedImages: string;
 }
