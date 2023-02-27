@@ -71,7 +71,7 @@ export class ServiceService {
     try {
       const manager = queryRunner.manager;
       if (files) {
-        createServiceDto.image = files.map((file) => file.filename).join(', ');
+        createServiceDto.image = files.map((file) => file.filename).join(',');
       }
       if (createServiceDto.tags) {
         createServiceDto.tags = JSON.parse(createServiceDto.tags);
@@ -171,12 +171,12 @@ export class ServiceService {
       });
 
       let uploadedImages = service.image.split(',').filter((image) => {
-        const path = `public/images/service/${image}`;
+        const path = `public/images/service/${image.trim()}`;
         if (!removedImagesRelativePaths.includes(path)) {
           return image;
         } else {
           if (existsSync(path)) {
-            unlinkSync(`public/images/service/${image}`);
+            unlinkSync(`public/images/service/${image.trim()}`);
           }
         }
       });
