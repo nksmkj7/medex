@@ -110,4 +110,8 @@ export class BookingDto {
   @IsOptional()
   @IsNumber()
   numberOfPeople: number;
+
+  @IsNotEmpty()
+  @IsString()
+  address: string;
 }

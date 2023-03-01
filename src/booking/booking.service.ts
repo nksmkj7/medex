@@ -380,7 +380,8 @@ export class BookingService {
         phone: bookingDto.phone,
         dialCode: bookingDto.dialCode,
         scheduleTimeId: bookingDto.scheduleTimeId,
-        numberOfPeople: bookingDto.numberOfPeople
+        numberOfPeople: bookingDto.numberOfPeople,
+        address: bookingDto.address
       };
 
       const transaction: TransactionData = {

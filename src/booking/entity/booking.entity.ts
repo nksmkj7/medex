@@ -118,4 +118,9 @@ export class BookingEntity extends CustomBaseEntity {
     default: 1
   })
   numberOfPeople: number;
+
+  @Column('varchar', {
+    nullable: true
+  })
+  address: string;
 }
