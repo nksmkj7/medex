@@ -81,7 +81,7 @@ export class BackOfficeProcessor {
         customer_name: `${booking.firstName} ${booking.lastName}`,
         phone: booking.phone,
         email: booking.email,
-        address: '',
+        address: booking.address,
         quantity: '1',
         total_price: transaction.totalAmount,
         currency: transaction.currency.toUpperCase(),
