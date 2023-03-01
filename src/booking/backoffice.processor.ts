@@ -84,7 +84,7 @@ export class BackOfficeProcessor {
         address: '',
         quantity: '1',
         total_price: transaction.totalAmount,
-        currency: transaction.currency,
+        currency: transaction.currency.toUpperCase(),
         discount_price: transaction.discount,
         pay_status: transaction.status.toUpperCase(),
         status: booking.status.toUpperCase(),
