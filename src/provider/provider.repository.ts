@@ -69,7 +69,7 @@ export class ProviderRepository extends BaseRepository<
 
   async getProviderDetail(id: number, transformOptions = {}) {
     const user = await this.userRepository.findOne({
-      relations: ['providerInformation', 'role'],
+      relations: ['providerInformation', 'role', 'providerInformation.country'],
       where: {
         id,
         role: {
