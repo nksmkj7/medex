@@ -16,7 +16,7 @@ import {
   UseInterceptors,
   Headers
 } from '@nestjs/common';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -76,6 +76,11 @@ export class CategoryController {
     return this.categoryService.activeCategories();
   }
 
+  @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: 'category detail by id'
+  })
   @Get(':id')
   findOne(
     @Param('id', ParseUUIDPipe)
