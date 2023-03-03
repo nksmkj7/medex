@@ -68,25 +68,26 @@ export class ProviderService {
     token: string,
     manager?: EntityManager
   ): Promise<UserSerializer> {
-    if (!createUserDto.status) {
-      const role = await this.roleRepository.findBy('name', roleName);
-      createUserDto.roleId = role.id;
-      const currentDateTime = new Date();
-      currentDateTime.setHours(currentDateTime.getHours() + 1);
-      createUserDto.tokenValidityDate = currentDateTime;
-    }
+    // if (!createUserDto?.status || ) {
+    const role = await this.roleRepository.findBy('name', roleName);
+    createUserDto.roleId = role.id;
+    const currentDateTime = new Date();
+    currentDateTime.setHours(currentDateTime.getHours() + 1);
+    createUserDto.tokenValidityDate = currentDateTime;
+    // }
     const user = await this.userRepository.store(createUserDto, token, manager);
     return user;
   }
 
   async createProvider(registerProviderDto: DeepPartial<ProviderEntity>) {
-    const { username, email, password, name, ...providerInformation } =
+    const { username, email, password, name, status, ...providerInformation } =
       registerProviderDto;
     const createUserDto: DeepPartial<UserEntity> = {
       username,
       email,
       password,
-      name
+      name,
+      status
     };
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
@@ -110,7 +111,11 @@ export class ProviderService {
         manager
       );
 
-      const registerProcess = !createUserDto.status;
+      // const registerProcess = !createUserDto.status;
+      const registerProcess =
+        createUserDto?.status && createUserDto.status === 'active'
+          ? false
+          : true;
 
       const subject = registerProcess ? 'Account created' : 'Set Password';
       const link = registerProcess ? `verify/${token}` : `reset/${token}`;
