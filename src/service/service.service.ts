@@ -101,9 +101,6 @@ export class ServiceService {
     referer?: string
   ): Promise<Pagination<ServiceSerializer>> {
     const searchCriteria = {};
-    if (referer !== appConfig.frontendUrl + '/') {
-      searchCriteria['status'] = true;
-    }
     const { keywords, provider = null } = serviceFilterDto;
     let relationalSearchCriteria = {};
     if (keywords) {
@@ -119,6 +116,17 @@ export class ServiceService {
           title: ILike(`%${keywords}%`)
         }
       };
+    }
+    if (referer !== appConfig.frontendUrl + '/') {
+      searchCriteria['status'] = true;
+      if (relationalSearchCriteria?.['user']) {
+        relationalSearchCriteria['user'] = {
+          ...relationalSearchCriteria['user'],
+          status: UserStatusEnum.ACTIVE
+        };
+      } else {
+        relationalSearchCriteria['user'] = { status: UserStatusEnum.ACTIVE };
+      }
     }
     if (provider) {
       searchCriteria['userId'] = provider;
