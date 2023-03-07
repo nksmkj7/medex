@@ -260,4 +260,14 @@ export class ProviderController {
       providerCategorywiseServiceDto
     );
   }
+
+  @Get('/username/:username')
+  @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: 'get provider detail by username'
+  })
+  async getProviderDetailByUsername(@Param('username') username: string) {
+    return this.providerService.getProviderDetailByUsername(username);
+  }
 }

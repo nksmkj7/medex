@@ -520,4 +520,18 @@ export class ProviderService {
       }
     );
   }
+
+  async getProviderDetailByUsername(username: string) {
+    const user = await this.userRepository.findOne({
+      relations: ['providerInformation', 'role', 'providerInformation.country'],
+      where: {
+        username,
+        role: {
+          name: 'provider'
+        }
+      }
+    });
+    if (!user) throw new NotFoundException();
+    return this.userRepository.transform(user, { groups: ['admin'] });
+  }
 }
