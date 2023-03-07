@@ -10,7 +10,7 @@ import { ModelSerializer } from 'src/common/serializer/model.serializer';
 const appConfig = config.get('app');
 
 export class CategorySerializer extends ModelSerializer {
-  id: number;
+  id: string;
 
   @ApiProperty()
   title: string;

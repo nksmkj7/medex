@@ -33,6 +33,7 @@ import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { Public } from 'src/common/decorators/public.decorator';
+import { ParseCustomerId } from 'src/common/pipes/parse-customer-id';
 
 @ApiTags('Category')
 @Controller('category')
@@ -125,5 +126,33 @@ export class CategoryController {
     categoryFilterDto: SubCategoryFilterDto
   ) {
     return this.categoryService.subCategories(id, categoryFilterDto);
+  }
+
+  @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: 'parent category detail by slug'
+  })
+  @Get('parent/:slug')
+  findParentCategoryBySlug(
+    @Param('slug')
+    slug: string
+  ): Promise<CategorySerializer> {
+    return this.categoryService.findParentBySlug(slug);
+  }
+
+  @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: 'child category detail by parent slug and child slug'
+  })
+  @Get('parent/:parentSlug/children/:childSlug')
+  findChildCategoryBySlug(
+    @Param('parentSlug')
+    parentSlug: string,
+    @Param('childSlug')
+    childSlug: string
+  ): Promise<CategorySerializer> {
+    return this.categoryService.findChildCategoryBySlug(parentSlug, childSlug);
   }
 }

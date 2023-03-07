@@ -169,4 +169,41 @@ export class CategoryService {
       relations: ['children']
     });
   }
+
+  async findParentBySlug(slug: string) {
+    const parentCategory = await this.repository.findOne(
+      {
+        slug,
+        parentId: null
+      },
+      {
+        relations: ['parent', 'children']
+      }
+    );
+    if (!parentCategory) {
+      throw new NotFoundException('Category not found.');
+    }
+    return this.repository.transform(parentCategory, {
+      groups: ['parent']
+    });
+  }
+
+  async findChildCategoryBySlug(parentSlug: string, childSlug: string) {
+    const parentCategory = await this.findParentBySlug(parentSlug);
+    const childCategory = await this.repository.findOne(
+      {
+        slug: childSlug,
+        parentId: parentCategory?.id ?? null
+      },
+      {
+        relations: ['parent', 'children']
+      }
+    );
+    if (!childCategory) {
+      throw new NotFoundException('Category not found.');
+    }
+    return this.repository.transform(childCategory, {
+      groups: ['children']
+    });
+  }
 }
