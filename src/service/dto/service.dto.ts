@@ -7,6 +7,7 @@ import {
   IsInt,
   IsJSON,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -84,7 +85,9 @@ export class ServiceDto {
   @ValidateIf((object, value) => {
     return !!value;
   })
-  @IsInt()
+  @IsNumber({
+    maxDecimalPlaces: 2
+  })
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
   discount: number;
@@ -94,14 +97,18 @@ export class ServiceDto {
   @ValidateIf((object, value) => {
     return !!value;
   })
-  @IsInt()
+  @IsNumber({
+    maxDecimalPlaces: 2
+  })
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
   serviceCharge: number;
 
   @IsNotEmpty()
   @Transform(({ value }) => Number(value))
-  @IsInt()
+  @IsNumber({
+    maxDecimalPlaces: 2
+  })
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
   price: number;
 
