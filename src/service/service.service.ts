@@ -809,4 +809,54 @@ export class ServiceService {
       .where(`schedule.serviceId = :serviceId`, { serviceId })
       .getMany();
   }
+
+  async findOneBySlug(serviceSlug: string, providerId: number) {
+    const service = await this.repository.findOne({
+      where: {
+        slug: serviceSlug,
+        userId: providerId
+      },
+      relations: ['user', 'user.providerInformation', 'category', 'subCategory']
+    });
+    if (!service) {
+      throw new NotFoundException('Service not found.');
+    }
+    return this.repository.transform(service);
+  }
+
+  async findServiceSpecialistsByServiceSlug(
+    serviceSlug: string,
+    providerId: number,
+    specialistFilterDto: SpecialistFilterDto
+  ) {
+    const service = await this.repository.findOne({
+      relations: ['specialists'],
+      where: {
+        slug: serviceSlug,
+        userId: providerId
+      }
+    });
+    const relatedSpecialistId = service.specialists.map(
+      (specialist) => specialist.id
+    );
+    const specialists = await this.specialistRepository.paginate(
+      specialistFilterDto,
+      [],
+      [
+        'fullName',
+        'contactNo',
+        'licenseRegistrationNumber',
+        'educationTraining',
+        'experienceExpertise',
+        'publicAwards',
+        'membershipActivities'
+      ],
+      {},
+      {
+        id: In(relatedSpecialistId)
+      }
+    );
+    const transformedService = this.repository.transform(service);
+    return { ...specialists, service: transformedService };
+  }
 }

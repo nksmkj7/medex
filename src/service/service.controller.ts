@@ -11,13 +11,14 @@ import {
   UseInterceptors,
   Headers,
   UploadedFile,
-  UploadedFiles
+  UploadedFiles,
+  ParseIntPipe
 } from '@nestjs/common';
 import {
   FileInterceptor,
   FilesInterceptor
 } from '@nestjs/platform-express/multer';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
@@ -164,6 +165,37 @@ export class ServiceController {
       serviceId,
       specialistId,
       updateAssignSpecialistDto
+    );
+  }
+
+  @ApiTags('Public')
+  @Public()
+  @Get(':serviceSlug/provider/:providerId')
+  @ApiOperation({
+    summary: 'get service detail by service slug and provider id'
+  })
+  findOneBySlug(
+    @Param('serviceSlug') serviceSlug: string,
+    @Param('providerId', ParseIntPipe) providerId: number
+  ): Promise<ServiceSerializer> {
+    return this.service.findOneBySlug(serviceSlug, providerId);
+  }
+
+  @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: 'get service specialist by service slug and provider id'
+  })
+  @Get(':serviceSlug/provider/:providerId/specialists')
+  findServiceSpecialistsByServiceSlug(
+    @Param('serviceSlug') serviceSlug: string,
+    @Param('providerId', ParseIntPipe) providerId: number,
+    @Query() specialistFilterDto: SpecialistFilterDto
+  ) {
+    return this.service.findServiceSpecialistsByServiceSlug(
+      serviceSlug,
+      providerId,
+      specialistFilterDto
     );
   }
 }
