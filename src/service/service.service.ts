@@ -45,6 +45,7 @@ export interface IProviderWithService {
   banner_link?: string;
   category_title: string;
   service_image?: string | string[];
+  username: string;
   [index: string]: string | number | string[];
 }
 
@@ -523,6 +524,7 @@ export class ServiceService {
         'CAST((price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_discount',
         'CAST((service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as service_charge_amount',
         'CAST((price-((discount/100)*price))+(service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_service_charge',
+        'usr.username as username',
         'provider.companyName as company_name',
         'provider.businessLogo as logo',
         'provider.businessLocation as location',
@@ -610,13 +612,15 @@ export class ServiceService {
         'state',
         'landmark',
         'banner',
-        'banner_link'
+        'banner_link',
+        'username'
       ]);
     };
 
     return providerWithService.reduce(
       (
         prevValue: {
+          username: string;
           company_name: string;
           provider_id: number;
           logo?: string;
@@ -652,7 +656,8 @@ export class ServiceService {
               : null,
             banner_link: currentValue.banner_link,
             category_title: currentValue.category_title,
-            services: [getFormattedData(currentValue)]
+            services: [getFormattedData(currentValue)],
+            username: currentValue.username
           });
         } else {
           currentProvider.services.push(getFormattedData(currentValue));
@@ -739,6 +744,7 @@ export class ServiceService {
         'CAST((price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_discount',
         'CAST((service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as service_charge_amount',
         'CAST((price-((discount/100)*price))+(service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_service_charge',
+        'usr.username as username',
         'provider.companyName as company_name',
         'provider.businessLogo as logo',
         'provider.businessLocation as location',
