@@ -46,6 +46,7 @@ export interface IProviderWithService {
   category_title: string;
   service_image?: string | string[];
   username: string;
+  slug: string;
   [index: string]: string | number | string[];
 }
 
@@ -512,6 +513,7 @@ export class ServiceService {
         'service.id as id',
         'service.title as title',
         'CAST(service.price as DOUBLE PRECISION) as price',
+        'service.slug as slug',
         'service.userId as provider_id',
         'service.durationInMinutes as duration_in_minutes',
         'service.description as description',
@@ -613,7 +615,8 @@ export class ServiceService {
         'landmark',
         'banner',
         'banner_link',
-        'username'
+        'username',
+        'slug'
       ]);
     };
 
@@ -631,6 +634,7 @@ export class ServiceService {
           banner?: string;
           banner_link?: string;
           category_title: string;
+          slug: string;
           services: { [index: string]: string }[];
         }[],
         currentValue: IProviderWithService
@@ -657,7 +661,8 @@ export class ServiceService {
             banner_link: currentValue.banner_link,
             category_title: currentValue.category_title,
             services: [getFormattedData(currentValue)],
-            username: currentValue.username
+            username: currentValue.username,
+            slug: currentValue.slug
           });
         } else {
           currentProvider.services.push(getFormattedData(currentValue));
@@ -731,6 +736,7 @@ export class ServiceService {
       .select([
         'service.id as id',
         'service.title as title',
+        'service.slug as slug',
         'CAST(service.price as DOUBLE PRECISION) as price',
         'service.userId as provider_id',
         'service.durationInMinutes as duration_in_minutes',
