@@ -698,7 +698,7 @@ export class ServiceService {
     }
     if (keywords) {
       query.andWhere(
-        `service.title Ilike :keywords OR provider."companyName" Ilike :keywords OR category.title Ilike :keywords`,
+        `(service.title Ilike :keywords OR provider."companyName" Ilike :keywords OR category.title Ilike :keywords)`,
         {
           keywords: `%${keywords}%`
         }
