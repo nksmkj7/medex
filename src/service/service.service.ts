@@ -46,7 +46,6 @@ export interface IProviderWithService {
   category_title: string;
   service_image?: string | string[];
   username: string;
-  slug: string;
   [index: string]: string | number | string[];
 }
 
@@ -615,8 +614,7 @@ export class ServiceService {
         'landmark',
         'banner',
         'banner_link',
-        'username',
-        'slug'
+        'username'
       ]);
     };
 
@@ -634,7 +632,6 @@ export class ServiceService {
           banner?: string;
           banner_link?: string;
           category_title: string;
-          slug: string;
           services: { [index: string]: string }[];
         }[],
         currentValue: IProviderWithService
@@ -661,8 +658,7 @@ export class ServiceService {
             banner_link: currentValue.banner_link,
             category_title: currentValue.category_title,
             services: [getFormattedData(currentValue)],
-            username: currentValue.username,
-            slug: currentValue.slug
+            username: currentValue.username
           });
         } else {
           currentProvider.services.push(getFormattedData(currentValue));
