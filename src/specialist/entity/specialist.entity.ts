@@ -16,7 +16,6 @@ import {
 @Entity({
   name: 'specialists'
 })
-@Unique(['licenseRegistrationNumber', 'licenseCountry'])
 export class SpecialistEntity extends CustomUuidBaseEntity {
   @Column('varchar')
   fullName: string;
