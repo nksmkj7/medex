@@ -1,4 +1,5 @@
-import { ObjectLiteral } from 'typeorm';
+import { ObjectLiteral, QueryRunner } from 'typeorm';
+import { difference } from 'lodash';
 
 export const slugify = (...args: (string | number)[]): string => {
   const value = args.join(' ');
@@ -74,3 +75,32 @@ export const generateRandomCode = (
   }
   return result;
 };
+
+export async function dropForeignKeys(
+  queryRunner: QueryRunner,
+  tableName: string,
+  columnNames: string[]
+) {
+  const table = await queryRunner.getTable(tableName);
+
+  for (const foreignKey of table.foreignKeys) {
+    for (const columnName of columnNames) {
+      if (foreignKey.columnNames.includes(columnName)) {
+        await queryRunner.dropForeignKey(tableName, foreignKey.name);
+      }
+    }
+  }
+}
+
+export async function dropUniqueConstraints(
+  queryRunner: QueryRunner,
+  tableName: string,
+  columnNames: string[]
+) {
+  const table = await queryRunner.getTable(tableName);
+  for (const uniqueConstraint of table.uniques) {
+    if (difference(uniqueConstraint.columnNames, columnNames).length) {
+      await queryRunner.dropUniqueConstraint(tableName, uniqueConstraint.name);
+    }
+  }
+}

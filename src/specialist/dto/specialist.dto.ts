@@ -69,18 +69,19 @@ export class SpecialistDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @Validate(
-    UniqueValidatorPipe,
-    [SpecialistEntity, ['licenseRegistrationNumber', 'licenseCountry']],
-    {
-      message: 'already taken'
-    }
-  )
+  // @Validate(
+  //   UniqueValidatorPipe,
+  //   [SpecialistEntity, ['licenseRegistrationNumber', 'licenseCountry']],
+  //   {
+  //     message: 'already taken'
+  //   }
+  // )
   licenseRegistrationNumber: string;
 
   @ApiPropertyOptional({
     type: 'number'
   })
+  @IsOptional()
   @Transform(({ value }) => {
     return Number(value);
   })
@@ -91,7 +92,7 @@ export class SpecialistDto {
   @ApiProperty({
     default: true
   })
-  @Transform(({value}) => value === 'true' ? true: false)
+  @Transform(({ value }) => (value === 'true' ? true : false))
   @IsBoolean()
   status: boolean;
 }
