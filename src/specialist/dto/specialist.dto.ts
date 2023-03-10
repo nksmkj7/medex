@@ -82,6 +82,7 @@ export class SpecialistDto {
     type: 'number'
   })
   @IsOptional()
+  @ValidateIf((object, value) => value)
   @Transform(({ value }) => {
     return Number(value);
   })

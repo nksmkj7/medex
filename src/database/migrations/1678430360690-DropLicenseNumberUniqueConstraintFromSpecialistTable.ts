@@ -12,13 +12,6 @@ export class DropLicenseNumberUniqueConstraintFromSpecialistTable1678430360690
   tableName = 'specialists';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // await queryRunner.dropUniqueConstraint(
-    //   this.tableName,
-    //   new TableUnique({
-    //     columnNames: ['licenseRegistrationNumber', 'licenseCountry']
-    //   })
-    // );
-
     await dropUniqueConstraints(queryRunner, this.tableName, [
       'licenseRegistrationNumber',
       'licenseCountry'
