@@ -40,7 +40,8 @@ export class SpecialistSerializer extends ModelSerializer {
   licenseRegistrationNumber: string;
 
   @ApiPropertyOptional()
-  licenseCountry: number;
+  @Transform(({ value }) => (!value ? null : value))
+  licenseCountry: number | null;
 
   @ApiProperty({
     name: 'status',
