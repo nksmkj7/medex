@@ -744,7 +744,7 @@ export class ServiceService {
         'service.tags as tags',
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
-        'case when service.discountType  ="percent" then CAST((discount/100)*price as DOUBLE PRECISION) else discount  end as discounted_amount',
+        "case when service.discountType  ='percent' then CAST((discount/100)*price as DOUBLE PRECISION) else discount  end as discounted_amount",
         'CAST((price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_discount',
         'CAST((service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as service_charge_amount',
         'CAST((price-((discount/100)*price))+(service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_service_charge',
