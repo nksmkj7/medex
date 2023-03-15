@@ -6,6 +6,7 @@ import {
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import * as config from 'config';
 import { UserSerializer } from 'src/auth/serializer/user.serializer';
+import { DiscountTypeEnum } from 'src/booking/enums/discount-type.enum';
 import { CategorySerializer } from 'src/category/serializer/category.serializer';
 
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
@@ -30,6 +31,13 @@ export class ServiceSerializer extends ModelSerializer {
 
   @ApiProperty()
   discount: number;
+
+  @ApiProperty({
+    name: 'discountType',
+    enum: DiscountTypeEnum,
+    enumName: 'discountType'
+  })
+  discountType: DiscountTypeEnum;
 
   @ApiProperty()
   durationInMinutes: number;

@@ -18,6 +18,7 @@ import {
   ValidateIf
 } from 'class-validator';
 import { UserEntity } from 'src/auth/entity/user.entity';
+import { DiscountTypeEnum } from 'src/booking/enums/discount-type.enum';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import {
   isGreaterThanTime,
@@ -89,7 +90,10 @@ export class ServiceDto {
     maxDecimalPlaces: 2
   })
   @Min(0, { message: 'min-{"ln":"0","count":"0"}' })
-  @Max(100, { message: 'max-{"ln":"100","count":"100"}' })
+  @ValidateIf(({ discountType }) => {
+    return discountType === DiscountTypeEnum.PERCENT;
+  })
+  @Max(100)
   discount: number;
 
   @ApiPropertyOptional()
@@ -186,4 +190,11 @@ export class ServiceDto {
   @IsOptional()
   @IsString()
   searchKeywords: string;
+
+  @ApiProperty({
+    default: DiscountTypeEnum.PERCENT
+  })
+  @IsNotEmpty()
+  @IsEnum(DiscountTypeEnum)
+  discountType: DiscountTypeEnum;
 }

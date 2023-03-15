@@ -1,4 +1,5 @@
 import { BookingInitiationLogEntity } from 'src/booking/entity/booking-initiation-log.entity';
+import { DiscountTypeEnum } from 'src/booking/enums/discount-type.enum';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { IPaymentPay } from './interface/payment-pay.interface';
 import { IPayment } from './payment.interface';
@@ -20,7 +21,11 @@ export abstract class PaymentAbstract<T> implements IPayment<T> {
     const price = +service.price;
     const serviceCharge = +service.serviceCharge;
     const discount = +service.discount;
-    const priceAfterDiscount = price - (discount / 100) * price;
+    const discountAmount =
+      service.discountType === DiscountTypeEnum.PERCENT
+        ? (discount / 100) * price
+        : discount;
+    const priceAfterDiscount = price - discountAmount;
     return (
       (priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount) *
       numberOfPerson

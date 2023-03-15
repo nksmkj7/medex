@@ -19,6 +19,7 @@ import {
 import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceSpecialistEntity } from './specialist-service.entity';
 import { ScheduleTypeEnum } from '../enums/schedule-type.enum';
+import { DiscountTypeEnum } from 'src/booking/enums/discount-type.enum';
 
 @Entity('services')
 @Unique(['slug', 'userId'])
@@ -117,7 +118,10 @@ export class ServiceEntity extends CustomUuidBaseEntity {
 
   @AfterLoad()
   afterLoad() {
-    this.discounted_amount = (this.discount / 100) * this.price;
+    this.discounted_amount =
+      this.discountType === DiscountTypeEnum.PERCENT
+        ? (this.discount / 100) * this.price
+        : this.discount;
     this.amount_after_discount = this.price - this.discounted_amount;
     this.service_charge_amount =
       (this.serviceCharge / 100) * this.amount_after_discount;
@@ -154,4 +158,11 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     nullable: true
   })
   shortDescription: string;
+
+  @Column({
+    type: 'enum',
+    enum: DiscountTypeEnum,
+    default: DiscountTypeEnum.PERCENT
+  })
+  discountType: DiscountTypeEnum;
 }
