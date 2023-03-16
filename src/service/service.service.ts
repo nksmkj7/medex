@@ -522,10 +522,10 @@ export class ServiceService {
         'service.scheduleType as "scheduleType"',
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
-        "case when service.discountType ='percent' then CAST((discount/100)*price as DOUBLE PRECISION) else discount  end as discounted_amount",
-        'CAST((price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_discount',
-        'CAST((service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as service_charge_amount',
-        'CAST((price-((discount/100)*price))+(service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_service_charge',
+        's.discounted_amount as discounted_amount',
+        'CAST((service.price-s.discounted_amount) as DOUBLE PRECISION) as amount_after_discount',
+        'CAST((service."serviceCharge"/100)*(service.price-s.discounted_amount) as DOUBLE PRECISION) as service_charge_amount',
+        'CAST((service.price-s.discounted_amount)+(service."serviceCharge"/100)*(service.price-s.discounted_amount) as DOUBLE PRECISION) as amount_after_service_charge',
         'usr.username as username',
         'provider.companyName as company_name',
         'provider.businessLogo as logo',
@@ -541,6 +541,20 @@ export class ServiceService {
       .andWhere('service.userId In (:...users)', {
         users: [...categoryAssociatedProviders]
       })
+      .leftJoin(
+        (qb) =>
+          qb
+            .select([
+              'id',
+              "case when s.discountType  ='percent' then CAST((s.discount/100)*price as DOUBLE PRECISION) else discount  end as discounted_amount"
+            ])
+            .where('s.userId In (:...users)', {
+              users: [...categoryAssociatedProviders]
+            })
+            .from(ServiceEntity, 's'),
+        's',
+        's.id = service.id'
+      )
       .leftJoin(
         (qb) =>
           qb
@@ -744,10 +758,10 @@ export class ServiceService {
         'service.tags as tags',
         'CAST(service.discount as DOUBLE PRECISION) as discount',
         'CAST(service.serviceCharge as DOUBLE PRECISION) as service_charge',
-        "case when service.discountType  ='percent' then CAST((discount/100)*price as DOUBLE PRECISION) else discount  end as discounted_amount",
-        'CAST((price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_discount',
-        'CAST((service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as service_charge_amount',
-        'CAST((price-((discount/100)*price))+(service."serviceCharge"/100)*(price-((discount/100)*price)) as DOUBLE PRECISION) as amount_after_service_charge',
+        's.discounted_amount as discounted_amount',
+        'CAST((service.price-s.discounted_amount) as DOUBLE PRECISION) as amount_after_discount',
+        'CAST((service."serviceCharge"/100)*(service.price-s.discounted_amount) as DOUBLE PRECISION) as service_charge_amount',
+        'CAST((service.price-s.discounted_amount)+(service."serviceCharge"/100)*(service.price-s.discounted_amount) as DOUBLE PRECISION) as amount_after_service_charge',
         'usr.username as username',
         'provider.companyName as company_name',
         'provider.businessLogo as logo',
@@ -762,6 +776,20 @@ export class ServiceService {
       .andWhere('service.userId In (:...users)', {
         users: [...categoryAssociatedProviders]
       })
+      .leftJoin(
+        (qb) =>
+          qb
+            .select([
+              'id',
+              "case when s.discountType  ='percent' then CAST((s.discount/100)*price as DOUBLE PRECISION) else discount  end as discounted_amount"
+            ])
+            .where('s.userId In (:...users)', {
+              users: [...categoryAssociatedProviders]
+            })
+            .from(ServiceEntity, 's'),
+        's',
+        's.id = service.id'
+      )
       .leftJoin(
         (qb) =>
           qb
