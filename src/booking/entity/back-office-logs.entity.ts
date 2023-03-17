@@ -1,16 +1,15 @@
-import { CustomUuidBaseEntity } from "src/common/entity/custom-uuid-base.entity";
-import { Column, Entity } from "typeorm";
-import { IBackOfficeResponse } from "../backoffice.processor";
+import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
+import { Column, Entity } from 'typeorm';
+import { IBackOfficeResponse } from '../backoffice.processor';
 
 @Entity('back_office_logs')
-export class BackOfficeLogEntity extends CustomUuidBaseEntity{ 
-    @Column('varchar')
-    bookingId: string
-    
-    @Column('jsonb')
-    backOfficeResponse: IBackOfficeResponse
-    
+export class BackOfficeLogEntity extends CustomUuidBaseEntity {
+  @Column('varchar')
+  bookingId: string;
 
-    @Column('boolean')
-    status: boolean
+  @Column('jsonb')
+  backOfficeResponse: IBackOfficeResponse;
+
+  @Column('boolean')
+  status: boolean;
 }

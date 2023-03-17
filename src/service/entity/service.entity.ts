@@ -20,6 +20,7 @@ import { SpecialistEntity } from 'src/specialist/entity/specialist.entity';
 import { ServiceSpecialistEntity } from './specialist-service.entity';
 import { ScheduleTypeEnum } from '../enums/schedule-type.enum';
 import { DiscountTypeEnum } from 'src/booking/enums/discount-type.enum';
+import { IServiceAdditionalInfo } from '../interfaces/service-additional-info.interface';
 
 @Entity('services')
 @Unique(['slug', 'userId'])
@@ -165,4 +166,9 @@ export class ServiceEntity extends CustomUuidBaseEntity {
     default: DiscountTypeEnum.PERCENT
   })
   discountType: DiscountTypeEnum;
+
+  @Column('jsonb', {
+    nullable: true
+  })
+  additionalInformation: IServiceAdditionalInfo;
 }
