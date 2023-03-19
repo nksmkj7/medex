@@ -10,14 +10,10 @@ import {
   UseGuards,
   UseInterceptors,
   Headers,
-  UploadedFile,
   UploadedFiles,
   ParseIntPipe
 } from '@nestjs/common';
-import {
-  FileInterceptor,
-  FilesInterceptor
-} from '@nestjs/platform-express/multer';
+import { FilesInterceptor } from '@nestjs/platform-express/multer';
 import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
@@ -29,6 +25,7 @@ import { SpecialistFilterDto } from 'src/specialist/dto/specialist-filter.dto';
 import { AssignSpecialistDto } from './dto/assign-specialist.dto';
 import { CategoryProviderServiceDto } from './dto/category-provider-service.dto';
 import { SearchCategoryProvideServiceDto } from './dto/search-category-provider-service.dto';
+import ServiceAdditionalInformationDto from './dto/service-additional-information.dto';
 import { ServiceFilterDto } from './dto/service-filter.dto';
 import { ServiceDto } from './dto/service.dto';
 import { UpdateAssignSpecialistDto } from './dto/update-assign-specialist.dto';
@@ -196,6 +193,20 @@ export class ServiceController {
       serviceSlug,
       providerId,
       specialistFilterDto
+    );
+  }
+
+  @ApiOperation({
+    summary: 'store service additional information'
+  })
+  @Post(':id/additional-information')
+  additionalInformation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() serviceAdditionalInformationDto: ServiceAdditionalInformationDto
+  ) {
+    return this.service.storeAdditionalInformation(
+      id,
+      serviceAdditionalInformationDto
     );
   }
 }

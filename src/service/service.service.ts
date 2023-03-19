@@ -26,6 +26,7 @@ import { UserEntity } from 'src/auth/entity/user.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { FileService } from 'src/file/file.service';
+import ServiceAdditionalInformationDto from './dto/service-additional-information.dto';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -896,5 +897,12 @@ export class ServiceService {
     );
     const transformedService = this.repository.transform(service);
     return { ...specialists, service: transformedService };
+  }
+
+  async storeAdditionalInformation(
+    id: string,
+    serviceAdditionalInformationDto: ServiceAdditionalInformationDto
+  ) {
+    this.repository.find(id);
   }
 }

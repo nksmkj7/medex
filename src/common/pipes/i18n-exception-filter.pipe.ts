@@ -121,6 +121,7 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
       let message = [];
 
       const getErrorMessage = async (constraints) => {
+        // console.log(constraints, 'contraints from getErrorMessage function');
         return await Promise.allSettled(
           Object.keys(constraints).map(async (key: string) => {
             let validationKey: string = key,
@@ -194,7 +195,6 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
         }
       }
     }
-    // console.log(validationData, 'validation data is --->');
     // for await (const item of validationData) {
     //   // validationData.forEach((item) => {
     //   if (item?.errors && item.errors.length) {

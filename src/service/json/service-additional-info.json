@@ -1,7 +1,32 @@
 [
   {
-    "icon": "string",
-    "key": "string",
-    "value": "string"
+    "icon": "icon",
+    "key": "sample type",
+    "value": "<h1>blood urine</h1>",
+    "show_in_box": false
+  },
+  {
+    "icon": "icon",
+    "key": "fasting required",
+    "value": "<h1>blood urine</h1>",
+    "show_in_box": false
+  },
+  {
+    "icon": "icon",
+    "key": "tube type",
+    "value": "<h1>blood urine</h1>",
+    "show_in_box": false
+  },
+  {
+    "icon": "Reports in",
+    "key": "Reports in",
+    "value": "15 hrs",
+    "show_in_box": false
+  },
+  {
+    "icon": "reports",
+    "key": "reports",
+    "value": "<h1>blood urine</h1>",
+    "show_in_box": true
   }
 ]
