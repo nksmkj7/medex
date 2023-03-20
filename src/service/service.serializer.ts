@@ -11,6 +11,7 @@ import { CategorySerializer } from 'src/category/serializer/category.serializer'
 
 import { ModelSerializer } from 'src/common/serializer/model.serializer';
 import { SpecialistSerializer } from 'src/specialist/serializer/specialist.serializer';
+import { IServiceAdditionalInfo } from './interfaces/service-additional-info.interface';
 const appConfig = config.get('app');
 
 export class ServiceSerializer extends ModelSerializer {
@@ -90,4 +91,7 @@ export class ServiceSerializer extends ModelSerializer {
     return null;
   })
   image: string[];
+
+  @ApiProperty()
+  additionalInformation: Array<IServiceAdditionalInfo>;
 }

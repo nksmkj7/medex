@@ -27,6 +27,7 @@ import { CategoryEntity } from 'src/category/entity/category.entity';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { FileService } from 'src/file/file.service';
 import ServiceAdditionalInformationDto from './dto/service-additional-information.dto';
+import { IServiceAdditionalInfo } from './interfaces/service-additional-info.interface';
 const appConfig = config.get('app');
 
 interface ICheckIds {
@@ -903,6 +904,13 @@ export class ServiceService {
     id: string,
     serviceAdditionalInformationDto: ServiceAdditionalInformationDto
   ) {
-    this.repository.find(id);
+    const service = await this.repository.findOne({ id });
+    if (!service) {
+      throw new NotFoundException('Service not found.');
+    }
+    service.additionalInformation =
+      serviceAdditionalInformationDto.additionalInformation as Array<IServiceAdditionalInfo>;
+
+    return service.save();
   }
 }

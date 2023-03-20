@@ -170,5 +170,5 @@ export class ServiceEntity extends CustomUuidBaseEntity {
   @Column('jsonb', {
     nullable: true
   })
-  additionalInformation: IServiceAdditionalInfo;
+  additionalInformation: Array<IServiceAdditionalInfo>;
 }
