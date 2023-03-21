@@ -1,9 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateBackofficeLogTable1672125285625
-  implements MigrationInterface
-{
-  tableName = 'back_office_logs';
+export class createCitiesTable1679323577067 implements MigrationInterface {
+  tableName = 'cities';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -18,16 +16,23 @@ export class CreateBackofficeLogTable1672125285625
             default: 'uuid_generate_v4()'
           },
           {
-            name: 'bookingId',
-            type: 'varchar'
+            name: 'slug',
+            type: 'varchar',
+            isNullable: false
           },
           {
-            name: 'backOfficeResponse',
-            type: 'jsonb'
+            name: 'countryId',
+            type: 'int'
+          },
+          {
+            name: 'name',
+            type: 'varchar',
+            isNullable: false
           },
           {
             name: 'status',
-            type: 'boolean'
+            type: 'boolean',
+            default: true
           },
           {
             name: 'createdAt',
@@ -42,10 +47,14 @@ export class CreateBackofficeLogTable1672125285625
         ],
         foreignKeys: [
           {
-            name: 'Booking',
-            columnNames: ['bookingId'],
-            referencedTableName: 'bookings',
+            columnNames: ['countryId'],
+            referencedTableName: 'countries',
             referencedColumnNames: ['id']
+          }
+        ],
+        uniques: [
+          {
+            columnNames: ['countryId', 'slug']
           }
         ]
       })

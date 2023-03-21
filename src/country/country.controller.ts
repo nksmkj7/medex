@@ -1,5 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query
+} from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DeepPartial } from 'typeorm';
 import { CountryService } from './country.service';
 import { CountryDto } from './dto/country.dto';
@@ -17,5 +24,13 @@ export class CountryController {
     CountryDto
   ) {
     return this.countryService.findAll(countryDto);
+  }
+
+  @ApiOperation({
+    summary: "store country's cities"
+  })
+  @Post(':id/cities')
+  cities(@Param('id', ParseIntPipe) id: number) {
+    console.log('country id is ---->', id);
   }
 }

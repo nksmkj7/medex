@@ -5,17 +5,21 @@ export class addAdditionalInformationInServiceTable1679033311128
 {
   tableName = 'services';
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.addColumn(
-      this.tableName,
-      new TableColumn({
-        name: 'additionalInformation',
-        type: 'jsonb',
-        isNullable: true
-      })
-    );
+    if (
+      !(await queryRunner.hasColumn(this.tableName, 'additionalInformation'))
+    ) {
+      await queryRunner.addColumn(
+        this.tableName,
+        new TableColumn({
+          name: 'additionalInformation',
+          type: 'jsonb',
+          isNullable: true
+        })
+      );
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    this.tableName, 'additionalInformation';
+    await queryRunner.dropColumn(this.tableName, 'additionalInformation');
   }
 }
