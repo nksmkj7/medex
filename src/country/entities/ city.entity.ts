@@ -1,6 +1,7 @@
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
 import { slugify } from 'src/common/helper/general.helper';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne } from 'typeorm';
+import { CountryEntity } from './country.entity';
 
 @Entity('cities')
 export class CityEntity extends CustomUuidBaseEntity {
@@ -29,4 +30,7 @@ export class CityEntity extends CustomUuidBaseEntity {
       this.slug = slugify(this.slug);
     }
   }
+
+  @ManyToOne(() => CountryEntity, (country) => country.cities)
+  country: CountryEntity;
 }

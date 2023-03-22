@@ -1,5 +1,6 @@
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { CityEntity } from './ city.entity';
 
 @Entity('countries')
 export class CountryEntity extends CustomBaseEntity {
@@ -26,4 +27,7 @@ export class CountryEntity extends CustomBaseEntity {
 
   @Column('varchar', { length: 200 })
   flag: string;
+
+  @OneToMany(() => CityEntity, (city) => city.country)
+  cities: CityEntity[];
 }

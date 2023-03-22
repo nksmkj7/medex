@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -9,6 +10,7 @@ import {
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { DeepPartial } from 'typeorm';
 import { CountryService } from './country.service';
+import { CityDto } from './dto/city.dto';
 import { CountryDto } from './dto/country.dto';
 import { CountryEntity } from './entities/country.entity';
 
@@ -27,10 +29,21 @@ export class CountryController {
   }
 
   @ApiOperation({
-    summary: "store country's cities"
+    summary: "get country's cities"
+  })
+  @Get(':id/cities')
+  getCities(@Param('id', ParseIntPipe) id: number) {
+    return this.countryService.getCities(id);
+  }
+
+  @ApiOperation({
+    summary: 'store country cities'
   })
   @Post(':id/cities')
-  cities(@Param('id', ParseIntPipe) id: number) {
-    console.log('country id is ---->', id);
+  saveCities(@Body() cityDto: CityDto) {
+    return this.countryService.storeCities(cityDto);
   }
+
+  // @Delete(':id/cities/:cityId')
+  // deleteCity()
 }
