@@ -4,6 +4,7 @@ import { PaginationInfoInterface } from 'src/paginate/pagination-info.interface'
 import { Connection } from 'typeorm';
 import { CityDto } from './dto/city.dto';
 import { CountryDto } from './dto/country.dto';
+import { UpdateCityDto } from './dto/update-city.dto';
 import { CityEntity } from './entities/ city.entity';
 import { CountryEntity } from './entities/country.entity';
 
@@ -91,7 +92,7 @@ export class CountryService {
     });
   }
 
-  async updateCity(cityId: string, updateCityDto) {
+  async updateCity(cityId: string, updateCityDto: UpdateCityDto) {
     const city = await this.connection
       .createEntityManager()
       .findOne(CityEntity, {
