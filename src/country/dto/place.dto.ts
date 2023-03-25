@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   Validate
 } from 'class-validator';
@@ -13,8 +14,9 @@ import { UniqueValidatorPipe } from 'src/common/pipes/unique-validator.pipe';
 import { IsValidForeignKey } from 'src/common/validators/is-valid-foreign-key.validator';
 import { CityEntity } from '../entities/ city.entity';
 import { CountryEntity } from '../entities/country.entity';
+import { PlaceEntity } from '../entities/place.entity';
 
-export class CityDto {
+export class PlaceDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(100, {
@@ -22,7 +24,7 @@ export class CityDto {
   })
   @Validate(
     UniqueValidatorPipe,
-    [CityEntity, [(value: string) => ({ slug: slugify(value) }), 'countryId']],
+    [PlaceEntity, [(value: string) => ({ slug: slugify(value) }), 'cityId']],
     {
       message: 'Name has already been assigned to this user'
     }
@@ -33,6 +35,11 @@ export class CityDto {
   @IsNumber()
   @Validate(IsValidForeignKey, [CountryEntity])
   countryId: number;
+
+  @IsNotEmpty()
+  @IsUUID()
+  @Validate(IsValidForeignKey, [CityEntity])
+  cityId: string;
 
   @ApiProperty({
     default: true,

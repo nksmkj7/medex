@@ -1,8 +1,9 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class createPlacesTable1679482886168 implements MigrationInterface {
-  tableName = 'places';
-
+export class createOperatingCountriesTable1679584155981
+  implements MigrationInterface
+{
+  tableName = 'operating_countries';
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -16,22 +17,8 @@ export class createPlacesTable1679482886168 implements MigrationInterface {
             default: 'uuid_generate_v4()'
           },
           {
-            name: 'slug',
-            type: 'varchar',
-            isNullable: false
-          },
-          {
             name: 'countryId',
             type: 'int'
-          },
-          {
-            name: 'cityId',
-            type: 'varchar'
-          },
-          {
-            name: 'name',
-            type: 'varchar',
-            isNullable: false
           },
           {
             name: 'status',
@@ -54,16 +41,6 @@ export class createPlacesTable1679482886168 implements MigrationInterface {
             columnNames: ['countryId'],
             referencedTableName: 'countries',
             referencedColumnNames: ['id']
-          },
-          {
-            columnNames: ['cityId'],
-            referencedTableName: 'cities',
-            referencedColumnNames: ['id']
-          }
-        ],
-        uniques: [
-          {
-            columnNames: ['countryId', 'slug', 'cityId']
           }
         ]
       })

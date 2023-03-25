@@ -1,6 +1,7 @@
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { CityEntity } from './ city.entity';
+import { PlaceEntity } from './place.entity';
 
 @Entity('countries')
 export class CountryEntity extends CustomBaseEntity {
@@ -30,4 +31,7 @@ export class CountryEntity extends CustomBaseEntity {
 
   @OneToMany(() => CityEntity, (city) => city.country)
   cities: CityEntity[];
+
+  @OneToMany(() => PlaceEntity, (place) => place.country)
+  places: PlaceEntity[];
 }

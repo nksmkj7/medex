@@ -1072,6 +1072,49 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         }
       ]
+    },
+    {
+      name: 'City management',
+      resource: 'city',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'view country cities',
+          route: [
+            {
+              path: '/countries/:id/cities',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'store city',
+          route: [
+            {
+              path: '/countries/:id/cities',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Edit static page content',
+          route: [
+            {
+              path: '/static-page/:id',
+              method: MethodList.PUT
+            }
+          ]
+        },
+        {
+          name: 'Delete static page',
+          route: [
+            {
+              path: '/static-page/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
     }
   ]
 };
