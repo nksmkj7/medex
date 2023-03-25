@@ -20,7 +20,8 @@ export class InfoDto {
   @IsString()
   key: string;
 
-  @IsNotEmpty()
+  @ValidateIf((object, value) => !!value)
+  @IsOptional()
   @IsString()
   value: string;
 
