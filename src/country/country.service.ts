@@ -19,6 +19,7 @@ import { OperatingCountryEntity } from './entities/operating-country.entity';
 import { PlaceEntity } from './entities/place.entity';
 import { difference } from 'lodash';
 import { slugify } from 'src/common/helper/general.helper';
+import { ProviderInformationEntity } from 'src/provider/entity/provider-information.entity';
 
 @Injectable()
 export class CountryService {
@@ -276,5 +277,67 @@ export class CountryService {
       throw new NotFoundException('Place not found.');
     }
     return place;
+  }
+
+  async getActiveCountries() {
+    return this.connection.createEntityManager().find(OperatingCountryEntity, {
+      where: {
+        status: true
+      },
+      relations: ['country']
+    });
+  }
+
+  async getActiveCountryCities(countryId: number) {
+    return this.connection.createEntityManager().find(CityEntity, {
+      where: { countryId, status: true }
+    });
+  }
+
+  async updateCountryList() {
+    const countries = await this.connection
+      .createQueryBuilder()
+      .select('provider_informations."countryId"')
+      .from(ProviderInformationEntity, 'provider_informations')
+      .distinctOn(['provider_informations.countryId'])
+      .getRawMany();
+    const countryIds = countries.map((country) => {
+      return country.countryId;
+    });
+    const values = countryIds.map((id) => ({
+      countryId: id
+    }));
+    return this.connection.manager
+      .createQueryBuilder(OperatingCountryEntity, 'op')
+      .insert()
+      .values(values)
+      .execute();
+  }
+
+  async updateCityList() {
+    const cities = await this.connection
+      .createQueryBuilder()
+      .select(
+        'LOWER(provider_informations."cityId") as name,provider_informations."countryId"'
+      )
+      .from(ProviderInformationEntity, 'provider_informations')
+      .distinctOn(['provider_informations.cityId'])
+      .getRawMany();
+    const values = cities
+      .filter((city) => {
+        if (city.name.length) {
+          return city;
+        }
+      })
+      .map((city) => ({
+        name: city.name,
+        countryId: city.countryId,
+        slug: slugify(city.name)
+      }));
+    return this.connection.manager
+      .createQueryBuilder(CityEntity, 'op')
+      .insert()
+      .values(values)
+      .execute();
   }
 }

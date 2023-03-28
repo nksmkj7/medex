@@ -1,5 +1,6 @@
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
+import { CityEntity } from 'src/country/entities/ city.entity';
 import { CountryEntity } from 'src/country/entities/country.entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
@@ -64,10 +65,12 @@ export class ProviderInformationEntity extends CustomBaseEntity {
   @Column('int')
   countryId: number;
 
-  @Column({
-    nullable: true
-  })
-  city: string;
+  @OneToOne(() => CityEntity)
+  @JoinColumn()
+  city: CityEntity;
+
+  @Column('varchar')
+  cityId: string;
 
   @Column({
     nullable: true

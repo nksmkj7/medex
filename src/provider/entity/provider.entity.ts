@@ -23,7 +23,7 @@ export class ProviderEntity extends UserEntity {
   @Column({
     nullable: true
   })
-  city: string;
+  cityId: string;
 
   @Column({
     nullable: true

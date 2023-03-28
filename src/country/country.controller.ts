@@ -11,7 +11,8 @@ import {
   Query
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { DeepPartial } from 'typeorm';
+import { get } from 'http';
+import { Public } from 'src/common/decorators/public.decorator';
 import { CountryService } from './country.service';
 import { CityDto } from './dto/city.dto';
 import { CountryDto } from './dto/country.dto';
@@ -19,9 +20,6 @@ import { OperatingCountryDto } from './dto/operating-country.dto';
 import { PlaceDto } from './dto/place.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
-import { CountryEntity } from './entities/country.entity';
-import { OperatingCountryEntity } from './entities/operating-country.entity';
-import { PlaceEntity } from './entities/place.entity';
 
 @ApiTags('Country')
 @Controller('countries')
@@ -147,5 +145,34 @@ export class CountryController {
   @Get('/places/:placeId')
   getOperatingPlace(@Param('placeId', ParseUUIDPipe) placeId: string) {
     return this.countryService.getOperatingPlace(placeId);
+  }
+
+  @ApiOperation({
+    summary: 'get active countries'
+  })
+  @Get('active')
+  getCountries() {
+    return this.countryService.getActiveCountries();
+  }
+
+  @ApiOperation({
+    summary: "get country's active cities"
+  })
+  @Get(':countryId/cities/active')
+  getActiveCities(@Param('countryId', ParseIntPipe) countryId: number) {
+    return this.countryService.getActiveCountryCities(countryId);
+  }
+
+  //this need to be deleted in future
+  @Public()
+  @Get('update-country')
+  updateCountryList() {
+    return this.countryService.updateCountryList();
+  }
+
+  @Public()
+  @Get('update-city')
+  updateCityList() {
+    return this.countryService.updateCityList();
   }
 }

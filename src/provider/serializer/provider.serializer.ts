@@ -33,7 +33,7 @@ export class ProviderSerializer extends ModelSerializer {
   countryId: number;
 
   @ApiProperty()
-  city: string;
+  cityId: string;
 
   @ApiProperty()
   state: string;
