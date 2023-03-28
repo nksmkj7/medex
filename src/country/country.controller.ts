@@ -147,6 +147,7 @@ export class CountryController {
     return this.countryService.getOperatingPlace(placeId);
   }
 
+  @Public()
   @ApiOperation({
     summary: 'get active countries'
   })
@@ -155,6 +156,7 @@ export class CountryController {
     return this.countryService.getActiveCountries();
   }
 
+  @Public()
   @ApiOperation({
     summary: "get country's active cities"
   })
