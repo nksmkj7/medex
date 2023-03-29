@@ -159,7 +159,7 @@ export class BaseRepository<
     searchCriteria: string[] = [],
     transformOptions = {},
     searchCondition = {},
-    relationalSearchCriteria: {} = {}
+    relationalSearchCriteria = {}
   ): Promise<Pagination<K>> {
     const whereCondition = [];
     const findOptions: FindManyOptions = {};

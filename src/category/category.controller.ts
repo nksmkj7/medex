@@ -16,7 +16,7 @@ import {
   UseInterceptors,
   Headers
 } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { Pagination } from 'src/paginate';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -33,7 +33,6 @@ import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
 import { Public } from 'src/common/decorators/public.decorator';
-import { ParseCustomerId } from 'src/common/pipes/parse-customer-id';
 
 @ApiTags('Category')
 @Controller('category')
@@ -61,14 +60,26 @@ export class CategoryController {
     });
   }
 
+  @ApiTags('Public')
   @Public()
   @Get()
+  @ApiOperation({
+    summary: 'Get all the categories'
+  })
+  @ApiHeader({
+    name: 'countryId',
+    required: false
+  })
   findAll(
     @Query()
     categoryFilterDto: CategoryFilterDto,
     @Headers() headers: object
   ): Promise<Pagination<CategorySerializer>> {
-    return this.categoryService.findAll(categoryFilterDto, headers['referer']);
+    return this.categoryService.findAll(
+      categoryFilterDto,
+      headers['referer'],
+      headers['countryId']
+    );
   }
 
   @Public()

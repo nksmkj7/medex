@@ -11,6 +11,9 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryEntity } from './entity/category.entity';
 import { existsSync, unlinkSync } from 'fs';
 import * as config from 'config';
+import { ServiceEntity } from 'src/service/entity/service.entity';
+import { UserEntity } from 'src/auth/entity/user.entity';
+import { ProviderInformationEntity } from 'src/provider/entity/provider-information.entity';
 
 const appConfig = config.get('app');
 
@@ -40,8 +43,11 @@ export class CategoryService {
 
   async findAll(
     categoryFilterDto: CategoryFilterDto,
-    referer?: string
+    referer?: string,
+    countryId?: number
   ): Promise<Pagination<CategorySerializer>> {
+    console.log(countryId, 'country id is --->');
+    return;
     const { mode } = categoryFilterDto;
     const searchCriteria = {};
     if (mode && mode !== 'all') {
@@ -54,6 +60,10 @@ export class CategoryService {
     if (referer !== appConfig.frontendUrl + '/') {
       searchCriteria['status'] = true;
     }
+    if (countryId) {
+      this.getCategoryIdsByCountry(countryId);
+    }
+    return;
     return this.repository.paginate(
       categoryFilterDto,
       ['children', 'parent'],
@@ -205,5 +215,19 @@ export class CategoryService {
     return this.repository.transform(childCategory, {
       groups: ['children']
     });
+  }
+
+  async getCategoryIdsByCountry(countryId: number) {
+    const categories = await this.connection
+      .createQueryBuilder()
+      .from(ServiceEntity, 'service')
+      .select('service."categoryId"')
+      .innerJoin(UserEntity, 'usr', 'usr.id = service."userId"')
+      .innerJoin(ProviderInformationEntity, 'ife', 'ife."userId" = usr.id')
+      .where('usr.status=:status', { status: true })
+      .andWhere('ife.countryId=:countryId', { countryId })
+      .distinctOn(['service."categoryId'])
+      .getRawMany();
+    console.log(categories, 'categories are --->');
   }
 }
