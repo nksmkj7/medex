@@ -101,7 +101,8 @@ export class ServiceService {
 
   async findAll(
     serviceFilterDto: ServiceFilterDto,
-    referer?: string
+    referer?: string,
+    countryId?: number
   ): Promise<Pagination<ServiceSerializer>> {
     const searchCriteria = {};
     const { keywords, provider = null } = serviceFilterDto;
@@ -130,13 +131,14 @@ export class ServiceService {
       } else {
         relationalSearchCriteria['user'] = { status: UserStatusEnum.ACTIVE };
       }
+      relationalSearchCriteria['user'] = { providerInformation: { countryId } };
     }
     if (provider) {
       searchCriteria['userId'] = provider;
     }
     return this.repository.paginate(
       serviceFilterDto,
-      ['user', 'category', 'subCategory'],
+      ['user', 'category', 'subCategory', 'user.providerInformation'],
       ['title'],
       {},
       searchCriteria,

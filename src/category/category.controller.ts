@@ -67,7 +67,7 @@ export class CategoryController {
     summary: 'Get all the categories'
   })
   @ApiHeader({
-    name: 'countryId',
+    name: 'country_id',
     required: false
   })
   findAll(
@@ -78,7 +78,7 @@ export class CategoryController {
     return this.categoryService.findAll(
       categoryFilterDto,
       headers['referer'],
-      headers['countryId']
+      headers['country_id']
     );
   }
 

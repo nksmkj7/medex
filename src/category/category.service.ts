@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from 'src/exception/not-found.exception';
 import { Pagination } from 'src/paginate';
-import { Connection, IsNull, Not } from 'typeorm';
+import { Connection, In, IsNull, Not } from 'typeorm';
 import { CategoryRepository } from './category.repository';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategorySerializer } from './serializer/category.serializer';
@@ -14,6 +14,7 @@ import * as config from 'config';
 import { ServiceEntity } from 'src/service/entity/service.entity';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { ProviderInformationEntity } from 'src/provider/entity/provider-information.entity';
+import { UserStatusEnum } from 'src/auth/user-status.enum';
 
 const appConfig = config.get('app');
 
@@ -46,8 +47,6 @@ export class CategoryService {
     referer?: string,
     countryId?: number
   ): Promise<Pagination<CategorySerializer>> {
-    console.log(countryId, 'country id is --->');
-    return;
     const { mode } = categoryFilterDto;
     const searchCriteria = {};
     if (mode && mode !== 'all') {
@@ -61,9 +60,8 @@ export class CategoryService {
       searchCriteria['status'] = true;
     }
     if (countryId) {
-      this.getCategoryIdsByCountry(countryId);
+      searchCriteria['id'] = In(await this.getCategoryIdsByCountry(countryId));
     }
-    return;
     return this.repository.paginate(
       categoryFilterDto,
       ['children', 'parent'],
@@ -218,16 +216,21 @@ export class CategoryService {
   }
 
   async getCategoryIdsByCountry(countryId: number) {
-    const categories = await this.connection
-      .createQueryBuilder()
-      .from(ServiceEntity, 'service')
-      .select('service."categoryId"')
-      .innerJoin(UserEntity, 'usr', 'usr.id = service."userId"')
-      .innerJoin(ProviderInformationEntity, 'ife', 'ife."userId" = usr.id')
-      .where('usr.status=:status', { status: true })
-      .andWhere('ife.countryId=:countryId', { countryId })
-      .distinctOn(['service."categoryId'])
-      .getRawMany();
-    console.log(categories, 'categories are --->');
+    try {
+      const categories = await this.connection
+        .createQueryBuilder()
+        .from(ServiceEntity, 'service')
+
+        .innerJoin(UserEntity, 'usr', 'usr.id = service."userId"')
+        .innerJoin(ProviderInformationEntity, 'ife', 'ife."userId" = usr.id')
+        .where('usr.status=:status', { status: UserStatusEnum.ACTIVE })
+        .andWhere('ife.countryId=:countryId', { countryId })
+        .distinctOn(['service."categoryId"'])
+        .select('service."categoryId"')
+        .getRawMany();
+      return categories.map((category) => category.categoryId);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

@@ -14,7 +14,7 @@ import {
   ParseIntPipe
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express/multer';
-import { ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/jwt-auth.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
@@ -64,13 +64,24 @@ export class ServiceController {
 
   @Public()
   @ApiTags('Public')
+  @ApiHeader({
+    name: 'country_id',
+    required: false
+  })
+  @ApiOperation({
+    summary: 'Get all services'
+  })
   @Get()
   findAll(
     @Query()
     serviceFilterDto: ServiceFilterDto,
     @Headers() headers: object
   ): Promise<Pagination<ServiceSerializer>> {
-    return this.service.findAll(serviceFilterDto, headers['referer']);
+    return this.service.findAll(
+      serviceFilterDto,
+      headers['referer'],
+      headers['country_id']
+    );
   }
 
   @UseInterceptors(new InjectRequestInterceptor(['params']))
