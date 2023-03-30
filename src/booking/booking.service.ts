@@ -107,20 +107,22 @@ export class BookingService {
     const paymentService = this.getPaymentService(bookingDto.paymentGateway);
     let paymentResponse = {};
     try {
-      paymentService.bookingInitiationLog =
+      const bookingInitiationLog = (paymentService.bookingInitiationLog =
         await this.storeBookingInitiationLog(
           schedule,
           customer,
           scheduleTime,
           bookingDto,
           service
-        );
+        ));
       paymentResponse = await paymentService.pay({
         bookingDto,
         customer,
         service,
         scheduleTime
       });
+      bookingInitiationLog.initialResponse = paymentResponse;
+      await bookingInitiationLog.save();
     } catch (error) {
       throw new PaymentGatewayException(error.message);
     }
