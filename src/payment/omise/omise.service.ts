@@ -105,11 +105,15 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       transactionStatus,
       'transaction status from omise card payment --->'
     );
-    this.bookingQueue.add('booking', {
-      bookingInitiation,
-      paymentResponse: response,
-      transactionStatus
-    });
+    this.bookingQueue.add(
+      'booking',
+      {
+        bookingInitiation,
+        paymentResponse: response,
+        transactionStatus
+      },
+      { attempts: 3, removeOnComplete: true, removeOnFail: true }
+    );
     return response;
   }
 
@@ -182,11 +186,15 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
           charge['status'] === event.data.status
             ? this.transactionStatus(event.data.status)
             : TransactionStatusEnum.FAILED;
-        this.bookingQueue.add('booking', {
-          bookingInitiation,
-          paymentResponse: event,
-          transactionStatus
-        });
+        this.bookingQueue.add(
+          'booking',
+          {
+            bookingInitiation,
+            paymentResponse: event,
+            transactionStatus
+          },
+          { attempts: 3, removeOnComplete: true, removeOnFail: true }
+        );
         break;
       default:
         console.log(`Unhandled event type ${event.key}.`);
