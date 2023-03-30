@@ -101,6 +101,10 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       customer: omiseCustomer.id
     });
     const transactionStatus = this.transactionStatus(response['status']);
+    console.log(
+      transactionStatus,
+      'transaction status from omise card payment --->'
+    );
     this.bookingQueue.add('booking', {
       bookingInitiation,
       paymentResponse: response,
