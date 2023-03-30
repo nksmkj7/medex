@@ -454,7 +454,8 @@ export class ServiceService {
   }
 
   async getProviderService(
-    categoryProviderServiceDto: CategoryProviderServiceDto
+    categoryProviderServiceDto: CategoryProviderServiceDto,
+    countryId?: number
   ) {
     const {
       categoryId,
@@ -465,13 +466,13 @@ export class ServiceService {
     } = categoryProviderServiceDto;
     const query = this.connection
       .createQueryBuilder(ServiceEntity, 'service')
-      .leftJoin(UserEntity, 'usr', 'usr.id = service."userId"')
+      .innerJoin(UserEntity, 'usr', 'usr.id = service."userId"')
       .leftJoin(
         CategoryEntity,
         'category',
         'category.id = service."categoryId"'
       )
-      .leftJoin(
+      .innerJoin(
         'provider_informations',
         'provider',
         'provider.userId = service.userId'
@@ -493,6 +494,9 @@ export class ServiceService {
       query.andWhere('service.subCategoryId = :subCategoryId', {
         subCategoryId
       });
+    }
+    if (countryId) {
+      query.andWhere('provider.countryId=:countryId', { countryId });
     }
     const offset = (page - 1) * limit;
     const totalCategoryAssociatedProvidersCount = await query
@@ -689,7 +693,8 @@ export class ServiceService {
   }
 
   async searchProviderService(
-    searchCategoryProvideServiceDto: SearchCategoryProvideServiceDto
+    searchCategoryProvideServiceDto: SearchCategoryProvideServiceDto,
+    countryId?: number
   ) {
     const {
       categoryId,
@@ -699,13 +704,13 @@ export class ServiceService {
     } = searchCategoryProvideServiceDto;
     const query = this.connection
       .createQueryBuilder(ServiceEntity, 'service')
-      .leftJoin(UserEntity, 'usr', 'usr.id = service."userId"')
+      .innerJoin(UserEntity, 'usr', 'usr.id = service."userId"')
       .leftJoin(
         CategoryEntity,
         'category',
         'category.id = service."categoryId"'
       )
-      .leftJoin(
+      .innerJoin(
         'provider_informations',
         'provider',
         'provider.userId = service.userId'
@@ -720,6 +725,10 @@ export class ServiceService {
       query.andWhere(`service.categoryId=:categoryId`, {
         categoryId
       });
+    }
+
+    if (countryId) {
+      query.andWhere('provider."countryId"=:countryId', { countryId });
     }
     if (keywords) {
       query.andWhere(

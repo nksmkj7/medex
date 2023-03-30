@@ -305,8 +305,8 @@ export class ProviderService {
     return user.schedule;
   }
 
-  async activeProviders() {
-    const providers = await this.userRepository
+  async activeProviders(countryId?: number) {
+    const query = this.userRepository
       .createQueryBuilder('user')
       .select([
         'user.id',
@@ -318,8 +318,13 @@ export class ProviderService {
       .innerJoin('user.providerInformation', 'providerInformation')
       .innerJoin('user.role', 'role', 'role.name=:roleName', {
         roleName: 'provider'
-      })
-      .getMany();
+      });
+    if (countryId) {
+      query.andWhere('"providerInformation"."countryId"=:countryId', {
+        countryId
+      });
+    }
+    const providers = await query.getMany();
     return this.userRepository.transformMany(providers, {
       groups: [
         ...adminUserGroupsForSerializing,

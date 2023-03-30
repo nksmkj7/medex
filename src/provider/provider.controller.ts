@@ -18,12 +18,13 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiConsumes,
+  ApiHeader,
+  ApiHeaders,
   ApiOperation,
   ApiQuery,
   ApiTags,
   OmitType
 } from '@nestjs/swagger';
-import { CategoryFilterDto } from 'src/category/dto/category-filter.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
@@ -72,9 +73,17 @@ export class ProviderController {
   }
 
   @Public()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: 'Get active providers'
+  })
   @Get('active')
-  getActiveProviders() {
-    return this.providerService.activeProviders();
+  @ApiHeader({
+    name: 'country_id',
+    required: false
+  })
+  getActiveProviders(@Headers('country_id') countryId?: number) {
+    return this.providerService.activeProviders(countryId);
   }
 
   @Get(':id')
@@ -222,6 +231,9 @@ export class ProviderController {
 
   @Public()
   @ApiTags('Public')
+  @ApiOperation({
+    summary: "Get provider's active banners"
+  })
   @Get(':providerId/banners-list')
   activeProviderBanners(@Param('providerId', ParseIntPipe) providerId: number) {
     return this.providerService.providerBanners(providerId, { status: true });

@@ -120,11 +120,19 @@ export class ServiceController {
 
   @ApiTags('Public')
   @Public()
+  @ApiHeader({
+    name: 'country_id',
+    required: false
+  })
   @Get('search-category')
   searchProviderService(
-    @Query() searchCategoryProvideServiceDto: SearchCategoryProvideServiceDto
+    @Query() searchCategoryProvideServiceDto: SearchCategoryProvideServiceDto,
+    @Headers('country_id') countryId?: number
   ) {
-    return this.service.searchProviderService(searchCategoryProvideServiceDto);
+    return this.service.searchProviderService(
+      searchCategoryProvideServiceDto,
+      countryId
+    );
   }
 
   @Public()
