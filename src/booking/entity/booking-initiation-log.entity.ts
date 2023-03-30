@@ -1,5 +1,5 @@
 import { CustomUuidBaseEntity } from 'src/common/entity/custom-uuid-base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ObjectLiteral } from 'typeorm';
 import {
   BookingData,
   TransactionData
@@ -20,4 +20,9 @@ export class BookingInitiationLogEntity extends CustomUuidBaseEntity {
     default: false
   })
   bookingCreated: boolean;
+
+  @Column('jsonb', {
+    nullable: true
+  })
+  initialResponse: ObjectLiteral;
 }
