@@ -94,11 +94,15 @@ export class StripeService extends PaymentAbstract<
           }
         );
         const transactionStatus = this.transactionStatus(paymentIntent.status);
-        this.bookingQueue.add('booking', {
-          bookingInitiation,
-          paymentResponse: event,
-          transactionStatus
-        });
+        this.bookingQueue.add(
+          'booking',
+          {
+            bookingInitiation,
+            paymentResponse: event,
+            transactionStatus
+          },
+          { attempts: 3, removeOnComplete: true, removeOnFail: true }
+        );
         break;
       default:
         console.log(`Unhandled event type ${event.type}.`);
