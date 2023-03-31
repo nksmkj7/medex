@@ -65,14 +65,14 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     bookingInitiation: BookingInitiationLogEntity
   ) {
     this.checkPaymentValidity(bookingDto, service);
-    if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
-      return this.verifyOmiseCardPayment(
-        customer,
-        bookingDto,
-        service,
-        bookingInitiation
-      );
-    }
+    // if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
+    //   return this.verifyOmiseCardPayment(
+    //     customer,
+    //     bookingDto,
+    //     service,
+    //     bookingInitiation
+    //   );
+    // }
     return this.verifyOtherPayment(
       customer,
       bookingDto,
@@ -124,6 +124,10 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     bookingInitiation: BookingInitiationLogEntity
   ) {
     const { currency, token } = bookingDto;
+    const omiseCustomer = await this.omise.customers.create({
+      email: customer.email,
+      card: bookingDto.token
+    });
     return this.omise.charges.create({
       amount:
         this.calculateServiceTotalAmount(
@@ -135,7 +139,8 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       return_uri: `${appConfig.customerEndUrl}/profile/bookings`,
       metadata: {
         bookingInitiationId: bookingInitiation.id
-      }
+      },
+      customer: omiseCustomer.id
     });
   }
 
