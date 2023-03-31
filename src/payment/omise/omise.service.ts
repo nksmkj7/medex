@@ -65,14 +65,14 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     bookingInitiation: BookingInitiationLogEntity
   ) {
     this.checkPaymentValidity(bookingDto, service);
-    // if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
-    //   return this.verifyOmiseCardPayment(
-    //     customer,
-    //     bookingDto,
-    //     service,
-    //     bookingInitiation
-    //   );
-    // }
+    if (bookingDto.paymentMethod === PaymentMethodEnum.CARD) {
+      return this.verifyOmiseCardPayment(
+        customer,
+        bookingDto,
+        service,
+        bookingInitiation
+      );
+    }
     return this.verifyOtherPayment(
       customer,
       bookingDto,
