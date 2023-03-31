@@ -124,6 +124,7 @@ export class BookingService {
       bookingInitiationLog.initialResponse = paymentResponse;
       await bookingInitiationLog.save();
     } catch (error) {
+      console.log(error, '------>');
       throw new PaymentGatewayException(error.message);
     }
     return paymentResponse;
