@@ -21,7 +21,7 @@ async function bootstrap() {
   const apiConfig = config.get('app');
   if (process.env.NODE_ENV === 'development') {
     app.enableCors({
-      origin: true,
+      origin: '*',
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true
     });
