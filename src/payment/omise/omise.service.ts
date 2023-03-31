@@ -129,11 +129,14 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       card: bookingDto.token
     });
     return this.omise.charges.create({
-      amount:
-        this.calculateServiceTotalAmount(
-          service,
-          bookingDto?.numberOfPeople ?? 1
-        ) * 100,
+      amount: Number(
+        (
+          this.calculateServiceTotalAmount(
+            service,
+            bookingDto?.numberOfPeople ?? 1
+          ) * 100
+        ).toFixed(2)
+      ),
       source: token,
       currency,
       return_uri: `${appConfig.customerEndUrl}/profile/bookings`,
