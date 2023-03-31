@@ -42,7 +42,7 @@ async function bootstrap() {
   } else {
     app.enableCors({
       // origin: process.env.ORIGIN || serverConfig.origin,
-      origin: true,
+      origin: '*',
       credentials: true
     });
     logger.log(
