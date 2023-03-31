@@ -124,10 +124,10 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     bookingInitiation: BookingInitiationLogEntity
   ) {
     const { currency, token } = bookingDto;
-    const omiseCustomer = await this.omise.customers.create({
-      email: customer.email,
-      card: bookingDto.token
-    });
+    // const omiseCustomer = await this.omise.customers.create({
+    //   email: customer.email,
+    //   card: bookingDto.token
+    // });
     return this.omise.charges.create({
       amount: Number(
         (
@@ -142,8 +142,8 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       return_uri: `${appConfig.customerEndUrl}/profile/bookings`,
       metadata: {
         bookingInitiationId: bookingInitiation.id
-      },
-      customer: omiseCustomer.id
+      }
+      // customer: omiseCustomer.id
     });
   }
 
