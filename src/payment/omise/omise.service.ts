@@ -101,7 +101,8 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
         ).toFixed(2)
       ),
       currency: bookingDto.currency,
-      customer: omiseCustomer.id
+      customer: omiseCustomer.id,
+      return_uri: `${appConfig.customerEndUrl}/profile/bookings`
     });
     const transactionStatus = this.transactionStatus(response['status']);
     this.bookingQueue.add(
