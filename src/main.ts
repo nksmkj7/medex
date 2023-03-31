@@ -41,7 +41,8 @@ async function bootstrap() {
     SwaggerModule.setup('api-docs', app, document, customOptions);
   } else {
     app.enableCors({
-      origin: process.env.ORIGIN || serverConfig.origin,
+      // origin: process.env.ORIGIN || serverConfig.origin,
+      origin: true,
       credentials: true
     });
     logger.log(
