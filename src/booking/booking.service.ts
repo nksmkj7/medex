@@ -197,15 +197,15 @@ export class BookingService {
   //   });
   // }
 
-  calculateServiceTotalAmount(service: ServiceEntity, numberOfPeople = 1) {
+  calculateServiceTotalAmount(service: ServiceEntity, numberOfPerson = 1) {
     const price = +service.price;
     const serviceCharge = +service.serviceCharge;
     const discount = +service.discount;
     const priceAfterDiscount = price - (discount / 100) * price;
-    return (
+    const totalAmount =
       (priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount) *
-      numberOfPeople
-    );
+      numberOfPerson;
+    return Number(totalAmount.toFixed(2));
   }
 
   // async getBookingTransaction(

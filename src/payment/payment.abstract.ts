@@ -24,7 +24,7 @@ export abstract class PaymentAbstract<T> implements IPayment<T> {
     const totalAmount =
       (priceAfterDiscount + (serviceCharge / 100) * priceAfterDiscount) *
       numberOfPerson;
-    return Number.parseFloat(totalAmount.toFixed(2));
+    return Number(totalAmount.toFixed(2));
   }
 
   abstract transactionStatus(status: string): string;
