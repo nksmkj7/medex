@@ -43,11 +43,14 @@ export class StripeService extends PaymentAbstract<
     const bookingInitiation = this.bookingInitiation;
     const customer = await this.customer(this.bookingInitiation.bookingData);
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount:
-        this.calculateServiceTotalAmount(
-          service,
-          bookingDto?.numberOfPeople ?? 1
-        ) * 100,
+      amount: Number(
+        (
+          this.calculateServiceTotalAmount(
+            service,
+            bookingDto?.numberOfPeople ?? 1
+          ) * 100
+        ).toFixed(2)
+      ),
       currency: bookingDto.currency,
       automatic_payment_methods: {
         enabled: true
