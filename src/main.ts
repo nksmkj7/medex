@@ -25,7 +25,7 @@ async function bootstrap() {
     //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
     //   // credentials: true
     // });
-    app.enableCors();
+    // app.enableCors();
     const swaggerConfig = new DocumentBuilder()
       .setTitle(apiConfig.name)
       .setDescription(apiConfig.description)
@@ -46,7 +46,6 @@ async function bootstrap() {
     //   origin: '*'
     //   // credentials: true
     // });
-    app.enableCors();
     logger.log(
       `Accepting request only from: ${
         process.env.ORIGIN || serverConfig.origin
