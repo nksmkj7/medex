@@ -20,11 +20,12 @@ async function bootstrap() {
   });
   const apiConfig = config.get('app');
   if (process.env.NODE_ENV === 'development') {
-    app.enableCors({
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
-      // credentials: true
-    });
+    // app.enableCors({
+    //   origin: '*',
+    //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
+    //   // credentials: true
+    // });
+    app.enableCors();
     const swaggerConfig = new DocumentBuilder()
       .setTitle(apiConfig.name)
       .setDescription(apiConfig.description)
@@ -40,11 +41,12 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api-docs', app, document, customOptions);
   } else {
-    app.enableCors({
-      // origin: process.env.ORIGIN || serverConfig.origin,
-      origin: '*'
-      // credentials: true
-    });
+    // app.enableCors({
+    //   // origin: process.env.ORIGIN || serverConfig.origin,
+    //   origin: '*'
+    //   // credentials: true
+    // });
+    app.enableCors();
     logger.log(
       `Accepting request only from: ${
         process.env.ORIGIN || serverConfig.origin
