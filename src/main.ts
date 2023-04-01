@@ -22,8 +22,8 @@ async function bootstrap() {
   if (process.env.NODE_ENV === 'development') {
     app.enableCors({
       origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      credentials: true
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
+      // credentials: true
     });
     const swaggerConfig = new DocumentBuilder()
       .setTitle(apiConfig.name)
@@ -42,8 +42,8 @@ async function bootstrap() {
   } else {
     app.enableCors({
       // origin: process.env.ORIGIN || serverConfig.origin,
-      origin: '*',
-      credentials: true
+      origin: '*'
+      // credentials: true
     });
     logger.log(
       `Accepting request only from: ${
