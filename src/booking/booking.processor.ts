@@ -52,6 +52,7 @@ export class BookingProcessor {
         transactionStatus
       );
     } catch (error) {
+      console.log(error, 'error from bookign processor');
       this.logger.error(error.stack);
       throw error;
     }
