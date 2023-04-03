@@ -42,12 +42,37 @@ export class StripeService extends PaymentAbstract<
     const { bookingDto, service } = paymentObj;
     const bookingInitiation = this.bookingInitiation;
     const customer = await this.customer(this.bookingInitiation.bookingData);
+    console.log(
+      {
+        amount: Number(
+          (
+            this.calculateServiceTotalAmount(
+              service,
+              bookingDto?.numberOfPeople ?? 1
+            ) * 100
+          ).toFixed(2)
+        ),
+        currency: bookingDto.currency,
+        automatic_payment_methods: {
+          enabled: true
+        },
+        metadata: {
+          bookingInitiationId: bookingInitiation.id
+        },
+        customer: customer.id,
+        description: service.shortDescription
+      },
+      '------>'
+    );
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount:
-        this.calculateServiceTotalAmount(
-          service,
-          bookingDto?.numberOfPeople ?? 1
-        ) * 100,
+      amount: Number(
+        (
+          this.calculateServiceTotalAmount(
+            service,
+            bookingDto?.numberOfPeople ?? 1
+          ) * 100
+        ).toFixed(2)
+      ),
       currency: bookingDto.currency,
       automatic_payment_methods: {
         enabled: true
@@ -94,11 +119,15 @@ export class StripeService extends PaymentAbstract<
           }
         );
         const transactionStatus = this.transactionStatus(paymentIntent.status);
-        this.bookingQueue.add('booking', {
-          bookingInitiation,
-          paymentResponse: event,
-          transactionStatus
-        });
+        this.bookingQueue.add(
+          'booking',
+          {
+            bookingInitiation,
+            paymentResponse: event,
+            transactionStatus
+          },
+          { attempts: 3, removeOnComplete: true, removeOnFail: true }
+        );
         break;
       default:
         console.log(`Unhandled event type ${event.type}.`);

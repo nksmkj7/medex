@@ -92,20 +92,28 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
       card: bookingDto.token
     });
     const response = await this.omise.charges.create({
-      amount:
-        this.calculateServiceTotalAmount(
-          service,
-          bookingDto?.numberOfPeople ?? 1
-        ) * 100,
+      amount: Number(
+        (
+          this.calculateServiceTotalAmount(
+            service,
+            bookingDto?.numberOfPeople ?? 1
+          ) * 100
+        ).toFixed(2)
+      ),
       currency: bookingDto.currency,
-      customer: omiseCustomer.id
+      customer: omiseCustomer.id,
+      return_uri: `${appConfig.customerEndUrl}/profile/bookings`
     });
     const transactionStatus = this.transactionStatus(response['status']);
-    this.bookingQueue.add('booking', {
-      bookingInitiation,
-      paymentResponse: response,
-      transactionStatus
-    });
+    this.bookingQueue.add(
+      'booking',
+      {
+        bookingInitiation,
+        paymentResponse: response,
+        transactionStatus
+      },
+      { attempts: 3, removeOnComplete: true, removeOnFail: true }
+    );
     return response;
   }
 
@@ -116,18 +124,26 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
     bookingInitiation: BookingInitiationLogEntity
   ) {
     const { currency, token } = bookingDto;
+    // const omiseCustomer = await this.omise.customers.create({
+    //   email: customer.email,
+    //   card: bookingDto.token
+    // });
     return this.omise.charges.create({
-      amount:
-        this.calculateServiceTotalAmount(
-          service,
-          bookingDto?.numberOfPeople ?? 1
-        ) * 100,
+      amount: Number(
+        (
+          this.calculateServiceTotalAmount(
+            service,
+            bookingDto?.numberOfPeople ?? 1
+          ) * 100
+        ).toFixed(2)
+      ),
       source: token,
       currency,
       return_uri: `${appConfig.customerEndUrl}/profile/bookings`,
       metadata: {
         bookingInitiationId: bookingInitiation.id
       }
+      // customer: omiseCustomer.id
     });
   }
 
@@ -178,11 +194,15 @@ export class OmiseService extends PaymentAbstract<Omise.Charges.ICharge> {
           charge['status'] === event.data.status
             ? this.transactionStatus(event.data.status)
             : TransactionStatusEnum.FAILED;
-        this.bookingQueue.add('booking', {
-          bookingInitiation,
-          paymentResponse: event,
-          transactionStatus
-        });
+        this.bookingQueue.add(
+          'booking',
+          {
+            bookingInitiation,
+            paymentResponse: event,
+            transactionStatus
+          },
+          { attempts: 3, removeOnComplete: true, removeOnFail: true }
+        );
         break;
       default:
         console.log(`Unhandled event type ${event.key}.`);
