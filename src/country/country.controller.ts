@@ -151,6 +151,7 @@ export class CountryController {
   @ApiOperation({
     summary: 'get active countries'
   })
+  @ApiTags('Public')
   @Get('active')
   getCountries() {
     return this.countryService.getActiveCountries();
@@ -160,6 +161,7 @@ export class CountryController {
   @ApiOperation({
     summary: "get country's active cities"
   })
+  @ApiTags('Public')
   @Get(':countryId/cities/active')
   getActiveCities(@Param('countryId', ParseIntPipe) countryId: number) {
     return this.countryService.getActiveCountryCities(countryId);
@@ -167,11 +169,13 @@ export class CountryController {
 
   //this need to be deleted in future
   @Public()
+  @ApiTags('Public')
   @Get('update-country')
   updateCountryList() {
     return this.countryService.updateCountryList();
   }
 
+  @ApiTags('Public')
   @Public()
   @Get('update-city')
   updateCityList() {
