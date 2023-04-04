@@ -33,14 +33,19 @@ export class createHomeJsonTable1680542077864 implements MigrationInterface {
             isNullable: true
           },
           {
-            name: 'startTime',
+            name: 'startDate',
             type: 'date',
             isNullable: true
           },
           {
-            name: 'expiryTime',
+            name: 'expiryDate',
             type: 'date',
             isNullable: true
+          },
+          {
+            name: 'countryId',
+            type: 'int',
+            unsigned: true
           },
           {
             name: 'moduleType',
@@ -60,6 +65,31 @@ export class createHomeJsonTable1680542077864 implements MigrationInterface {
             name: 'updatedAt',
             type: 'timestamp',
             default: 'now()'
+          }
+        ],
+        foreignKeys: [
+          {
+            referencedColumnNames: ['id'],
+            referencedTableName: 'countries',
+            columnNames: ['countryId']
+          }
+        ],
+        indices: [
+          {
+            name: 'IDX_' + this.tableName + '_slug',
+            columnNames: ['slug']
+          },
+          {
+            name: 'IDX_' + this.tableName + '_countryId',
+            columnNames: ['countryId']
+          },
+          {
+            name: 'IDX_' + this.tableName + '_startDate',
+            columnNames: ['startDate']
+          },
+          {
+            name: 'IDX_' + this.tableName + '_expiryDate',
+            columnNames: ['expiryDate']
           }
         ]
       })

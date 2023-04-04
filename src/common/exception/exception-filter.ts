@@ -12,6 +12,7 @@ export class CommonExceptionFilter implements ExceptionFilter {
   constructor(private readonly i18n: I18nService) {}
 
   async catch(exception: HttpException, host: ArgumentsHost) {
+    console.log('hello world --->');
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const statusCode = exception.getStatus();

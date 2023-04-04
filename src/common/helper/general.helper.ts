@@ -1,5 +1,6 @@
 import { ObjectLiteral, QueryRunner } from 'typeorm';
 import { difference } from 'lodash';
+import { PaginationInfoInterface } from 'src/paginate/pagination-info.interface';
 
 export const slugify = (...args: (string | number)[]): string => {
   const value = args.join(' ');
@@ -100,4 +101,21 @@ export async function dropUniqueConstraints(
       await queryRunner.dropUniqueConstraint(tableName, uniqueConstraint.name);
     }
   }
+}
+
+export function getPaginationInfo(options: {
+  limit?: number;
+  page?: number;
+}): PaginationInfoInterface {
+  const page =
+    typeof options.page !== 'undefined' && options.page > 0 ? options.page : 1;
+  const limit =
+    typeof options.limit !== 'undefined' && options.limit > 0
+      ? options.limit
+      : 10;
+  return {
+    skip: (page - 1) * limit,
+    limit,
+    page
+  };
 }
