@@ -1,18 +1,22 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Put,
   Query,
-  UseGuards
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
 import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { InjectRequestInterceptor } from 'src/common/interceptors/inject-request.interceptor';
 import { HomeJsonSearchDto } from './dto/home-json-search.dto';
 import { HomeJsonDto } from './dto/home-json.dto';
 import { UpdateHomeJsonDto } from './dto/update-home-json.dto';
@@ -50,6 +54,7 @@ export class HomeJsonController {
     return this.service.findById(id);
   }
 
+  @UseInterceptors(new InjectRequestInterceptor(['params']))
   @ApiOperation({
     summary: 'Update home json data by id'
   })
@@ -61,10 +66,21 @@ export class HomeJsonController {
     return this.service.update(id, updateHomeJsonDto);
   }
 
-  // @Public()
-  // @Get()
-  // @ApiTags('Public')
-  // getHomeJson() {
-  //   return this.service.getHomeJson();
-  // }
+  @Public()
+  @Get()
+  @ApiTags('Public')
+  @ApiOperation({
+    summary: 'get home json api for specific country'
+  })
+  getHomeJson(@Query('countryId', ParseIntPipe) countryId: number) {
+    return this.service.getHomeJson(countryId);
+  }
+
+  @ApiOperation({
+    summary: 'Delete home json section by id'
+  })
+  @Delete('/:id')
+  removeHomeJsonSection(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.delete(id);
+  }
 }
