@@ -13,7 +13,6 @@ import { BookingProcessor } from './booking.processor';
 import { BackOfficeProcessor } from './backoffice.processor';
 
 const queueConfig = config.get('queue');
-console.log(queueConfig, 'queueConfig is --->');
 
 @Module({
   controllers: [BookingController],

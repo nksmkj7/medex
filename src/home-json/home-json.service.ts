@@ -8,11 +8,12 @@ import dayjs = require('dayjs');
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { getPaginationInfo } from 'src/common/helper/general.helper';
 import { CountryDto } from 'src/country/dto/country.dto';
-import { Brackets, Connection } from 'typeorm';
+import { Brackets, Connection, ObjectLiteral } from 'typeorm';
 import { HomeJsonSearchDto } from './dto/home-json-search.dto';
 import { HomeJsonDto } from './dto/home-json.dto';
 import { UpdateHomeJsonDto } from './dto/update-home-json.dto';
 import { HomeJsonEntity } from './entity/home-json.entity';
+import { HomeJsonTypeEnum } from './enum/home-json-type.enun';
 
 @Injectable()
 export class HomeJsonService {
@@ -48,11 +49,13 @@ export class HomeJsonService {
           );
         })
       )
+      .orderBy('position')
       .getRawMany();
+    console.log(homeJsonData, '------->');
     // if (existsSync(this.jsonFilePath)) {
     //   return readFileSync(this.jsonFilePath, { encoding: 'utf-8' });
     // }
-    return {};
+    return homeJsonData;
   }
 
   async findAll(homeJsonSearchDto: HomeJsonSearchDto) {
@@ -110,5 +113,24 @@ export class HomeJsonService {
   async delete(homeJsonId: string) {
     const homeJson = await this.findById(homeJsonId);
     return homeJson.remove();
+  }
+
+  generateHomeJson(homeJsonDbData: any[]) {
+    homeJsonDbData.map((homeJsonData) => {
+      const data = [];
+    });
+    console.log(this.generateHomeJson, '------>');
+  }
+
+  getHomeJsonData(homeJsonData: ObjectLiteral) {
+    switch (homeJsonData.moduleType) {
+      case HomeJsonTypeEnum.CATEGORIES: {
+        return this.getCategoryHomeJsonData();
+      }
+    }
+  }
+
+  getCategoryHomeJsonData() {
+    return [];
   }
 }
