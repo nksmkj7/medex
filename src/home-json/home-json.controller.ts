@@ -28,6 +28,7 @@ import { HomeJsonService } from './home-json.service';
 export class HomeJsonController {
   constructor(private readonly service: HomeJsonService) {}
 
+  @Public()
   @ApiOperation({
     summary: 'add home json section'
   })

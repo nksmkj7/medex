@@ -6,6 +6,7 @@ import {
 import { InjectConnection } from '@nestjs/typeorm';
 import dayjs = require('dayjs');
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { CategoryEntity } from 'src/category/entity/category.entity';
 import { getPaginationInfo } from 'src/common/helper/general.helper';
 import { CountryDto } from 'src/country/dto/country.dto';
 import { Brackets, Connection, ObjectLiteral } from 'typeorm';
@@ -14,6 +15,8 @@ import { HomeJsonDto } from './dto/home-json.dto';
 import { UpdateHomeJsonDto } from './dto/update-home-json.dto';
 import { HomeJsonEntity } from './entity/home-json.entity';
 import { HomeJsonTypeEnum } from './enum/home-json-type.enun';
+import * as config from 'config';
+const appConfig = config.get('app');
 
 @Injectable()
 export class HomeJsonService {
@@ -51,11 +54,7 @@ export class HomeJsonService {
       )
       .orderBy('position')
       .getRawMany();
-    console.log(homeJsonData, '------->');
-    // if (existsSync(this.jsonFilePath)) {
-    //   return readFileSync(this.jsonFilePath, { encoding: 'utf-8' });
-    // }
-    return homeJsonData;
+    return await this.generateHomeJson(homeJsonData);
   }
 
   async findAll(homeJsonSearchDto: HomeJsonSearchDto) {
@@ -115,22 +114,51 @@ export class HomeJsonService {
     return homeJson.remove();
   }
 
-  generateHomeJson(homeJsonDbData: any[]) {
+  async generateHomeJson(homeJsonDbData: any[]) {
+    const promises = [];
     homeJsonDbData.map((homeJsonData) => {
-      const data = [];
+      promises.push(this.getHomeJsonData(homeJsonData));
     });
-    console.log(this.generateHomeJson, '------>');
+    const modules = await Promise.allSettled(promises);
+    return this.onlyGetFulfilledData(modules);
   }
 
   getHomeJsonData(homeJsonData: ObjectLiteral) {
     switch (homeJsonData.moduleType) {
       case HomeJsonTypeEnum.CATEGORIES: {
-        return this.getCategoryHomeJsonData();
+        return this.getCategoryHomeJsonData(homeJsonData);
       }
     }
   }
 
-  getCategoryHomeJsonData() {
-    return [];
+  async getCategoryHomeJsonData(categoryHomeJsonData: ObjectLiteral) {
+    const content = categoryHomeJsonData.content;
+    const categoryIds = content.categories;
+    const categories = await this.connection
+      .createQueryBuilder()
+      .from(CategoryEntity, 'categories')
+      .select([
+        'categories.id as id',
+        'categories.title as title',
+        'categories."shortDescription" as desc',
+        'categories.slug as slug',
+        `case when(categories.image is not null) then :imageUrl || categories.image end as image`
+      ])
+      .whereInIds(categoryIds)
+      .setParameter('imageUrl', `${appConfig.appUrl}/images/category/`)
+      .getRawMany();
+    categoryHomeJsonData['data'] = categories;
+    const { id, moduleType: type, position, data } = categoryHomeJsonData;
+    return { id, type, position, data };
+  }
+
+  onlyGetFulfilledData(promiseResults: PromiseSettledResult<any>[]) {
+    const fulfilledResult = [];
+    promiseResults.forEach((promiseResult: { status: string; value?: any }) => {
+      if (promiseResult.status === 'fulfilled') {
+        fulfilledResult.push(promiseResult.value);
+      }
+    });
+    return fulfilledResult;
   }
 }
